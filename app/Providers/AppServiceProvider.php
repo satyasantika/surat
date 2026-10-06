@@ -7,9 +7,12 @@ use App\Services\Pdf\PembangkitPdfDompdf;
 use App\Services\Pdf\PembangkitPdfGotenberg;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -36,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
 
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        RateLimiter::for('masuk', fn (Request $request) => Limit::perMinute(5)
+            ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('daftar', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
         Gate::before(fn ($user) => $user->hasRole('super-admin') ? true : null);
 

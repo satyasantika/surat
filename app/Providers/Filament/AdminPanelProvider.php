@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\WajibMfa;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -29,6 +31,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->passwordReset()
+            ->profile()
+            ->multiFactorAuthentication(
+                [AppAuthentication::make()->recoverable()],
+                isRequired: true,
+            )
+            ->multiFactorAuthenticationRequiredMiddlewareName(WajibMfa::class)
             ->databaseNotifications()
             ->renderHook(PanelsRenderHook::FOOTER, fn (): string => '<div class="py-2 text-center text-xs text-gray-500">Persuratan FKIP Unsil v'.e(config('app.version')).'</div>')
             ->colors([
