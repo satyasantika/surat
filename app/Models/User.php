@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\TercatatAktivitas;
+use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
@@ -13,8 +14,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -34,6 +38,32 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     protected function namaLog(): string
     {
         return 'pengguna';
+    }
+
+    /** @return BelongsTo<UnitKerja, $this> */
+    public function unitKerja(): BelongsTo
+    {
+        return $this->belongsTo(UnitKerja::class);
+    }
+
+    /** @return HasMany<PemangkuJabatan, $this> */
+    public function pemangkuJabatan(): HasMany
+    {
+        return $this->hasMany(PemangkuJabatan::class);
+    }
+
+    /**
+     * Jabatan yang sedang diemban pengguna (tanggal bawaan: hari ini).
+     *
+     * @return Collection<int, Jabatan>
+     */
+    public function jabatanAktif(?CarbonInterface $tanggal = null): Collection
+    {
+        return $this->pemangkuJabatan()
+            ->berlakuPada($tanggal ?? now())
+            ->with('jabatan')
+            ->get()
+            ->pluck('jabatan');
     }
 
     public function wajibMfa(): bool
