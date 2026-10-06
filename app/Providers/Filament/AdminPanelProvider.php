@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->multiFactorAuthenticationRequiredMiddlewareName(WajibMfa::class)
             ->databaseNotifications()
+            ->renderHook(PanelsRenderHook::BODY_START, fn (): string => view('components.banner-impersonasi')->render())
             ->renderHook(PanelsRenderHook::FOOTER, fn (): string => '<div class="py-2 text-center text-xs text-gray-500">Persuratan FKIP Unsil v'.e(config('app.version')).'</div>')
             ->colors([
                 'primary' => Color::hex('#1e3a8a'),

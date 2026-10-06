@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TercatatAktivitas;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
@@ -25,10 +26,15 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, HasUuids, Notifiable;
+    use HasFactory, HasRoles, HasUuids, Notifiable, TercatatAktivitas;
 
     /** Peran yang memakai halaman Livewire, bukan panel Filament. */
     public const PERAN_TANPA_PANEL = ['pengurus-ormawa', 'pegawai'];
+
+    protected function namaLog(): string
+    {
+        return 'pengguna';
+    }
 
     public function wajibMfa(): bool
     {

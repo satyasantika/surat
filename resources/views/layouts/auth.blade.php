@@ -7,6 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+<x-banner-impersonasi />
 <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
     <h1 class="mb-6 text-center text-xl font-semibold text-blue-900">{{ config('app.name') }}</h1>
     <div class="rounded-lg bg-white p-6 shadow">

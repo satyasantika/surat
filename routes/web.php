@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\DaftarController;
 use App\Http\Controllers\Auth\KataSandiController;
 use App\Http\Controllers\Auth\MasukController;
 use App\Http\Controllers\Auth\ProfilController;
+use App\Http\Controllers\ImpersonasiController;
 use App\Http\Middleware\PastikanAktif;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
@@ -31,5 +32,7 @@ Route::get('/verifikasi-surel/{id}/{hash}', [DaftarController::class, 'verifikas
 Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->group(function () {
     Route::post('/keluar', [MasukController::class, 'destroy'])->name('logout');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
+    Route::post('/impersonasi/selesai', [ImpersonasiController::class, 'selesai'])->name('impersonasi.selesai');
+    Route::post('/impersonasi/{user}', [ImpersonasiController::class, 'mulai'])->whereUuid('user')->name('impersonasi.mulai');
     Route::put('/profil/sandi', [ProfilController::class, 'updateSandi'])->name('profil.sandi');
 });
