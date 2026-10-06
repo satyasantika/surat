@@ -4,6 +4,21 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.4.0] - 2026-10-07
+
+Fase 4: surat masuk dan disposisi.
+
+### Ditambahkan
+- Perintah `surat:buat-superadmin` untuk akun super-admin pertama.
+- Registrasi surat masuk (`RegistrasiSuratMasuk`): nomor agenda dari register `agenda-masuk`, tautan pindaian wajib, klasifikasi keamanan dan derajat kecepatan (enum), resource panel dengan filter dan relation manager tautan berkas.
+- `SuratMasukPolicy` (BR-04): surat rahasia/sangat rahasia hanya untuk dekan, penerima disposisi, dan super-admin; admin persuratan hanya metadata (perihal disamarkan `[RAHASIA]`, tanpa ringkasan dan tautan).
+- Disposisi berjenjang (`BuatDisposisi`, `TandaiDibaca`, `LaporTindakLanjut`, `SelesaikanDisposisi`): batas waktu bawaan per derajat, disposisi lanjutan berantai, CHECK satu sumber di basis data, izin baru `disposisi.teruskan`.
+- Kotak masuk pimpinan `/disposisi` (Livewire, ramah ponsel) dan relation manager status penerima di panel.
+- Lembar disposisi PDF yang di-stream (`/surat-masuk/{id}/lembar-disposisi`).
+
+### Diubah
+- `disposisi.buat` hanya untuk dekan; wakil dekan dan kasubag meneruskan lewat `disposisi.teruskan`.
+
 ## [0.3.0] - 2026-10-07
 
 Fase 3: master data.
