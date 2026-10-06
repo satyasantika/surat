@@ -38,3 +38,23 @@ location /surat/ {
     client_max_body_size 20m;
 }
 ```
+
+## Layanan tambahan di compose pusat
+
+Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Tambahkan service berikut bila ingin Gotenberg (PDF presisi) dan Horizon berjalan; tanpa itu set `PDF_DRIVER=dompdf` dan jalankan antrean manual (`srp php artisan horizon`).
+
+```yaml
+  surat-gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    networks: [laranet]
+
+  surat-horizon:
+    build: { context: ., dockerfile: php/laravel8.5.Dockerfile }
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes: ["./surat:/var/www/html"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    command: php artisan horizon
+    networks: [laranet]
+```

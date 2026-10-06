@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\PembangkitPdf;
+use App\Services\Pdf\PembangkitPdfDompdf;
+use App\Services\Pdf\PembangkitPdfGotenberg;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(PembangkitPdf::class, fn () => match (config('pdf.driver')) {
+            'dompdf' => new PembangkitPdfDompdf,
+            default => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),
+        });
     }
 
     /**
