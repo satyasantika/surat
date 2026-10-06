@@ -37,4 +37,9 @@ class MasterPolicy
     {
         return $pelaku->can('master.kelola');
     }
+
+    public function import(User $pelaku): bool
+    {
+        return $pelaku->can('master.kelola');
+    }
 }
