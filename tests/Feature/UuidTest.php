@@ -23,8 +23,8 @@ it('menjalankan route model binding dengan uuid', function () {
     $this->get('/uji-binding/'.Str::uuid7())->assertNotFound();
 });
 
-it('menjalankan seeder bawaan', function () {
+it('menjalankan seeder bawaan tanpa membuat akun', function () {
     $this->seed();
 
-    expect(User::count())->toBe(1);
+    expect(User::count())->toBe(0);
 });
