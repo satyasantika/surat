@@ -20,3 +20,21 @@ srp php artisan migrate
 ```
 
 Aplikasi: http://localhost:8028 (port dari compose pusat). Perintah PHP/Composer selalu lewat `srp`; npm dijalankan dari host (container belum berisi Node).
+
+## Subpath produksi `/surat`
+
+Produksi: `https://supportfkip.unsil.ac.id/surat` (reverse proxy memotong awalan). Atur di `.env`: `APP_URL` dan `ASSET_URL` = URL tersebut, `SESSION_PATH=/surat`, `SESSION_COOKIE=surat_session`, `SESSION_SECURE_COOKIE=true`, `TRUSTED_PROXIES=<ip proxy>`. Bila `APP_URL` berpath, `AppServiceProvider` memaksa root URL; semua URL harus lewat `route()`/`url()`/`asset()` (diuji `tests/Arch/SubpathTest.php`).
+
+Build aset dengan awalan: `ASSET_URL=https://supportfkip.unsil.ac.id/surat npm run build` (di host).
+
+```nginx
+location = /surat { return 301 /surat/; }
+location /surat/ {
+    proxy_pass http://127.0.0.1:<port>/;          # garis miring akhir = awalan dipotong
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Prefix /surat;
+    client_max_body_size 20m;
+}
+```
