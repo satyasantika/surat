@@ -1,0 +1,25 @@
+# Laravel
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/app/tmp/*
+!/storage/app/tmp/.gitkeep
+.phpunit.result.cache
+.env
+.env.*
+!.env.example
+
+# Data & cadangan (tidak boleh masuk repo)
+*.sql
+*.sql.gz
+*.zip
+/*.xlsx
+/*.csv
+
+# Bahan lama di luar repo aplikasi
+/OrmawaHub - 2/
+/Permendikbud-No-3-Tahun-2021-Tata-Naskah-Dinas.pdf
+/vibecoding/

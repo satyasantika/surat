@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .{1,72}$'
+first_line=$(head -n1 "$1")
+if ! [[ "$first_line" =~ $pattern ]] && ! [[ "$first_line" =~ ^Merge ]]; then
+  echo "✖ Pesan commit tidak sesuai Conventional Commits."
+  echo "  Contoh: feat(inventaris): tambah impor excel"
+  exit 1
+fi
