@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\MasukController;
 use App\Http\Controllers\Auth\ProfilController;
 use App\Http\Controllers\BukaTautanController;
 use App\Http\Controllers\ImpersonasiController;
+use App\Http\Controllers\LembarDisposisiPdfController;
 use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -33,6 +34,7 @@ Route::get('/verifikasi-surel/{id}/{hash}', [DaftarController::class, 'verifikas
 
 Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->group(function () {
     Route::post('/keluar', [MasukController::class, 'destroy'])->name('logout');
+    Route::get('/surat-masuk/{surat}/lembar-disposisi', LembarDisposisiPdfController::class)->whereUuid('surat')->name('surat-masuk.lembar-disposisi');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
     Route::get('/berkas/{tautan}/buka', BukaTautanController::class)->whereUuid('tautan')->name('berkas.buka');
