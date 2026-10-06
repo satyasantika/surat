@@ -2,31 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Pengguna\MulaiImpersonasi;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 /**
  * Fitur resmi "masuk sebagai" (BR-22): hanya super-admin, tercatat di log aktivitas.
  */
 class ImpersonasiController extends Controller
 {
-    public function mulai(Request $request, User $user): RedirectResponse
+    public function mulai(Request $request, User $user, MulaiImpersonasi $aksi): RedirectResponse
     {
-        $admin = $request->user();
-
-        abort_unless(Gate::allows('impersonasi'), 403);
-        abort_if($request->session()->has('impersonator_id'), 403, 'Sedang dalam mode masuk sebagai.');
-        abort_if($user->is($admin) || ! $user->aktif || $user->hasRole('super-admin'), 403);
-
-        activity('impersonasi')->event('mulai')->performedOn($user)->log("Masuk sebagai {$user->email}");
-
-        $request->session()->regenerate();
-        Auth::login($user);
-        $request->session()->forget('password_hash_web');
-        $request->session()->put('impersonator_id', $admin->getKey());
+        $aksi->jalankan($request->user(), $user);
 
         return redirect(url('admin'));
     }
