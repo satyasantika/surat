@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Contracts\PembangkitPdf;
+use App\Contracts\PenyimpananBerkas;
+use App\Services\Berkas\TautanEksternal;
 use App\Services\Pdf\PembangkitPdfDompdf;
 use App\Services\Pdf\PembangkitPdfGotenberg;
 use Carbon\Carbon;
@@ -23,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(PenyimpananBerkas::class, fn () => match (config('berkas.mode')) {
+            default => new TautanEksternal,
+        });
+
         $this->app->bind(PembangkitPdf::class, fn () => match (config('pdf.driver')) {
             'dompdf' => new PembangkitPdfDompdf,
             default => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Kode unit fakultas pada nomor naskah (token {kode_unit}).
+    'kode_unit' => env('KODE_UNIT', 'UN58.10'),
+
     // Domain surel yang diizinkan untuk akun (BR-01). Pola surel mahasiswa perlu diverifikasi.
     'domain_surel' => ['unsil.ac.id', 'student.unsil.ac.id'],
 

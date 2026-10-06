@@ -4,6 +4,23 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.3.0] - 2026-10-07
+
+Fase 3: master data.
+
+### Ditambahkan
+- Unit kerja (pohon), jabatan, dan pemangku jabatan (Plt, SK) dengan `Jabatan::pemangkuPada()` dan `User::jabatanAktif()`; larangan dua pemangku definitif yang tumpang tindih; seeder struktur FKIP (`UN58.10`).
+- Klasifikasi arsip hierarkis dengan retensi, impor CSV lewat antrean `impor`, cache `surat:master:klasifikasi`, pencegahan siklus.
+- Register nomor dan mesin penomoran `AmbilNomorBerikutnya` (Cache::lock + transaksi + `FOR UPDATE` + UNIQUE, dengan percobaan ulang deadlock), `TandaiNomorBatal`, token pola lengkap; nomor tidak dapat diubah/dihapus; uji 20 proses paralel.
+- Jenis naskah dengan definisi variabel, mode tanda tangan diizinkan, validasi templat Blade, dan sepuluh templat awal.
+- Pengaturan sistem ter-cache beserta halaman pengaturan (super-admin).
+- Fondasi tautan berkas: `TautanBerkasValid`, `PenyimpananBerkas`/`TautanEksternal`, job `PeriksaTautanBerkas` (anti-SSRF: daftar putih, IP publik, DNS dipaku, tanpa redirect), komponen `x-tautan-berkas`, pengalihan berotorisasi, `ttd_visual` tidak pernah menjadi URL; uji arsitektur tanpa unggahan berkas.
+- `docs/KEPUTUSAN.md` (K-01 tabel impor Filament, K-02 nilai terverifikasi, K-03 MariaDB).
+
+### Catatan
+- Notifikasi ke pemilik saat tautan mati dan pemeriksaan mingguan terjadwal menyusul di F11.
+- Templat naskah awal minimal; dirancang ulang di F5.1.
+
 ## [0.2.0] - 2026-10-07
 
 Fase 2: login, peran, audit, pengguna.
