@@ -8,6 +8,7 @@ use App\Enums\StatusNaskah;
 use App\Filament\Resources\Naskahs\Pages\CreateNaskah;
 use App\Filament\Resources\Naskahs\Pages\EditNaskah;
 use App\Filament\Resources\Naskahs\Pages\ListNaskahs;
+use App\Filament\Resources\Naskahs\Pages\ViewNaskah;
 use App\Models\Jabatan;
 use App\Models\JenisNaskah;
 use App\Models\KlasifikasiArsip;
@@ -15,12 +16,14 @@ use App\Models\Naskah;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
@@ -143,12 +146,35 @@ class NaskahResource extends Resource
                 TextColumn::make('updated_at')->label('Diubah')->since(),
             ])
             ->filters([SelectFilter::make('status')->options(StatusNaskah::pilihan())])
-            ->recordActions([EditAction::make()]);
+            ->recordActions([EditAction::make(), ViewAction::make()]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make('Naskah')->columns(2)->schema([
+                TextEntry::make('nomor')->placeholder('Belum bernomor'),
+                TextEntry::make('tanggal_naskah')->date('d F Y')->placeholder('—'),
+                TextEntry::make('jenis.nama')->label('Jenis'),
+                TextEntry::make('status')->badge()->formatStateUsing(fn (StatusNaskah $state) => $state->label()),
+                TextEntry::make('perihal')->columnSpanFull(),
+                TextEntry::make('penandaTanganJabatan.nama')->label('Jabatan penanda tangan'),
+                TextEntry::make('penandaTanganUser.name')->label('Ditandatangani oleh')->placeholder('—'),
+                TextEntry::make('mode_tanda_tangan')->label('Mode')->formatStateUsing(fn (string $state) => JenisNaskah::MODE_TANDA_TANGAN[$state] ?? $state),
+                TextEntry::make('hash_pdf')->label('SHA-256 PDF')->placeholder('—')->copyable()->fontFamily('mono')->columnSpanFull(),
+            ]),
+        ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [NaskahTautanRelationManager::class, RiwayatRelationManager::class];
     }
 
     public static function getPages(): array
     {
         return [
+            'view' => ViewNaskah::route('/{record}'),
             'index' => ListNaskahs::route('/'),
             'create' => CreateNaskah::route('/create'),
             'edit' => EditNaskah::route('/{record}/edit'),

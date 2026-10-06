@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ProfilController;
 use App\Http\Controllers\BukaTautanController;
 use App\Http\Controllers\ImpersonasiController;
 use App\Http\Controllers\LembarDisposisiPdfController;
+use App\Http\Controllers\NaskahPdfController;
 use App\Http\Controllers\PratinjauNaskahController;
 use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Pimpinan\KotakMasuk;
@@ -37,6 +38,7 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::post('/keluar', [MasukController::class, 'destroy'])->name('logout');
     Route::get('/surat-masuk/{surat}/lembar-disposisi', LembarDisposisiPdfController::class)->whereUuid('surat')->name('surat-masuk.lembar-disposisi');
     Route::get('/naskah/{naskah}/pratinjau', PratinjauNaskahController::class)->whereUuid('naskah')->name('naskah.pratinjau');
+    Route::get('/naskah/{naskah}/pdf', NaskahPdfController::class)->whereUuid('naskah')->name('naskah.pdf');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
     Route::get('/berkas/{tautan}/buka', BukaTautanController::class)->whereUuid('tautan')->name('berkas.buka');

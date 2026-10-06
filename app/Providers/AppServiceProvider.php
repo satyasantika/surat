@@ -29,10 +29,16 @@ class AppServiceProvider extends ServiceProvider
             default => new TautanEksternal,
         });
 
-        $this->app->bind(PembangkitPdf::class, fn () => match (config('pdf.driver')) {
+        $this->app->bind(PembangkitPdf::class, fn () => $this->pembangkitPdf((string) config('pdf.driver')));
+        $this->app->bind('pdf.naskah', fn () => $this->pembangkitPdf((string) config('pdf.driver_naskah')));
+    }
+
+    private function pembangkitPdf(string $driver): PembangkitPdf
+    {
+        return match ($driver) {
             'dompdf' => new PembangkitPdfDompdf,
             default => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),
-        });
+        };
     }
 
     /**

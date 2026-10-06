@@ -6,6 +6,7 @@ use App\Actions\Nomor\AmbilNomorBerikutnya;
 use App\Contracts\PenandaTangan;
 use App\Enums\StatusNaskah;
 use App\Exceptions\ModeTidakDidukung;
+use App\Jobs\TerbitkanNaskah;
 use App\Models\Naskah;
 use App\Models\User;
 use App\Services\TandaTangan\Basah;
@@ -26,7 +27,7 @@ class TandaTangani
 
     public function jalankan(Naskah $naskah, User $pelaku): Naskah
     {
-        return $this->transisi->dalamKunci($naskah, function (Naskah $segar) use ($pelaku) {
+        $hasil = $this->transisi->dalamKunci($naskah, function (Naskah $segar) use ($pelaku) {
             $this->transisi->pastikanStatus($segar, [StatusNaskah::MenungguTandaTangan], 'Naskah belum siap atau sudah ditandatangani.');
             $segar->load(['jenis.register', 'penandaTanganJabatan', 'klasifikasiArsip']);
 
@@ -60,6 +61,10 @@ class TandaTangani
 
             return $segar;
         });
+
+        TerbitkanNaskah::dispatch($hasil)->afterCommit();
+
+        return $hasil;
     }
 
     private function otorisasi(Naskah $naskah, User $pelaku): void
@@ -112,6 +117,9 @@ class TandaTangani
             'jabatan_dasar' => $atasNama || $naskah->atas_nama !== null ? $naskah->penandaTanganJabatan->nama : null,
         ];
         $konteks['mode'] = $mode['mode'];
+        if (isset($mode['ttd_gambar'])) {
+            $konteks['ttd_gambar'] = $mode['ttd_gambar'];
+        }
         $konteks['ditandatangani_pada'] = now()->toIso8601String();
 
         // Pola nomor ikut dibekukan agar jelas pola mana yang berlaku saat itu.

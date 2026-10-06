@@ -20,6 +20,15 @@ class NaskahPolicy
             || $naskah->paraf()->where('user_id', $pelaku->getKey())->exists();
     }
 
+    /** Mencatat pindaian naskah bertanda tangan basah (hanya admin penomoran). */
+    public function catatPindaian(User $pelaku, Naskah $naskah): bool
+    {
+        return $pelaku->can('nomor.terbitkan')
+            && $naskah->mode_tanda_tangan === 'basah'
+            && $naskah->snapshot !== null
+            && in_array($naskah->status->value, ['ditandatangani', 'terbit'], true);
+    }
+
     public function create(User $pelaku): bool
     {
         return $pelaku->can('naskah.draf');

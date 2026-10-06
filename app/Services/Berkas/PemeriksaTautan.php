@@ -3,8 +3,8 @@
 namespace App\Services\Berkas;
 
 use App\Models\TautanBerkas;
+use App\Support\HostAman;
 use App\Support\UrlBerkas;
-use Closure;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -14,9 +14,6 @@ use Throwable;
  */
 class PemeriksaTautan
 {
-    /** @var (Closure(string): list<string>)|null  penyelesai DNS, dapat diganti di uji */
-    public static ?Closure $penyelesai = null;
-
     public function periksa(TautanBerkas $tautan): string
     {
         $status = $this->cek($tautan->url);
@@ -34,7 +31,7 @@ class PemeriksaTautan
             return 'tidak_dapat_diakses';
         }
 
-        $ip = $this->ipPublik($urai['host']);
+        $ip = HostAman::ipPublik($urai['host']);
 
         if ($ip === null) {
             return 'tidak_dapat_diakses';
@@ -53,23 +50,5 @@ class PemeriksaTautan
         } catch (Throwable) {
             return 'tidak_dapat_diakses';
         }
-    }
-
-    /** IP publik pertama dari host; null bila ada IP pribadi/terlindung atau DNS gagal. */
-    private function ipPublik(string $host): ?string
-    {
-        $ips = (self::$penyelesai ?? fn (string $h) => gethostbynamel($h) ?: [])($host);
-
-        if ($ips === []) {
-            return null;
-        }
-
-        foreach ($ips as $ip) {
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                return null;
-            }
-        }
-
-        return $ips[0];
     }
 }

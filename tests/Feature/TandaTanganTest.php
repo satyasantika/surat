@@ -14,6 +14,7 @@ use App\Models\NomorTerpakai;
 use App\Models\PemangkuJabatan;
 use App\Models\TautanBerkas;
 use App\Models\User;
+use App\Support\HostAman;
 use Carbon\CarbonImmutable;
 use Database\Seeders\JenisNaskahSeeder;
 use Database\Seeders\KlasifikasiArsipSeeder;
@@ -23,9 +24,12 @@ use Database\Seeders\RegisterNomorSeeder;
 use Database\Seeders\StrukturFkipSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+
+const PNG_1X1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
 uses(RefreshDatabase::class);
 
@@ -171,7 +175,13 @@ it('mewajibkan gambar tanda tangan visual untuk mode visual', function () {
         'url' => 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQr/view', 'ditambahkan_oleh' => $dekan->id,
     ]);
 
-    expect(app(TandaTangani::class)->jalankan($n->fresh(), $dekan)->snapshot['mode'])->toBe('visual');
+    HostAman::$penyelesai = fn () => ['142.250.4.100'];
+    Http::fake(['lh3.googleusercontent.com/*' => Http::response(base64_decode(PNG_1X1), 200, ['Content-Type' => 'image/png'])]);
+
+    $snapshot = app(TandaTangani::class)->jalankan($n->fresh(), $dekan)->snapshot;
+    HostAman::$penyelesai = null;
+
+    expect($snapshot['mode'])->toBe('visual')->and($snapshot['ttd_gambar'])->toStartWith('data:image/png;base64,');
 });
 
 it('mewajibkan klasifikasi arsip bila pola nomor memakainya dan tidak menghabiskan nomor', function () {
