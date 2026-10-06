@@ -12,6 +12,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([PeranDanIzinSeeder::class, StrukturFkipSeeder::class, KlasifikasiArsipSeeder::class]);
+        $this->call([PeranDanIzinSeeder::class, StrukturFkipSeeder::class, KlasifikasiArsipSeeder::class, RegisterNomorSeeder::class]);
     }
 }

@@ -58,7 +58,7 @@ class KlasifikasiArsipResource extends Resource
                 TextColumn::make('induk.kode')->label('Induk')->placeholder('—'),
                 TextColumn::make('retensi_aktif_tahun')->label('Aktif (th)')->placeholder('—'),
                 TextColumn::make('retensi_inaktif_tahun')->label('Inaktif (th)')->placeholder('—'),
-                TextColumn::make('keterangan_akhir')->label('Akhir')->badge()->formatStateUsing(fn (?string $s) => KlasifikasiArsip::KETERANGAN_AKHIR[$s] ?? $s),
+                TextColumn::make('keterangan_akhir')->label('Akhir')->badge()->formatStateUsing(fn (?string $state) => KlasifikasiArsip::KETERANGAN_AKHIR[$state] ?? $state),
                 IconColumn::make('aktif')->boolean(),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);

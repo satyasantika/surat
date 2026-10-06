@@ -136,3 +136,13 @@ it('membatasi halaman klasifikasi ke master.kelola', function () {
     $lain->forceFill(['app_authentication_secret' => 'JBSWY3DPEHPK3PXP'])->save();
     $this->actingAs($lain)->get('/admin/klasifikasi-arsip')->assertForbidden();
 });
+
+it('merender daftar klasifikasi yang berisi data', function () {
+    $this->seed(KlasifikasiArsipSeeder::class);
+    $this->actingAs(pengelolaKlasifikasi());
+
+    Livewire::test(ManageKlasifikasiArsips::class)
+        ->assertCanSeeTableRecords(KlasifikasiArsip::all())
+        ->assertSee('Kegiatan organisasi kemahasiswaan')
+        ->assertSee('Musnah');
+});
