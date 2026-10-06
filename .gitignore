@@ -23,3 +23,22 @@
 /OrmawaHub - 2/
 /Permendikbud-No-3-Tahun-2021-Tata-Naskah-Dinas.pdf
 /vibecoding/
+*.log
+.DS_Store
+.env.backup
+.env.production
+.phpactor.json
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/public/fonts-manifest.dev.json
+/storage/pail
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
