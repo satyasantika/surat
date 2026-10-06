@@ -6,10 +6,14 @@ use App\Actions\Disposisi\BuatDisposisi;
 use App\Actions\Disposisi\LaporTindakLanjut;
 use App\Actions\Disposisi\SelesaikanDisposisi;
 use App\Actions\Disposisi\TandaiDibaca;
+use App\Actions\Naskah\KembalikanNaskah;
+use App\Actions\Naskah\ParafiNaskah;
 use App\Enums\StatusDisposisiPenerima;
+use App\Enums\StatusNaskah;
 use App\Enums\StatusSuratMasuk;
 use App\Models\Disposisi;
 use App\Models\DisposisiPenerima;
+use App\Models\Naskah;
 use App\Models\SuratMasuk;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -51,6 +55,8 @@ class KotakMasuk extends Component
 
     public string $laporan = '';
 
+    public string $catatanNaskah = '';
+
     public function mount(): void
     {
         abort_unless($this->pengguna()->hasAnyRole([...self::PERAN, 'super-admin']), 403);
@@ -58,7 +64,7 @@ class KotakMasuk extends Component
 
     public function pilihTab(string $tab): void
     {
-        $this->tab = in_array($tab, ['perlu', 'terkirim', 'selesai'], true) ? $tab : 'perlu';
+        $this->tab = in_array($tab, ['perlu', 'terkirim', 'selesai', 'naskah'], true) ? $tab : 'perlu';
         $this->tutup();
     }
 
@@ -121,13 +127,26 @@ class KotakMasuk extends Component
         $this->tutup();
     }
 
+    public function parafi(string $naskahId): void
+    {
+        app(ParafiNaskah::class)->jalankan(Naskah::findOrFail($naskahId), $this->pengguna(), $this->catatanNaskah ?: null);
+        $this->tutup();
+    }
+
+    public function kembalikanNaskah(string $naskahId): void
+    {
+        app(KembalikanNaskah::class)->jalankan(Naskah::findOrFail($naskahId), $this->pengguna(), $this->catatanNaskah);
+        $this->tutup();
+    }
+
     public function render(): View
     {
         $pengguna = $this->pengguna();
 
         return view('livewire.pimpinan.kotak-masuk', [
             'surat' => $this->tab === 'perlu' ? $this->suratBelumDidisposisikan() : collect(),
-            'penerimaDaftar' => $this->tab === 'terkirim' ? collect() : $this->daftarPenerima(),
+            'naskahDaftar' => $this->tab === 'naskah' ? $this->daftarNaskah() : collect(),
+            'penerimaDaftar' => in_array($this->tab, ['terkirim', 'naskah'], true) ? collect() : $this->daftarPenerima(),
             'terkirim' => $this->tab === 'terkirim' ? $this->daftarTerkirim() : collect(),
             'calonPenerima' => $this->terbuka ? $this->calonPenerima() : collect(),
             'bolehDisposisi' => $pengguna->can('disposisi.buat') && $pengguna->hasAnyRole(['dekan', 'super-admin']),
@@ -151,7 +170,7 @@ class KotakMasuk extends Component
 
     private function resetForm(): void
     {
-        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan');
+        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan', 'catatanNaskah');
         $this->resetErrorBag();
     }
 
@@ -199,6 +218,21 @@ class KotakMasuk extends Component
             ->whereIn('status', $status)
             ->latest()
             ->get();
+    }
+
+    /** @return Collection<int, Naskah> naskah yang menunggu paraf giliran pengguna atau tanda tangannya */
+    private function daftarNaskah(): Collection
+    {
+        $pengguna = $this->pengguna();
+        $jabatanIds = $pengguna->jabatanAktif()->pluck('id')->all();
+
+        return Naskah::with(['jenis', 'penyusun', 'paraf'])
+            ->whereIn('status', [StatusNaskah::Paraf->value, StatusNaskah::MenungguTandaTangan->value])
+            ->get()
+            ->filter(fn (Naskah $n) => $n->status === StatusNaskah::Paraf
+                ? $n->paraf->firstWhere('status', 'menunggu')?->user_id === $pengguna->getKey()
+                : in_array($n->penanda_tangan_jabatan_id, $jabatanIds, true))
+            ->values();
     }
 
     /** @return Collection<int, Disposisi> */

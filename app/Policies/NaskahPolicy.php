@@ -16,7 +16,8 @@ class NaskahPolicy
     {
         return $pelaku->can('nomor.terbitkan')
             || $naskah->penyusun_id === $pelaku->getKey()
-            || $this->pemangkuPenandaTangan($pelaku, $naskah);
+            || $this->pemangkuPenandaTangan($pelaku, $naskah)
+            || $naskah->paraf()->where('user_id', $pelaku->getKey())->exists();
     }
 
     public function create(User $pelaku): bool

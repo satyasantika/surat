@@ -115,7 +115,8 @@ class Naskah extends Model
 
         $query->where(fn (Builder $q) => $q
             ->where('penyusun_id', $pengguna->getKey())
-            ->orWhereIn('penanda_tangan_jabatan_id', $jabatanIds));
+            ->orWhereIn('penanda_tangan_jabatan_id', $jabatanIds)
+            ->orWhereHas('paraf', fn (Builder $p) => $p->where('user_id', $pengguna->getKey())));
     }
 
     /** @return BelongsTo<JenisNaskah, $this> */
@@ -164,6 +165,24 @@ class Naskah extends Model
     public function semuaTujuan(): HasMany
     {
         return $this->hasMany(NaskahTujuan::class)->orderBy('urutan');
+    }
+
+    /** @return HasMany<NaskahParaf, $this> */
+    public function paraf(): HasMany
+    {
+        return $this->hasMany(NaskahParaf::class)->orderBy('urutan');
+    }
+
+    /** @return HasMany<RiwayatNaskah, $this> */
+    public function riwayat(): HasMany
+    {
+        return $this->hasMany(RiwayatNaskah::class)->orderBy('created_at')->orderBy('id');
+    }
+
+    /** Paraf yang sedang ditunggu (urutan terkecil yang belum diputus). */
+    public function parafBerjalan(): ?NaskahParaf
+    {
+        return $this->paraf()->where('status', NaskahParaf::MENUNGGU)->first();
     }
 
     /** @return MorphMany<TautanBerkas, $this> */
