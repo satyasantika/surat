@@ -8,6 +8,7 @@ use App\Actions\Disposisi\SelesaikanDisposisi;
 use App\Actions\Disposisi\TandaiDibaca;
 use App\Actions\Naskah\KembalikanNaskah;
 use App\Actions\Naskah\ParafiNaskah;
+use App\Actions\Naskah\TandaTangani;
 use App\Enums\StatusDisposisiPenerima;
 use App\Enums\StatusNaskah;
 use App\Enums\StatusSuratMasuk;
@@ -130,6 +131,12 @@ class KotakMasuk extends Component
     public function parafi(string $naskahId): void
     {
         app(ParafiNaskah::class)->jalankan(Naskah::findOrFail($naskahId), $this->pengguna(), $this->catatanNaskah ?: null);
+        $this->tutup();
+    }
+
+    public function tandatangani(string $naskahId): void
+    {
+        app(TandaTangani::class)->jalankan(Naskah::findOrFail($naskahId), $this->pengguna());
         $this->tutup();
     }
 

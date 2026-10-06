@@ -18,6 +18,8 @@ class RiwayatNaskah extends Model
 
     protected $table = 'riwayat_naskah';
 
+    protected $dateFormat = 'Y-m-d H:i:s.u';
+
     protected static function booted(): void
     {
         static::updating(fn () => throw new LogicException('Riwayat naskah tidak dapat diubah.'));

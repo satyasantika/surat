@@ -109,6 +109,9 @@
                         @if ($n->status === \App\Enums\StatusNaskah::Paraf)
                             <button type="button" wire:click="parafi('{{ $n->id }}')" class="rounded bg-blue-900 px-4 py-2 text-white">Paraf</button>
                         @endif
+                        @if ($n->status === \App\Enums\StatusNaskah::MenungguTandaTangan)
+                            <button type="button" wire:click="tandatangani('{{ $n->id }}')" wire:confirm="Tandatangani naskah ini? Nomor akan diberikan dan isi dibekukan." class="rounded bg-green-700 px-4 py-2 text-white">Tandatangani</button>
+                        @endif
                         <button type="button" wire:click="kembalikanNaskah('{{ $n->id }}')" class="rounded border border-red-700 px-4 py-2 text-red-700">Kembalikan</button>
                     </div>
                 </div>

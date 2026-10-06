@@ -32,6 +32,12 @@ class Naskah extends Model
 {
     use HasUuids, SoftDeletes, TercatatAktivitas;
 
+    /** Isi naskah yang dibekukan sejak ditandatangani (snapshot terisi). */
+    public const BEKU_SETELAH_TTD = [
+        'jenis_naskah_id', 'klasifikasi_arsip_id', 'klasifikasi_keamanan', 'derajat_kecepatan', 'perihal', 'data', 'isi',
+        'penanda_tangan_jabatan_id', 'penanda_tangan_user_id', 'atas_nama', 'mode_tanda_tangan', 'penyusun_id', 'ditandatangani_pada',
+    ];
+
     /** Kolom yang tidak boleh berubah setelah terisi (BR-07, BR-08). */
     public const IMMUTABLE = ['nomor', 'tanggal_naskah', 'snapshot', 'hash_pdf', 'nomor_terpakai_id'];
 
@@ -69,6 +75,14 @@ class Naskah extends Model
 
                 if ($asli !== null && $naskah->isDirty($kolom)) {
                     throw new LogicException("Kolom {$kolom} tidak dapat diubah setelah terisi.");
+                }
+            }
+
+            if ($naskah->getRawOriginal('snapshot') !== null) {
+                foreach (self::BEKU_SETELAH_TTD as $kolom) {
+                    if ($naskah->isDirty($kolom)) {
+                        throw new LogicException("Kolom {$kolom} dibekukan setelah naskah ditandatangani.");
+                    }
                 }
             }
         });
