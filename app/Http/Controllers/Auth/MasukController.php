@@ -52,7 +52,7 @@ class MasukController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(route('profil'));
+        return redirect()->intended(route($user->hasRole('pegawai') ? 'disposisi' : 'profil'));
     }
 
     public function destroy(Request $request): RedirectResponse

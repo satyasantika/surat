@@ -105,7 +105,7 @@ class SuratMasukResource extends Resource
 
     public static function getRelations(): array
     {
-        return [SuratMasukTautanRelationManager::class];
+        return [SuratMasukTautanRelationManager::class, DisposisiRelationManager::class];
     }
 
     public static function getPages(): array

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -78,6 +79,12 @@ class SuratMasuk extends Model
     public function disposisi(): HasMany
     {
         return $this->hasMany(Disposisi::class);
+    }
+
+    /** @return HasManyThrough<DisposisiPenerima, Disposisi, $this> */
+    public function penerimaDisposisi(): HasManyThrough
+    {
+        return $this->hasManyThrough(DisposisiPenerima::class, Disposisi::class);
     }
 
     /** @return MorphMany<TautanBerkas, $this> */
