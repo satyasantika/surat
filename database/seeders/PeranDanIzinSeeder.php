@@ -12,7 +12,7 @@ class PeranDanIzinSeeder extends Seeder
     /** Permission granular per modul (PRD §3.1). */
     public const IZIN = [
         'masuk.lihat', 'masuk.registrasi',
-        'disposisi.buat', 'disposisi.tindaklanjut',
+        'disposisi.buat', 'disposisi.teruskan', 'disposisi.tindaklanjut',
         'naskah.draf', 'naskah.paraf', 'naskah.tandatangan', 'naskah.templat',
         'nomor.terbitkan',
         'arsip.lihat',
@@ -43,11 +43,11 @@ class PeranDanIzinSeeder extends Seeder
             'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
         ],
         'wakil-dekan' => [
-            'masuk.lihat', 'disposisi.buat', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
+            'masuk.lihat', 'disposisi.teruskan', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
             'naskah.tandatangan', 'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
         ],
         'kasubag' => [
-            'masuk.lihat', 'disposisi.buat', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
+            'masuk.lihat', 'disposisi.teruskan', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
             'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
         ],
         'pembina-ormawa' => [

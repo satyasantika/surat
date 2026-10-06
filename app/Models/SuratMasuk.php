@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -71,6 +72,12 @@ class SuratMasuk extends Model
     public function registrator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diregistrasi_oleh');
+    }
+
+    /** @return HasMany<Disposisi, $this> */
+    public function disposisi(): HasMany
+    {
+        return $this->hasMany(Disposisi::class);
     }
 
     /** @return MorphMany<TautanBerkas, $this> */

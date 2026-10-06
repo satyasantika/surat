@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\DisposisiPenerima;
 use App\Models\SuratMasuk;
 use App\Models\User;
 
@@ -56,9 +57,12 @@ class SuratMasukPolicy
             || ($pelaku->hasRole('operator-layanan') && $pelaku->can('masuk.lihat'));
     }
 
-    /** Diperluas pada F4.2 setelah tabel disposisi ada. */
+    /** Penerima pada disposisi mana pun (awal maupun lanjutan) atas surat ini. */
     protected function penerimaDisposisi(User $pelaku, SuratMasuk $surat): bool
     {
-        return false;
+        return DisposisiPenerima::query()
+            ->where('user_id', $pelaku->getKey())
+            ->whereHas('disposisi', fn ($q) => $q->where('surat_masuk_id', $surat->getKey()))
+            ->exists();
     }
 }
