@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Naskahs\Pages;
 
+use App\Actions\Naskah\BatalkanNaskah;
 use App\Contracts\PenyimpananBerkas;
 use App\Filament\Resources\Naskahs\NaskahResource;
 use App\Models\Naskah;
 use App\Rules\TautanBerkasValid;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -34,6 +36,15 @@ class ViewNaskah extends ViewRecord
                 ->url(fn () => route('naskah.pdf', $this->naskah()), shouldOpenInNewTab: true),
             Action::make('pratinjau')->label('Pratinjau')->icon('heroicon-o-eye')
                 ->url(fn () => route('naskah.pratinjau', $this->naskah()), shouldOpenInNewTab: true),
+            Action::make('batalkan')->label('Batalkan naskah')->icon('heroicon-o-x-circle')->color('danger')
+                ->visible(fn () => auth()->user()->can('batalkan', $this->naskah()))
+                ->requiresConfirmation()->modalDescription('Naskah tetap tercatat di register dengan status dibatalkan; nomornya tidak dipakai ulang.')
+                ->schema([Textarea::make('alasan')->required()->minLength(5)->maxLength(2000)])
+                ->action(function (array $data) {
+                    app(BatalkanNaskah::class)->jalankan($this->naskah(), auth()->user(), $data['alasan']);
+                    Notification::make()->title('Naskah dibatalkan')->success()->send();
+                    $this->redirect(NaskahResource::getUrl('view', ['record' => $this->naskah()]));
+                }),
             Action::make('catatPindaian')->label('Catat pindaian bertanda tangan')->icon('heroicon-o-paper-clip')
                 ->visible(fn () => auth()->user()->can('catatPindaian', $this->naskah()))
                 ->schema([

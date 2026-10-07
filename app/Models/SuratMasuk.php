@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property CarbonImmutable $tanggal_terima
+ * @property CarbonImmutable $tanggal_surat
  * @property KlasifikasiKeamanan $klasifikasi_keamanan
  * @property DerajatKecepatan $derajat_kecepatan
  * @property StatusSuratMasuk $status

@@ -146,6 +146,18 @@ it('memvalidasi pola nomor', function (string $pola, bool $sah) {
     ['{urut:123}', false],
 ]);
 
+it('menolak dua register dengan pola yang sama lewat panel', function () {
+    Filament::setCurrentPanel('admin');
+    $u = User::factory()->create()->assignRole('operator-layanan');
+    $u->givePermissionTo('master.kelola');
+    $u->forceFill(['app_authentication_secret' => 'JBSWY3DPEHPK3PXP'])->save();
+    $this->actingAs($u);
+
+    Livewire::test(ManageRegisterNomors::class)
+        ->callAction(TestAction::make(CreateAction::class), ['kode' => 'kembar', 'nama' => 'Kembar', 'pola' => '{urut:4}/AGD/{tahun}', 'reset' => 'tahunan'])
+        ->assertHasActionErrors(['pola']);
+});
+
 it('mengelola register lewat panel dengan validasi pola', function () {
     Filament::setCurrentPanel('admin');
     $u = User::factory()->create()->assignRole('operator-layanan');

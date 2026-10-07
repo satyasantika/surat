@@ -20,6 +20,13 @@ class NaskahPolicy
             || $naskah->paraf()->where('user_id', $pelaku->getKey())->exists();
     }
 
+    /** Pembatalan naskah yang sudah bernomor (BR-06); nomornya tidak dipakai ulang. */
+    public function batalkan(User $pelaku, Naskah $naskah): bool
+    {
+        return $pelaku->can('naskah.batalkan')
+            && in_array($naskah->status->value, ['ditandatangani', 'terbit'], true);
+    }
+
     /** Mencatat pindaian naskah bertanda tangan basah (hanya admin penomoran). */
     public function catatPindaian(User $pelaku, Naskah $naskah): bool
     {

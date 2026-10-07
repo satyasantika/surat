@@ -40,7 +40,8 @@ class RegisterNomorResource extends Resource
             TextInput::make('nama')->required()->maxLength(150),
             TextInput::make('pola')->required()->maxLength(150)
                 ->helperText('Token: {urut}, {urut:3}, {kode_unit}, {klasifikasi}, {bulan_romawi}, {tahun}, {kode_jenis}. Hanya berlaku untuk nomor berikutnya.')
-                ->rule(new PolaNomorSah),
+                ->rule(new PolaNomorSah)->unique(ignoreRecord: true)
+                ->validationMessages(['unique' => 'Pola ini sudah dipakai register lain; nomor dari dua register dengan pola sama dapat bertabrakan.']),
             Select::make('reset')->options(RegisterNomor::RESET)->required()->default('tahunan'),
             Toggle::make('aktif')->default(true),
         ]);

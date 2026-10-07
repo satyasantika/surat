@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Berkas sementara (ekspor) dihapus otomatis paling lambat 24 jam (STANDAR-TEKNIS §1a.6).
+Schedule::command('surat:bersihkan-tmp')->hourly();
