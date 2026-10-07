@@ -114,7 +114,7 @@ class AjukanPermohonan
             throw new AuthorizationException('Hanya pengurus aktif dengan SK berlaku yang dapat mengajukan atas nama ormawa ini.');
         }
 
-        if ($ormawa->diblokir_lpj && Pengaturan::get('blokir_lpj_terlambat')) {
+        if (Pengaturan::get('blokir_lpj_terlambat') && ($ormawa->diblokir_lpj || $ormawa->lpjTerlambat())) {
             throw ValidationException::withMessages(['ormawa' => 'Ormawa diblokir karena LPJ terlambat. Lengkapi LPJ sebelum mengajukan permohonan baru.']);
         }
     }

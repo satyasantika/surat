@@ -41,7 +41,15 @@
 
         <section class="rounded-lg bg-white p-4 shadow" aria-label="LPJ jatuh tempo">
             <h3 class="font-medium">LPJ jatuh tempo</h3>
-            <p class="text-sm text-slate-500">Tidak ada LPJ yang jatuh tempo.</p>
+            @forelse ($lpjDaftar as $l)
+                <p class="text-sm" wire:key="lpj-{{ $l->id }}">
+                    <a class="text-blue-800 underline" href="{{ route('ormawa.lpj', ['ormawa' => $ormawa->id, 'lpj' => $l->id]) }}">{{ $l->permohonan->nama_kegiatan }}</a>
+                    · batas {{ $l->batas_waktu->translatedFormat('d M Y') }}
+                    @if ($l->terlambat())<span class="rounded bg-red-100 px-1.5 text-xs text-red-800">Terlambat</span>@endif
+                </p>
+            @empty
+                <p class="text-sm text-slate-500">Tidak ada LPJ yang jatuh tempo.</p>
+            @endforelse
         </section>
     @endif
 </div>

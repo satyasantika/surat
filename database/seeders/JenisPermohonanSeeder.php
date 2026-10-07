@@ -23,7 +23,7 @@ class JenisPermohonanSeeder extends Seeder
 
         foreach ($jenis as [$kode, $nama, $ruangan, $rektorat, $naskah, $wajib]) {
             JenisPermohonan::updateOrCreate(['kode' => $kode], [
-                'nama' => $nama, 'butuh_ruangan' => $ruangan, 'butuh_fasilitas_rektorat' => $rektorat,
+                'nama' => $nama, 'butuh_ruangan' => $ruangan, 'butuh_fasilitas_rektorat' => $rektorat, 'butuh_lpj' => $kode !== 'pengantar-proposal',
                 'jenis_naskah_id' => $naskah, 'berkas_wajib' => $wajib, 'aktif' => true,
             ]);
         }

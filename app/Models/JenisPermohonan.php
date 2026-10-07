@@ -10,18 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 
 /** @property array<int, string> $berkas_wajib */
-#[Fillable(['kode', 'nama', 'butuh_ruangan', 'butuh_fasilitas_rektorat', 'jenis_naskah_id', 'berkas_wajib', 'aktif'])]
+#[Fillable(['kode', 'nama', 'butuh_ruangan', 'butuh_fasilitas_rektorat', 'butuh_lpj', 'jenis_naskah_id', 'berkas_wajib', 'aktif'])]
 class JenisPermohonan extends Model
 {
     use HasUuids, TercatatAktivitas;
 
     protected $table = 'jenis_permohonan';
 
-    protected $attributes = ['aktif' => true, 'butuh_ruangan' => false, 'butuh_fasilitas_rektorat' => false];
+    protected $attributes = ['aktif' => true, 'butuh_ruangan' => false, 'butuh_fasilitas_rektorat' => false, 'butuh_lpj' => true];
 
     protected function casts(): array
     {
-        return ['butuh_ruangan' => 'boolean', 'butuh_fasilitas_rektorat' => 'boolean', 'berkas_wajib' => 'array', 'aktif' => 'boolean'];
+        return ['butuh_ruangan' => 'boolean', 'butuh_fasilitas_rektorat' => 'boolean', 'butuh_lpj' => 'boolean', 'berkas_wajib' => 'array', 'aktif' => 'boolean'];
     }
 
     protected static function booted(): void

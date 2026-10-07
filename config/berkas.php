@@ -13,6 +13,9 @@ return [
         '*.sharepoint.com',
     ],
 
+    // Tautan media publik (LPJ/galeri): hanya domain berikut.
+    'domain_media' => ['instagram.com', '*.instagram.com', 'youtube.com', '*.youtube.com', 'youtu.be'],
+
     // Pemendek URL yang ditolak.
     'pemendek' => ['bit.ly', 's.id', 'tinyurl.com', 't.co', 'goo.gl', 'cutt.ly', 'is.gd', 'rb.gy', 'ow.ly', 'shorturl.at'],
 
