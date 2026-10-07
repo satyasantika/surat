@@ -58,3 +58,9 @@ Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Tambahkan s
     command: php artisan horizon
     networks: [laranet]
 ```
+
+## Uji penerimaan (staging)
+
+`php artisan surat:siapkan-uat` menyiapkan data **rekaan** (ditolak di produksi): akun per peran (`uat.<peran>@contoh.test`, kata sandi acak dicetak sekali),
+3 ormawa, surat masuk, permohonan di setiap tahap, LPJ (terlambat/diajukan/dinilai), kabar, dan galeri; idempoten. Skenario uji per peran: **docs/05-UJI-PENERIMAAN.md**.
+Panduan pengguna: **docs/PANDUAN-ADMIN.md**, **docs/PANDUAN-PIMPINAN.md**, **docs/PANDUAN-ORMAWA.md** (versi HTML dengan tangkapan layar di `public/panduan/`).
