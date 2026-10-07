@@ -18,5 +18,7 @@
         </div>
     </section>
 
+    <p class="mb-2 text-sm">Butuh bantuan memakai aplikasi? Buka <a href="{{ asset('panduan/index.html') }}" class="text-blue-800 underline">Panduan Pengguna</a> per peran lengkap dengan tangkapan layar.</p>
+
     <p class="text-sm">Memeriksa keaslian surat? <a href="{{ route('verifikasi.form') }}" class="text-blue-800 underline">Verifikasi surat</a></p>
 </x-layouts.publik>

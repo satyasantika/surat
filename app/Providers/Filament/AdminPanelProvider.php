@@ -35,12 +35,13 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->multiFactorAuthentication(
                 [AppAuthentication::make()->recoverable()],
-                isRequired: true,
+                // Akun demo panduan (lokal) dapat dikecualikan; di staging/produksi selalu wajib (config panduan.tanpa_mfa hanya berlaku di local).
+                isRequired: ! (config('panduan.tanpa_mfa') && app()->environment('local')),
             )
             ->multiFactorAuthenticationRequiredMiddlewareName(WajibMfa::class)
             ->databaseNotifications()
             ->renderHook(PanelsRenderHook::BODY_START, fn (): string => view('components.banner-impersonasi')->render())
-            ->renderHook(PanelsRenderHook::FOOTER, fn (): string => '<div class="py-2 text-center text-xs text-gray-500">Persuratan FKIP Unsil v'.e(config('app.version')).'</div>')
+            ->renderHook(PanelsRenderHook::FOOTER, fn (): string => '<div class="py-2 text-center text-xs text-gray-500">Persuratan FKIP Unsil v'.e(config('app.version')).' · <a class="underline" href="'.e(asset('panduan/index.html')).'">Panduan pengguna</a></div>')
             ->colors([
                 'primary' => Color::hex('#1e3a8a'),
             ])

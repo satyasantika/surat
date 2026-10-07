@@ -1,0 +1,556 @@
+{
+ "peran": [
+  {
+   "kode": "publik",
+   "judul": "Pengunjung (publik)",
+   "akun": null,
+   "tujuan": "Melihat kabar kegiatan ormawa, galeri, profil organisasi, dan memeriksa keaslian surat bertanda QR tanpa perlu akun.",
+   "masuk": "Tidak perlu masuk. Buka alamat aplikasi; halaman publik tersedia untuk semua orang.",
+   "langkah": [
+    {
+     "gambar": "01-beranda",
+     "judul": "Beranda",
+     "teks": "Beranda menampilkan kabar terbaru dan cuplikan galeri. Menu atas memuat **Kabar**, **Galeri**, **Organisasi**, dan **Verifikasi surat**.",
+     "url": "/"
+    },
+    {
+     "gambar": "02-kabar",
+     "judul": "Daftar kabar",
+     "teks": "Hanya kabar yang sudah disetujui admin yang tampil. Gunakan tombol halaman di bawah daftar untuk kabar sebelumnya.",
+     "url": "/kabar"
+    },
+    {
+     "gambar": "03-kabar-detail",
+     "judul": "Membaca kabar",
+     "teks": "Klik judul kabar untuk membaca isi lengkap, tag, dan organisasi penulisnya.",
+     "url": "/kabar",
+     "klik": "Seminar Pendidikan Sukses (rekaan)"
+    },
+    {
+     "gambar": "04-galeri",
+     "judul": "Galeri",
+     "teks": "Foto, video YouTube, dan tautan Instagram kegiatan. Video diputar tanpa pelacak; Instagram dibuka di tab baru.",
+     "url": "/galeri"
+    },
+    {
+     "gambar": "05-organisasi",
+     "judul": "Daftar organisasi",
+     "teks": "Organisasi mahasiswa FKIP beserta tingkatnya.",
+     "url": "/organisasi"
+    },
+    {
+     "gambar": "06-organisasi-detail",
+     "judul": "Profil organisasi",
+     "teks": "Visi, misi, dan **nama serta jabatan** pengurus aktif. Nomor induk, telepon, dan surel pribadi tidak pernah ditampilkan.",
+     "url": "/organisasi",
+     "klik": "HIMA Uji Matematika"
+    },
+    {
+     "gambar": "07-verifikasi",
+     "judul": "Memeriksa keaslian surat",
+     "teks": "Pindai kode QR pada surat, atau tempel kode/tautan verifikasi pada kolom ini lalu **Periksa**. Halaman hasil menampilkan nomor, tanggal, penanda tangan, status, dan sidik (hash) dokumen.",
+     "url": "/verifikasi"
+    }
+   ],
+   "faq": [
+    [
+     "Mengapa surat saya tidak ditemukan?",
+     "Surat yang belum terbit atau masih draf tidak dapat diverifikasi; kode QR tercetak hanya pada naskah yang sudah ditandatangani."
+    ],
+    [
+     "Apakah isi surat tampil?",
+     "Tidak. Verifikasi hanya menampilkan data identitas surat, bukan isi atau lampirannya."
+    ]
+   ]
+  },
+  {
+   "kode": "pengurus-ormawa",
+   "judul": "Pengurus ormawa",
+   "akun": "panduan.pengurus-bem@contoh.test",
+   "tujuan": "Mengajukan permohonan kegiatan dan ruangan, memantau progres, mengunduh surat izin, mengisi LPJ, mengelola profil, dan mengusulkan kabar untuk organisasi Anda.",
+   "masuk": "Daftar di halaman **Daftar** dengan surel `…@student.unsil.ac.id`, verifikasi surel, lalu minta ketua/sekretaris atau admin menautkan akun Anda ke ormawa (berdasarkan NIM). Masuk lewat halaman **Masuk**; akun bersama organisasi tidak ada.",
+   "langkah": [
+    {
+     "gambar": "01-masuk",
+     "judul": "Halaman masuk",
+     "teks": "Isi surel dan kata sandi pribadi. Lima percobaan gagal per menit akan dikunci sementara. Lupa kata sandi? Pakai tautan di bawah formulir.",
+     "url": "/masuk",
+     "akun": null
+    },
+    {
+     "gambar": "02-beranda",
+     "judul": "Beranda ormawa",
+     "teks": "Ringkasan ormawa, SK dan periode, jumlah permohonan, LPJ jatuh tempo, serta tautan kabar. Bila Anda pengurus beberapa ormawa, pilih lewat tab di atas.",
+     "url": "/ormawa"
+    },
+    {
+     "gambar": "03-profil",
+     "judul": "Profil dan pengurus",
+     "teks": "Ketua dan sekretaris dapat mengubah singkatan, akun media, visi, misi, dan daftar pengurus. NIM dan telepon bersifat pribadi.",
+     "url": "/ormawa",
+     "klik": "Ubah profil dan pengurus"
+    },
+    {
+     "gambar": "04-progres",
+     "judul": "Memantau progres permohonan",
+     "teks": "Linimasa tiap permohonan: validasi admin, disposisi dekan, persetujuan WD, rekomendasi kasubag, hingga surat izin. Permohonan yang dikembalikan dapat diperbaiki dan diajukan ulang; yang sudah terbit menyediakan tombol **Unduh surat izin**.",
+     "url": "/ormawa",
+     "klik": "Progres"
+    },
+    {
+     "gambar": "05-ajukan",
+     "judul": "Mengajukan permohonan baru",
+     "teks": "Pilih jenis, isi data kegiatan dan penanggung jawab, pilih ruangan dan sesi (ketersediaan tampil langsung), lalu lampirkan **tautan** surat permohonan dan proposal. Aplikasi tidak menerima unggahan berkas.",
+     "url": "/ormawa",
+     "klik": "Ajukan baru"
+    },
+    {
+     "gambar": "06-lpj",
+     "judul": "Mengisi LPJ",
+     "teks": "Setelah kegiatan selesai, isi tanggal pelaksanaan, peserta, ringkasan, kendala, solusi, dan tautan berkas LPJ, lalu **Ajukan LPJ**. LPJ yang terlambat (seperti contoh ini) dapat memblokir pengajuan permohonan baru sampai LPJ diajukan; setelah dinilai, nilai akhir dan catatan tampil di sini.",
+     "url": "/ormawa",
+     "klik": "Pelatihan Guru (LPJ terlambat)",
+     "akun": "panduan.pengurus-matematika@contoh.test"
+    },
+    {
+     "gambar": "07-kabar",
+     "judul": "Mengusulkan kabar",
+     "teks": "Tulis judul, isi, tag, dan tautan foto sampul; **Simpan draf** atau **Simpan & ajukan**. Kabar tampil publik setelah disetujui admin; bila ditolak, catatan admin ditampilkan.",
+     "url": "/ormawa",
+     "klik": "Tulis dan kelola kabar ormawa"
+    },
+    {
+     "gambar": "08-notifikasi",
+     "judul": "Notifikasi",
+     "teks": "Setiap perpindahan tahap permohonan, penilaian LPJ, dan keputusan kabar tercatat di sini dan dikirim ke surel.",
+     "url": "/notifikasi"
+    },
+    {
+     "gambar": "09-profil-akun",
+     "judul": "Akun dan preferensi notifikasi",
+     "teks": "Atur kanal surel/WhatsApp per kategori, nomor WhatsApp opsional, dan ganti kata sandi.",
+     "url": "/profil"
+    }
+   ],
+   "faq": [
+    [
+     "Saya tidak bisa mengajukan permohonan.",
+     "Pastikan SK kepengurusan ormawa masih berlaku, akun Anda sudah ditautkan, dan ormawa tidak diblokir karena LPJ terlambat."
+    ],
+    [
+     "Tautan berkas ditolak.",
+     "Gunakan satu berkas Google Drive atau unsil.ac.id (bukan folder, bukan pemendek URL seperti bit.ly) dan bagikan agar dapat dibuka."
+    ],
+    [
+     "Ruangan tampil terisi.",
+     "Pilih sesi lain. Sesi \"seharian\" bentrok dengan semua sesi pada hari yang sama."
+    ]
+   ]
+  },
+  {
+   "kode": "pembina-ormawa",
+   "judul": "Dosen pembina ormawa",
+   "akun": "panduan.pembina@contoh.test",
+   "tujuan": "Memantau ormawa binaan, menyetujui permohonan (bila tahap persetujuan pembina diaktifkan fakultas), dan melihat LPJ.",
+   "masuk": "Admin membuatkan akun dengan peran pembina dan menautkannya ke ormawa binaan. Masuk lewat **Masuk**; panel admin dapat dibuka dari `/admin` sesuai izin.",
+   "langkah": [
+    {
+     "gambar": "01-profil",
+     "judul": "Profil akun",
+     "teks": "Atur kata sandi dan preferensi notifikasi. Anda menerima notifikasi saat permohonan binaan menunggu persetujuan Anda.",
+     "url": "/profil"
+    },
+    {
+     "gambar": "02-dasbor",
+     "judul": "Dasbor panel",
+     "teks": "Panel hanya menampilkan menu yang diizinkan untuk peran pembina.",
+     "url": "/admin"
+    },
+    {
+     "gambar": "03-ormawa",
+     "judul": "Ormawa binaan",
+     "teks": "Daftar ormawa yang Anda bina beserta profilnya. Anda dapat memperbarui profil ormawa binaan.",
+     "url": "/admin/ormawa"
+    },
+    {
+     "gambar": "04-lpj",
+     "judul": "LPJ ormawa binaan",
+     "teks": "Pantau LPJ ormawa binaan (hanya binaan Anda yang tampil). Penilaian dilakukan pimpinan.",
+     "url": "/admin/lpj"
+    }
+   ],
+   "faq": [
+    [
+     "Mengapa ormawa lain tidak tampil?",
+     "Pembina hanya melihat ormawa dan LPJ binaannya."
+    ],
+    [
+     "Di mana menyetujui permohonan?",
+     "Tahap persetujuan pembina hanya muncul bila diaktifkan di Pengaturan sistem; notifikasi akan menautkan permohonan terkait."
+    ]
+   ]
+  },
+  {
+   "kode": "pegawai",
+   "judul": "Pegawai penerima disposisi",
+   "akun": "panduan.pegawai@contoh.test",
+   "tujuan": "Menerima dan menindaklanjuti disposisi surat dari pimpinan, lalu melaporkan hasilnya.",
+   "masuk": "Admin membuatkan akun. Masuk lewat **Masuk**; Anda diarahkan ke kotak masuk disposisi.",
+   "langkah": [
+    {
+     "gambar": "01-kotak-masuk",
+     "judul": "Kotak masuk disposisi",
+     "teks": "Daftar disposisi untuk Anda lengkap dengan instruksi, batas waktu, dan status. Membuka disposisi menandainya **dibaca**.",
+     "url": "/disposisi"
+    },
+    {
+     "gambar": "02-kotak-masuk-ponsel",
+     "judul": "Dari ponsel",
+     "teks": "Tampilan menyesuaikan layar kecil sehingga disposisi dapat ditindaklanjuti dari ponsel.",
+     "url": "/disposisi",
+     "viewport": "ponsel"
+    },
+    {
+     "gambar": "03-notifikasi",
+     "judul": "Notifikasi",
+     "teks": "Disposisi baru dan pengingat batas waktu tercatat di sini dan dikirim ke surel.",
+     "url": "/notifikasi"
+    },
+    {
+     "gambar": "04-profil",
+     "judul": "Akun dan preferensi",
+     "teks": "Atur kanal notifikasi dan ganti kata sandi.",
+     "url": "/profil"
+    }
+   ],
+   "faq": [
+    [
+     "Bagaimana melaporkan hasil?",
+     "Buka disposisi, isi **laporan tindak lanjut**, lalu **Selesaikan**. Pemberi disposisi diberi tahu."
+    ],
+    [
+     "Surat rahasia tidak terbuka.",
+     "Surat rahasia hanya terbuka bagi dekan dan penerima disposisinya; pastikan disposisi ditujukan kepada akun Anda."
+    ]
+   ]
+  },
+  {
+   "kode": "dekan",
+   "judul": "Dekan",
+   "akun": "panduan.dekan@contoh.test",
+   "tujuan": "Mendisposisikan surat masuk dan permohonan ormawa, menandatangani naskah, menilai LPJ, serta memantau kinerja lewat dasbor dan laporan.",
+   "masuk": "Akun dibuat admin. Pada masuk pertama ke panel `/admin` Anda wajib menyiapkan **MFA** (aplikasi autentikator); selanjutnya kode MFA diminta saat masuk.",
+   "langkah": [
+    {
+     "gambar": "01-kotak-masuk",
+     "judul": "Kotak masuk",
+     "teks": "Surat masuk yang menunggu disposisi dan permohonan ormawa yang menunggu disposisi Anda.",
+     "url": "/disposisi"
+    },
+    {
+     "gambar": "02-ponsel",
+     "judul": "Dari ponsel",
+     "teks": "Seluruh tugas harian dapat dikerjakan dari ponsel.",
+     "url": "/disposisi",
+     "viewport": "ponsel"
+    },
+    {
+     "gambar": "03-dasbor",
+     "judul": "Dasbor",
+     "teks": "Angka agregat: surat belum didisposisikan, disposisi terlambat per pejabat, naskah menunggu tanda tangan, permohonan per tahap, LPJ terlambat.",
+     "url": "/admin"
+    },
+    {
+     "gambar": "04-naskah",
+     "judul": "Naskah keluar",
+     "teks": "Naskah yang menunggu tanda tangan Anda. **Tanda tangani** membentuk nomor, tanggal, dan QR verifikasi otomatis.",
+     "url": "/admin/naskah"
+    },
+    {
+     "gambar": "05-lpj",
+     "judul": "Penilaian LPJ",
+     "teks": "Buka LPJ berstatus diajukan → **Nilai** aspek ketepatan dan kepatuhan. Nilai akhir terbentuk setelah semua penilai mengisi.",
+     "url": "/admin/lpj"
+    },
+    {
+     "gambar": "06-laporan",
+     "judul": "Laporan",
+     "teks": "Pilih LAP-01…LAP-06, atur periode, **Tampilkan**; **Ekspor XLSX** diproses antrean dan tautan unduh muncul di lonceng notifikasi.",
+     "url": "/admin/laporan"
+    }
+   ],
+   "faq": [
+    [
+     "Siapa yang melihat surat rahasia?",
+     "Hanya dekan dan penerima disposisinya; admin hanya melihat metadata registrasi."
+    ],
+    [
+     "Berganti ponsel, MFA tidak terbaca.",
+     "Hubungi super-admin untuk mengatur ulang MFA Anda."
+    ]
+   ]
+  },
+  {
+   "kode": "wakil-dekan",
+   "judul": "Wakil Dekan",
+   "akun": "panduan.wd-kemahasiswaan@contoh.test",
+   "tujuan": "Menindaklanjuti disposisi, memutuskan permohonan ormawa yang didisposisikan kepada Anda, memaraf/menandatangani naskah, dan menilai LPJ.",
+   "masuk": "Akun dan jabatan (bidang) ditetapkan admin. Wajib menyiapkan **MFA** pada masuk pertama ke `/admin`.",
+   "langkah": [
+    {
+     "gambar": "01-kotak-masuk",
+     "judul": "Kotak masuk",
+     "teks": "Disposisi surat masuk dan permohonan ormawa yang menunggu keputusan Anda.",
+     "url": "/disposisi"
+    },
+    {
+     "gambar": "02-ponsel",
+     "judul": "Dari ponsel",
+     "teks": "Keputusan dapat diambil dari ponsel.",
+     "url": "/disposisi",
+     "viewport": "ponsel"
+    },
+    {
+     "gambar": "03-dasbor",
+     "judul": "Dasbor",
+     "teks": "Ringkasan beban kerja dan keterlambatan.",
+     "url": "/admin"
+    },
+    {
+     "gambar": "04-naskah",
+     "judul": "Paraf dan tanda tangan",
+     "teks": "Naskah menunggu giliran paraf Anda atau tanda tangan atas nama/untuk beliau.",
+     "url": "/admin/naskah"
+    },
+    {
+     "gambar": "05-lpj",
+     "judul": "Penilaian LPJ",
+     "teks": "Nilai aspek ketepatan dan kepatuhan; nilai dapat direvisi sebelum final.",
+     "url": "/admin/lpj"
+    }
+   ],
+   "faq": [
+    [
+     "Bagaimana keputusan WD diproses?",
+     "Semua WD yang ditunjuk harus **Setuju** agar permohonan lanjut ke kasubag; satu **Tolak** membuat permohonan ditolak (alasan wajib)."
+    ],
+    [
+     "Saya Plt WD.",
+     "Plt dapat memutus selama masa jabatan Plt tercatat di Master › Jabatan."
+    ]
+   ]
+  },
+  {
+   "kode": "kasubag",
+   "judul": "Kepala Subbagian Umum",
+   "akun": "panduan.kasubag@contoh.test",
+   "tujuan": "Menindaklanjuti disposisi, memaraf naskah, memberi rekomendasi permohonan ormawa, dan menilai kelengkapan LPJ.",
+   "masuk": "Akun dibuat admin; wajib menyiapkan MFA bila akun memiliki peran yang mensyaratkannya.",
+   "langkah": [
+    {
+     "gambar": "01-kotak-masuk",
+     "judul": "Kotak masuk",
+     "teks": "Disposisi dan permohonan yang menunggu rekomendasi Anda.",
+     "url": "/disposisi"
+    },
+    {
+     "gambar": "02-naskah",
+     "judul": "Paraf naskah",
+     "teks": "Naskah yang menunggu paraf Anda; **Paraf** atau **Kembalikan** dengan catatan.",
+     "url": "/admin/naskah"
+    },
+    {
+     "gambar": "03-lpj",
+     "judul": "Penilaian kelengkapan LPJ",
+     "teks": "Aspek kelengkapan laporan dan kontribusi bagi fakultas.",
+     "url": "/admin/lpj"
+    },
+    {
+     "gambar": "04-arsip",
+     "judul": "Register dan arsip",
+     "teks": "Telusuri register surat masuk/keluar dan arsip sesuai klasifikasi keamanan.",
+     "url": "/admin/arsip"
+    }
+   ],
+   "faq": [
+    [
+     "Rekomendasi saya menolak.",
+     "Alasan wajib diisi dan ormawa diberi tahu; permohonan berstatus ditolak."
+    ]
+   ]
+  },
+  {
+   "kode": "admin-persuratan",
+   "judul": "Admin persuratan",
+   "akun": "panduan.admin@contoh.test",
+   "tujuan": "Meregistrasi surat masuk, menyusun dan menerbitkan naskah bernomor, memvalidasi permohonan ormawa, mengelola ormawa/kabar/galeri, serta laporan dan arsip.",
+   "masuk": "Akun dibuat super-admin. Wajib menyiapkan **MFA** pada masuk pertama ke `/admin`.",
+   "langkah": [
+    {
+     "gambar": "01-dasbor",
+     "judul": "Dasbor",
+     "teks": "Surat masuk belum didisposisikan, naskah menunggu tanda tangan, permohonan per tahap, dan LPJ terlambat.",
+     "url": "/admin"
+    },
+    {
+     "gambar": "02-surat-masuk",
+     "judul": "Daftar surat masuk",
+     "teks": "Setiap surat bernomor agenda otomatis. Surat selesai dapat **Diarsipkan**.",
+     "url": "/admin/surat-masuk"
+    },
+    {
+     "gambar": "03-surat-masuk-baru",
+     "judul": "Registrasi surat masuk",
+     "teks": "Isi asal, nomor dan tanggal surat, perihal, klasifikasi, dan **tautan pindaian** (wajib). Nomor agenda terbentuk saat disimpan.",
+     "url": "/admin/surat-masuk/create"
+    },
+    {
+     "gambar": "04-naskah",
+     "judul": "Naskah keluar",
+     "teks": "Susun dari templat → ajukan paraf → tanda tangan → nomor otomatis → terbitkan.",
+     "url": "/admin/naskah"
+    },
+    {
+     "gambar": "05-permohonan",
+     "judul": "Permohonan ormawa",
+     "teks": "Tab per status; **Validasi**, **Kembalikan** (catatan wajib), atau **Tolak** (alasan wajib).",
+     "url": "/admin/permohonan"
+    },
+    {
+     "gambar": "06-plot-ruangan",
+     "judul": "Plot ruangan",
+     "teks": "Kalender ruangan × sesi: pemakaian layanan, ditahan, dan dikonfirmasi; catat pemakaian manual.",
+     "url": "/admin/plot-ruangan"
+    },
+    {
+     "gambar": "07-kabar",
+     "judul": "Kabar",
+     "teks": "Terbitkan atau tolak kabar usulan ormawa; buat kabar fakultas.",
+     "url": "/admin/kabar"
+    },
+    {
+     "gambar": "08-register",
+     "judul": "Register surat masuk",
+     "teks": "Pencarian dan ekspor register; perihal rahasia disamarkan.",
+     "url": "/admin/register-surat-masuk"
+    },
+    {
+     "gambar": "09-arsip",
+     "judul": "Arsip",
+     "teks": "Cari nomor, perihal, asal/tujuan, dan klasifikasi; menghormati klasifikasi keamanan.",
+     "url": "/admin/arsip"
+    },
+    {
+     "gambar": "10-laporan",
+     "judul": "Laporan",
+     "teks": "LAP-01…LAP-06 dengan filter periode dan ekspor XLSX.",
+     "url": "/admin/laporan"
+    }
+   ],
+   "faq": [
+    [
+     "Nomor naskah tidak muncul.",
+     "Nomor hanya terbentuk saat naskah ditandatangani, bukan saat draf."
+    ],
+    [
+     "Tidak dapat membuka surat rahasia.",
+     "Hanya dekan dan penerima disposisi; admin melihat metadata registrasi saja."
+    ]
+   ]
+  },
+  {
+   "kode": "operator-layanan",
+   "judul": "Operator layanan",
+   "akun": "panduan.operator@contoh.test",
+   "tujuan": "Mengelola bagian tertentu yang diizinkan admin (mis. kabar, galeri, dan jadwal ruangan) tanpa akses penuh.",
+   "masuk": "Akun dibuat super-admin dengan izin granular per modul. Menu panel hanya memuat modul yang diizinkan.",
+   "langkah": [
+    {
+     "gambar": "01-dasbor",
+     "judul": "Dasbor terbatas",
+     "teks": "Hanya menu sesuai izin Anda yang tampil.",
+     "url": "/admin"
+    },
+    {
+     "gambar": "02-kabar",
+     "judul": "Kabar",
+     "teks": "Terbitkan atau tolak kabar usulan ormawa (bila diberi izin kabar).",
+     "url": "/admin/kabar"
+    },
+    {
+     "gambar": "03-galeri",
+     "judul": "Galeri",
+     "teks": "Tambah foto/video/Instagram dan aktifkan; **Ambil saran dari LPJ** menyalin tautan media LPJ sebagai item nonaktif.",
+     "url": "/admin/galeri"
+    },
+    {
+     "gambar": "04-plot-ruangan",
+     "judul": "Plot ruangan",
+     "teks": "Catat pemakaian ruangan manual (bila diberi izin jadwal ruangan).",
+     "url": "/admin/plot-ruangan"
+    }
+   ],
+   "faq": [
+    [
+     "Menu yang saya perlukan tidak ada.",
+     "Minta super-admin menambahkan izin yang sesuai pada akun Anda."
+    ]
+   ]
+  },
+  {
+   "kode": "super-admin",
+   "judul": "Super-admin",
+   "akun": "panduan.super-admin@contoh.test",
+   "tujuan": "Mengelola pengguna, peran dan izin, pengaturan kebijakan, master data, audit, dan migrasi data.",
+   "masuk": "Akun pertama dibuat lewat perintah server `php artisan surat:buat-superadmin` (interaktif). MFA wajib saat masuk pertama.",
+   "langkah": [
+    {
+     "gambar": "01-pengguna",
+     "judul": "Pengguna",
+     "teks": "Buat akun, tetapkan peran/izin, nonaktifkan, dan masuk sebagai pengguna lain (tercatat) untuk membantu.",
+     "url": "/admin/pengguna"
+    },
+    {
+     "gambar": "02-pengaturan",
+     "judul": "Pengaturan sistem",
+     "teks": "Kebijakan fakultas: minimal hari pengajuan, batas LPJ dan blokir, sesi ruangan, kop surat, WhatsApp, pengingat.",
+     "url": "/admin/pengaturan"
+    },
+    {
+     "gambar": "03-jabatan",
+     "judul": "Jabatan dan pemangku",
+     "teks": "Satu pemangku definitif per jabatan; Plt terpisah dengan masa jabatan.",
+     "url": "/admin/jabatan"
+    },
+    {
+     "gambar": "04-register-nomor",
+     "judul": "Register nomor",
+     "teks": "Pola nomor naskah, agenda, dan permohonan; nomor yang dikeluarkan tidak dapat diubah.",
+     "url": "/admin/register-nomor"
+    },
+    {
+     "gambar": "05-aktivitas",
+     "judul": "Log aktivitas",
+     "teks": "Jejak audit semua perubahan (pelaku selalu pengguna terautentikasi).",
+     "url": "/admin/aktivitas"
+    },
+    {
+     "gambar": "06-log-migrasi",
+     "judul": "Log migrasi",
+     "teks": "Hasil impor OrmawaHub per baris: ok, peringatan, lewati, galat.",
+     "url": "/admin/log-migrasi"
+    }
+   ],
+   "faq": [
+    [
+     "Kehilangan MFA.",
+     "Super-admin lain atau akses server dapat mengatur ulang rahasia MFA; simpan kode pemulihan."
+    ],
+    [
+     "Bagaimana mencadangkan?",
+     "Lihat docs/DEPLOY.md: cadangan harian dan uji pulih."
+    ]
+   ]
+  }
+ ]
+}
