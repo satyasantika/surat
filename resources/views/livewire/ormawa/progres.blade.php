@@ -26,6 +26,9 @@
                             @endforeach
                         </ul>
                     @endif
+                    @if ($detail->naskahIzin && $detail->naskahIzin->status->value === 'terbit')
+                        <p><a href="{{ route('naskah.pdf', $detail->naskahIzin) }}" target="_blank" rel="noopener noreferrer" class="rounded bg-green-700 px-3 py-2 text-white">Unduh surat izin ({{ $detail->naskahIzin->nomor }})</a></p>
+                    @endif
                     @if ($bolehPribadi)
                         <p class="text-slate-600">Ketua pelaksana: {{ $detail->penanggung_jawab['ketua']['nama'] ?? '—' }} · HP {{ $detail->penanggung_jawab['ketua']['hp'] ?? '—' }}</p>
                     @endif

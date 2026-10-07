@@ -42,7 +42,7 @@ class Progres extends Component
         $detail = $this->terpilih ? $daftar->firstWhere('id', $this->terpilih) : null;
 
         if ($detail !== null) {
-            $detail->load(['riwayat.pelaku', 'ruangan', 'pengaju']);
+            $detail->load(['riwayat.pelaku', 'ruangan', 'pengaju', 'naskahIzin']);
         }
 
         return view('livewire.ormawa.progres', [

@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Permohonans\Pages;
 
+use App\Actions\Permohonan\BuatPengantarRektorat;
 use App\Actions\Permohonan\DisposisiPermohonan;
 use App\Actions\Permohonan\KembalikanPermohonan;
 use App\Actions\Permohonan\PutusanWd;
 use App\Actions\Permohonan\RekomendasiKasubag;
 use App\Actions\Permohonan\SetujuiPembina;
+use App\Actions\Permohonan\TerbitkanIzin;
 use App\Actions\Permohonan\TolakPermohonan;
 use App\Actions\Permohonan\ValidasiPermohonan;
+use App\Filament\Resources\Naskahs\NaskahResource;
 use App\Filament\Resources\Permohonans\PermohonanResource;
 use App\Models\Jabatan;
 use App\Models\Permohonan;
@@ -89,6 +92,23 @@ class ViewPermohonan extends ViewRecord
                 ->visible(fn () => $pengguna()->can('rekomendasiKasubag', $this->permohonan()))
                 ->schema([Textarea::make('alasan')->required()->maxLength(2000)])
                 ->action(fn (array $data) => $this->jalankan(fn () => app(RekomendasiKasubag::class)->tolak($this->permohonan(), $pengguna(), $data['alasan']), 'Permohonan ditolak')),
+            Action::make('terbitkanIzin')->label('Buat draf surat izin')->color('success')
+                ->visible(fn () => $pengguna()->can('terbitkanIzin', $this->permohonan()))->requiresConfirmation()
+                ->modalDescription('Draf naskah dibuat dari templat jenis permohonan; sunting lalu ajukan paraf/tanda tangan.')
+                ->action(function () use ($pengguna) {
+                    $this->jalankan(function () use ($pengguna) {
+                        $naskah = app(TerbitkanIzin::class)->jalankan($this->permohonan(), $pengguna());
+                        $this->redirect(NaskahResource::getUrl('edit', ['record' => $naskah]));
+                    }, 'Draf surat izin dibuat');
+                }),
+            Action::make('pengantarRektorat')->label('Buat surat pengantar ke rektorat')
+                ->visible(fn () => $pengguna()->can('pengantarRektorat', $this->permohonan()) && $this->permohonan()->jenis->butuh_fasilitas_rektorat)
+                ->action(function () use ($pengguna) {
+                    $this->jalankan(function () use ($pengguna) {
+                        $naskah = app(BuatPengantarRektorat::class)->jalankan($this->permohonan(), $pengguna());
+                        $this->redirect(NaskahResource::getUrl('edit', ['record' => $naskah]));
+                    }, 'Draf surat pengantar dibuat');
+                }),
             Action::make('tolak')->label('Tolak')->color('danger')
                 ->visible(fn () => $pengguna()->can('putusTahapAwal', $this->permohonan()))
                 ->schema([Textarea::make('alasan')->required()->maxLength(2000)])

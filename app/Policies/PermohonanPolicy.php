@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\StatusPermohonan;
+use App\Models\Naskah;
 use App\Models\Permohonan;
 use App\Models\User;
 
@@ -87,5 +88,18 @@ class PermohonanPolicy
         return $permohonan->status === StatusPermohonan::RekomendasiKasubag
             && $pelaku->can('permohonan.putuskan') && $pelaku->hasRole('kasubag')
             && $pelaku->jabatanAktif()->contains('kode', 'kasubag-umum');
+    }
+
+    /** Admin membuat draf surat izin setelah rekomendasi kasubag. */
+    public function terbitkanIzin(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::Penerbitan && $pelaku->can('permohonan.validasi') && $pelaku->can('naskah.draf')
+            && ($permohonan->naskah_izin_id === null || Naskah::whereKey($permohonan->naskah_izin_id)->where('status', 'dibatalkan')->exists());
+    }
+
+    public function pengantarRektorat(User $pelaku, Permohonan $permohonan): bool
+    {
+        return in_array($permohonan->status, [StatusPermohonan::Penerbitan, StatusPermohonan::Selesai], true)
+            && $pelaku->can('permohonan.validasi') && $pelaku->can('naskah.draf');
     }
 }

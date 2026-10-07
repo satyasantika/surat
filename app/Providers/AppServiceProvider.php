@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Contracts\LayananRuangan;
 use App\Contracts\PembangkitPdf;
 use App\Contracts\PenyimpananBerkas;
+use App\Events\NaskahTerbit;
+use App\Listeners\SelesaikanPermohonanDariNaskah;
 use App\Services\Berkas\TautanEksternal;
 use App\Services\Pdf\PembangkitPdfDompdf;
 use App\Services\Pdf\PembangkitPdfGotenberg;
@@ -17,6 +19,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -66,6 +69,8 @@ class AppServiceProvider extends ServiceProvider
 
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        Event::listen(NaskahTerbit::class, SelesaikanPermohonanDariNaskah::class);
 
         RateLimiter::for('masuk', fn (Request $request) => Limit::perMinute(5)
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
