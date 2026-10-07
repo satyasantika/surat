@@ -6,9 +6,9 @@ use App\Contracts\LayananRuangan;
 use App\Exceptions\RuanganBentrok;
 use App\Models\PemakaianRuanganLokal;
 use App\Models\RuanganLokal;
+use App\Support\KunciRuangan;
 use App\Support\SesiRuangan;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -46,7 +46,7 @@ class LayananRuanganLokal implements LayananRuangan
             throw new InvalidArgumentException("Sesi {$sesi} tidak dikenal.");
         }
 
-        return Cache::lock("ruangan:{$kode}:{$tanggal}", 10)->block(5, fn () => DB::transaction(function () use ($ruangan, $tanggal, $sesi, $referensi, $keterangan) {
+        return KunciRuangan::dengan([['kode' => $kode, 'tanggal' => $tanggal]], fn () => DB::transaction(function () use ($ruangan, $tanggal, $sesi, $referensi, $keterangan) {
             // Idempoten: referensi sama pada tanggal+sesi yang sama mengembalikan pemakaian yang ada.
             if ($referensi !== null) {
                 $ada = PemakaianRuanganLokal::where('ruangan_lokal_id', $ruangan->getKey())->whereDate('tanggal', $tanggal)

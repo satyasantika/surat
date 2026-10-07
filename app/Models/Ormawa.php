@@ -26,7 +26,7 @@ class Ormawa extends Model
 
     protected function casts(): array
     {
-        return ['aktif' => 'boolean'];
+        return ['aktif' => 'boolean', 'diblokir_lpj' => 'boolean', 'diblokir_sejak' => 'datetime'];
     }
 
     protected static function booted(): void

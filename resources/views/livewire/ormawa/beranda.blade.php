@@ -32,7 +32,11 @@
 
         <section class="rounded-lg bg-white p-4 shadow" aria-label="Permohonan">
             <h3 class="font-medium">Permohonan</h3>
-            <p class="text-sm text-slate-500">Belum ada permohonan.</p>
+            <p class="text-sm text-slate-500">{{ $jumlahPermohonan > 0 ? $jumlahPermohonan.' permohonan tercatat.' : 'Belum ada permohonan.' }}</p>
+            <p class="mt-2 flex gap-4 text-sm">
+                <a class="text-blue-800 underline" href="{{ route('ormawa.permohonan', $ormawa) }}">Progres</a>
+                <a class="text-blue-800 underline" href="{{ route('ormawa.permohonan.baru', $ormawa) }}">Ajukan baru</a>
+            </p>
         </section>
 
         <section class="rounded-lg bg-white p-4 shadow" aria-label="LPJ jatuh tempo">

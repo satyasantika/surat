@@ -41,7 +41,7 @@ it('menyemai register standar', function () {
 it('memberi nomor berurutan per register', function () {
     expect(ambil('agenda-masuk', '2026-03-10')->nomor_lengkap)->toBe('0001/AGD/2026')
         ->and(ambil('agenda-masuk', '2026-03-11')->nomor_lengkap)->toBe('0002/AGD/2026')
-        ->and(ambil('permohonan', '2026-03-11')->nomor_lengkap)->toBe('0001/PMH/III/2026');
+        ->and(ambil('permohonan', '2026-03-11')->nomor_lengkap)->toBe('PMH-2026-0001');
 });
 
 it('mereset urutan pada 1 Januari', function () {
