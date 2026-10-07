@@ -4,6 +4,14 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.8.0] - 2026-10-07
+
+Fase 8: LPJ dan penilaian.
+
+### Ditambahkan
+- LPJ dibuat otomatis (draf, batas waktu) saat permohonan selesai; formulir `Ormawa\IsiLpj` dengan tautan berkas LPJ wajib dan tautan media tervalidasi; `Ormawa::lpjTerlambat()` memblokir pengajuan baru bila lewat toleransi (dapat dimatikan di pengaturan, BR-16).
+- Rubrik LPJ sebagai master (`RubrikLpjResource`, izin `master.kelola`) dengan seeder rubrik lama (total 100), penilaian oleh pemangku jabatan yang tercantum (`NilaiLpj`), nilai 0..maks, revisi sebelum final, `HitungNilaiAkhir` (setelah semua penilai lengkap; rumus jumlah atau persen), `LpjResource` dengan aksi nilai dan matriks nilai; ormawa melihat nilai akhir dan catatan hanya setelah final.
+
 ## [0.7.0] - 2026-10-07
 
 Fase 7: permohonan ormawa dan ruangan.
