@@ -3,6 +3,7 @@
 namespace App\Services\Berkas;
 
 use App\Models\TautanBerkas;
+use App\Services\Notifikasi\NotifikasiAlur;
 use App\Support\HostAman;
 use App\Support\UrlBerkas;
 use Illuminate\Support\Facades\Http;
@@ -16,9 +17,14 @@ class PemeriksaTautan
 {
     public function periksa(TautanBerkas $tautan): string
     {
+        $sebelum = $tautan->status_cek;
         $status = $this->cek($tautan->url);
 
         $tautan->forceFill(['status_cek' => $status, 'dicek_pada' => now()])->saveQuietly();
+
+        if ($status === 'tidak_dapat_diakses' && $sebelum !== 'tidak_dapat_diakses') {
+            app(NotifikasiAlur::class)->tautanMati($tautan);
+        }
 
         return $status;
     }

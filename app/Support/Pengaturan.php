@@ -30,6 +30,9 @@ class Pengaturan
         // jumlah = jumlah nilai semua penilai; persen = jumlah / total maksimum × 100
         'rumus_nilai_lpj' => ['nilai' => 'jumlah', 'grup' => 'lpj'],
         'wa_aktif' => ['nilai' => false, 'grup' => 'notifikasi'],
+        // pengingat terjadwal: disposisi "mendekati" bila batas waktu dalam N jam; permohonan "tertahan" bila N hari di satu tahap
+        'jam_pengingat_disposisi' => ['nilai' => 24, 'grup' => 'notifikasi'],
+        'hari_tertahan_permohonan' => ['nilai' => 3, 'grup' => 'notifikasi'],
         'layanan_ruangan' => ['nilai' => 'lokal', 'grup' => 'ruangan'],
         // [{nama, kategori}]: pilihan fasilitas rektorat pada permohonan (diisi impor OrmawaHub atau admin)
         'fasilitas_rektorat_katalog' => ['nilai' => [], 'grup' => 'permohonan'],
