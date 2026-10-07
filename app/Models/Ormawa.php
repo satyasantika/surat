@@ -83,6 +83,12 @@ class Ormawa extends Model
         return $this->hasMany(SkKepengurusan::class);
     }
 
+    /** @return HasMany<PengurusOrmawa, $this> */
+    public function pengurus(): HasMany
+    {
+        return $this->hasMany(PengurusOrmawa::class);
+    }
+
     /** @return MorphMany<TautanBerkas, $this> */
     public function tautan(): MorphMany
     {

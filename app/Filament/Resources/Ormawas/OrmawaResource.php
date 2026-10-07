@@ -102,7 +102,7 @@ class OrmawaResource extends Resource
 
     public static function getRelations(): array
     {
-        return [SkRelationManager::class, OrmawaTautanRelationManager::class];
+        return [PengurusRelationManager::class, SkRelationManager::class, OrmawaTautanRelationManager::class];
     }
 
     public static function getPages(): array
