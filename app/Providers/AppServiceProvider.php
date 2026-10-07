@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\LayananRuangan;
 use App\Contracts\PembangkitPdf;
 use App\Contracts\PenyimpananBerkas;
 use App\Services\Berkas\TautanEksternal;
 use App\Services\Pdf\PembangkitPdfDompdf;
 use App\Services\Pdf\PembangkitPdfGotenberg;
+use App\Services\Ruangan\LayananRuanganAset;
+use App\Services\Ruangan\LayananRuanganLokal;
+use App\Support\Pengaturan;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -25,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Pilihan layanan dibaca dari pengaturan saat dipakai (bukan saat boot). API Aset hanya bila URL & token terisi.
+        $this->app->bind(LayananRuangan::class, function () {
+            $aset = config('layanan.aset');
+
+            // Mode aset_api tanpa URL/token berarti salah konfigurasi: layanan melempar LayananRuanganTidakTersedia,
+            // bukan diam-diam memakai data lokal (risiko pemesanan ganda).
+            return Pengaturan::get('layanan_ruangan') === 'aset_api'
+                ? new LayananRuanganAset((string) $aset['url'], (string) $aset['token'], $aset['timeout'], $aset['cache_detik'])
+                : new LayananRuanganLokal;
+        });
+
         $this->app->bind(PenyimpananBerkas::class, fn () => match (config('berkas.mode')) {
             default => new TautanEksternal,
         });
