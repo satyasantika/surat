@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\StatusPermohonan;
 use App\Models\Permohonan;
 use App\Models\User;
 
@@ -29,5 +30,40 @@ class PermohonanPolicy
         return $pelaku->can('permohonan.validasi')
             || $permohonan->diajukan_oleh === $pelaku->getKey()
             || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa);
+    }
+
+    public function setujuiPembina(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $pelaku->can('permohonan.setujui-pembina')
+            && $permohonan->ormawa->pembina_user_id === $pelaku->getKey()
+            && $permohonan->status === StatusPermohonan::PersetujuanPembina;
+    }
+
+    public function validasi(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $pelaku->can('permohonan.validasi') && $permohonan->status === StatusPermohonan::ValidasiAdmin;
+    }
+
+    /** Mengembalikan/menolak pada tahap pembina (oleh pembina binaan) atau tahap validasi (oleh admin). */
+    public function putusTahapAwal(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $this->setujuiPembina($pelaku, $permohonan) || $this->validasi($pelaku, $permohonan);
+    }
+
+    /** Pengurus aktif ormawa merevisi lalu mengajukan ulang permohonan yang dikembalikan. */
+    public function revisi(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::Dikembalikan
+            && $pelaku->can('permohonan.ajukan')
+            && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id);
+    }
+
+    /** Pembatalan oleh pengurus aktif (ketua/sekretaris atau pengaju) sebelum penerbitan. */
+    public function batalkan(User $pelaku, Permohonan $permohonan): bool
+    {
+        return ! $permohonan->status->akhir()
+            && $permohonan->status !== StatusPermohonan::Penerbitan
+            && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id)
+            && ($permohonan->diajukan_oleh === $pelaku->getKey() || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa));
     }
 }
