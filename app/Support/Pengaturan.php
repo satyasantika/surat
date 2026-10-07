@@ -27,6 +27,8 @@ class Pengaturan
             'UNIVERSITAS SILIWANGI',
             'FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN',
         ], 'grup' => 'surat'],
+        // jumlah = jumlah nilai semua penilai; persen = jumlah / total maksimum × 100
+        'rumus_nilai_lpj' => ['nilai' => 'jumlah', 'grup' => 'lpj'],
         'wa_aktif' => ['nilai' => false, 'grup' => 'notifikasi'],
         'layanan_ruangan' => ['nilai' => 'lokal', 'grup' => 'ruangan'],
     ];

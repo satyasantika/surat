@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Actions\Lpj\NilaiLpj;
 use App\Models\Lpj;
 use App\Models\User;
 
@@ -32,5 +33,13 @@ class LpjPolicy
         return $lpj->status === Lpj::DRAF
             && $pelaku->can('lpj.isi')
             && $pelaku->ormawaAktif()->contains('id', $lpj->permohonan->ormawa_id);
+    }
+
+    /** Penilaian: pemangku jabatan penilai pada LPJ yang diajukan dan belum final. */
+    public function nilai(User $pelaku, Lpj $lpj): bool
+    {
+        return $lpj->status === Lpj::DIAJUKAN
+            && $pelaku->can('lpj.nilai')
+            && NilaiLpj::rubrikUntuk($pelaku)->isNotEmpty();
     }
 }

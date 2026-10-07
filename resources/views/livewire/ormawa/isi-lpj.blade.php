@@ -30,6 +30,10 @@
     </section>
 
     @if ($lpj->nilai_akhir !== null)
-        <section class="rounded-lg bg-white p-4 shadow"><h3 class="font-medium">Nilai akhir</h3><p class="text-2xl font-semibold">{{ $lpj->nilai_akhir }}</p></section>
+        <section class="rounded-lg bg-white p-4 shadow"><h3 class="font-medium">Nilai akhir</h3><p class="text-2xl font-semibold">{{ $lpj->nilai_akhir }}</p>
+            @foreach ($lpj->nilai->filter(fn ($n) => filled($n->catatan)) as $n)
+                <p class="mt-2 text-sm"><span class="text-slate-500">{{ $n->rubrik->nama }} · {{ $n->jabatan->nama }}:</span> {{ $n->catatan }}</p>
+            @endforeach
+        </section>
     @endif
 </div>

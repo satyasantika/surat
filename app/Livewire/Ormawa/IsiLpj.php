@@ -88,7 +88,7 @@ class IsiLpj extends Component
 
     private function model(): Lpj
     {
-        $lpj = Lpj::with('permohonan')->findOrFail($this->lpjId);
+        $lpj = Lpj::with(['permohonan', 'nilai.rubrik', 'nilai.jabatan'])->findOrFail($this->lpjId);
         Gate::forUser($this->pengguna())->authorize('view', $lpj);
 
         return $lpj;

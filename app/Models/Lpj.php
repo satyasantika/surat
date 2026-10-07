@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
@@ -57,6 +58,12 @@ class Lpj extends Model
     public function permohonan(): BelongsTo
     {
         return $this->belongsTo(Permohonan::class);
+    }
+
+    /** @return HasMany<NilaiLpj, $this> */
+    public function nilai(): HasMany
+    {
+        return $this->hasMany(NilaiLpj::class);
     }
 
     /** @return MorphMany<TautanBerkas, $this> */
