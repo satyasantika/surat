@@ -78,7 +78,7 @@ composer panduan       # = bash tests/panduan/jalankan.sh (dijalankan dari host)
 Skrip menyiapkan basis data **sementara** (`db_surat_testing`), mengisinya dengan `PanduanSeeder` (akun `panduan.<peran>@contoh.test`, data rekaan,
 hanya `APP_ENV=local`), menjalankan server artisan sementara di container `surat-php`, menangkap layar lewat container
 `mcr.microsoft.com/playwright`, lalu membangun HTML. `PANDUAN_PASSWORD` dibuat acak per proses (atau set sendiri). Akun demo hanya dikecualikan dari MFA di
-lokal (`PANDUAN_TANPA_MFA`). Untuk satu peran saja: `PANDUAN_PERAN=dekan,kasubag composer panduan`.
+lokal (`PANDUAN_TANPA_MFA`). Panduan **super-admin bersifat internal**: dibangun ke `docs/panduan-internal/` (bukan `public/`), tidak ditautkan di indeks maupun landing page, dan tidak ikut citra produksi. Untuk satu peran saja: `PANDUAN_PERAN=dekan,kasubag composer panduan`.
 
 Bila ingin menjalankannya sebagai service compose pusat (`~/code/docker-compose.yml`, di luar repo) seperti STANDAR-TEKNIS §2.5:
 

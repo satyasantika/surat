@@ -43,7 +43,8 @@ async function halaman(akun, jenis) {
 
 for (const peran of alur.peran) {
   if (peranDipilih && !peranDipilih.includes(peran.kode)) continue;
-  const dir = join(akar, 'public/panduan/img', peran.kode);
+  // Panduan internal (super-admin) tidak boleh berada di public/: tidak disajikan web dan tidak ditautkan di landing page.
+  const dir = join(akar, peran.internal ? 'docs/panduan-internal/img' : 'public/panduan/img', peran.kode);
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
 

@@ -17,6 +17,10 @@ it('setiap peran sistem memiliki halaman panduan dan tercantum di indeks', funct
     $indeks = file_get_contents(public_path('panduan/index.html'));
 
     foreach (array_keys(PeranDanIzinSeeder::PERAN) as $peran) {
+        if ($peran === 'super-admin') {
+            continue; // panduan internal: lihat tes berikutnya
+        }
+
         expect(public_path("panduan/{$peran}.html"))->toBeFile()->and($indeks)->toContain("href=\"{$peran}.html\"");
     }
 
@@ -102,4 +106,16 @@ it('MFA hanya dikecualikan untuk akun demo contoh.test di lokal dengan flag meny
 
     $this->app['env'] = 'production';
     expect($demo->wajibMfa())->toBeTrue();
+});
+
+it('panduan super-admin tersembunyi: ada di docs, tidak di public, tidak ditautkan dari halaman mana pun', function () {
+    expect(base_path('docs/panduan-internal/super-admin.html'))->toBeFile()->and(public_path('panduan/super-admin.html'))->not->toBeFile()->and(public_path('panduan/img/super-admin'))->not->toBeDirectory();
+
+    foreach (berkasPanduan() as $f) {
+        expect(file_get_contents($f->getPathname()))->not->toContain('super-admin.html');
+    }
+
+    $this->withoutVite();
+    $this->get('/')->assertOk()->assertDontSee('super-admin.html');
+    $this->get('/panduan/super-admin.html')->assertNotFound();
 });

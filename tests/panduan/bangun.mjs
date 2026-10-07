@@ -9,7 +9,9 @@ const alur = JSON.parse(readFileSync(join(akar, 'tests/panduan/alur.json'), 'utf
 const versi = (/^APP_VERSION=(.+)$/m.exec(readFileSync(join(akar, '.env.example'), 'utf8')) ?? [, 'dev'])[1].trim();
 const tanggal = process.env.PANDUAN_TANGGAL ?? new Date().toISOString().slice(0, 10);
 const keluar = join(akar, 'public/panduan');
+const dalam = join(akar, 'docs/panduan-internal');
 mkdirSync(keluar, { recursive: true });
+mkdirSync(dalam, { recursive: true });
 
 const e = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 // Penebalan **x** dan kode `x` sederhana pada teks tepercaya (berkas sumber milik tim).
@@ -48,7 +50,7 @@ ${isi}
 </html>
 `;
 
-const indeks = alur.peran.map((p) => `<li><a href="${p.kode}.html"><div class="kartu"><strong>${e(p.judul)}</strong><br><small>${e(p.tujuan)}</small></div></a></li>`).join('\n');
+const indeks = alur.peran.filter((p) => !p.internal).map((p) => `<li><a href="${p.kode}.html"><div class="kartu"><strong>${e(p.judul)}</strong><br><small>${e(p.tujuan)}</small></div></a></li>`).join('\n');
 writeFileSync(join(keluar, 'index.html'), halaman('Beranda panduan', `<h1>Panduan pengguna</h1>
 <p>Pilih peran Anda. Setiap panduan berisi langkah bernomor dengan tangkapan layar dan tanya-jawab singkat. Panduan ini siap dicetak.</p>
 <ul class="daftar">
@@ -57,14 +59,15 @@ ${indeks}
 
 let ada = 0;
 for (const p of alur.peran) {
+  const tujuan = p.internal ? dalam : keluar;
   const langkah = p.langkah.map((l, i) => {
     const berkas = `img/${p.kode}/${l.gambar}.png`;
-    if (!existsSync(join(keluar, berkas))) console.warn(`PERINGATAN: ${berkas} belum ada (jalankan tangkap.mjs)`);
+    if (!existsSync(join(tujuan, berkas))) console.warn(`PERINGATAN: ${berkas} belum ada (jalankan tangkap.mjs)`);
     else ada++;
     return `<li class="kartu langkah"><div><strong>${e(l.judul)}</strong><br>${md(l.teks)}</div><figure><img src="${berkas}" alt="${e(`${p.judul}: ${l.judul}`)}" loading="lazy"><figcaption>Langkah ${i + 1} — ${e(l.judul)}</figcaption></figure></li>`;
   }).join('\n');
   const faq = (p.faq ?? []).map(([t, j]) => `<details><summary>${e(t)}</summary><p>${md(j)}</p></details>`).join('\n');
-  writeFileSync(join(keluar, `${p.kode}.html`), halaman(p.judul, `<nav><a href="index.html">&larr; Semua panduan</a></nav>
+  writeFileSync(join(tujuan, `${p.kode}.html`), halaman(p.judul, `${p.internal ? '<nav><strong>Internal — jangan dipublikasikan</strong></nav>' : '<nav><a href="index.html">&larr; Semua panduan</a></nav>'}
 <h1>${e(p.judul)}</h1>
 <h2>Tujuan</h2><p>${md(p.tujuan)}</p>
 <h2>Cara masuk</h2><p>${md(p.masuk)}</p>
@@ -74,6 +77,6 @@ ${langkah}
 </ol>
 <h2>Tanya jawab</h2>
 ${faq}
-<p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>`));
+${p.internal ? '' : '<p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>'}`));
 }
 console.log(`Panduan dibangun: ${alur.peran.length} halaman, ${ada} gambar ditautkan.`);

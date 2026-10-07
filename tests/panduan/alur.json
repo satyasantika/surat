@@ -550,7 +550,8 @@
      "Bagaimana mencadangkan?",
      "Lihat docs/DEPLOY.md: cadangan harian dan uji pulih."
     ]
-   ]
+   ],
+   "internal": true
   }
  ]
 }
