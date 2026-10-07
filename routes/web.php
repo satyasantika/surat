@@ -12,6 +12,8 @@ use App\Http\Controllers\NaskahPdfController;
 use App\Http\Controllers\PratinjauNaskahController;
 use App\Http\Controllers\Publik\VerifikasiController;
 use App\Http\Middleware\PastikanAktif;
+use App\Livewire\Ormawa\Beranda as BerandaOrmawa;
+use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +46,8 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/naskah/{naskah}/pratinjau', PratinjauNaskahController::class)->whereUuid('naskah')->name('naskah.pratinjau');
     Route::get('/naskah/{naskah}/pdf', NaskahPdfController::class)->whereUuid('naskah')->name('naskah.pdf');
     Route::get('/ekspor/{berkas}', EksporUnduhController::class)->middleware('signed')->name('ekspor.unduh');
+    Route::get('/ormawa', BerandaOrmawa::class)->name('ormawa');
+    Route::get('/ormawa/{ormawa}/profil', ProfilOrmawa::class)->whereUuid('ormawa')->name('ormawa.profil');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
     Route::get('/berkas/{tautan}/buka', BukaTautanController::class)->whereUuid('tautan')->name('berkas.buka');

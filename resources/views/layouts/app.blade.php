@@ -10,7 +10,7 @@
 <x-banner-impersonasi />
 <header class="bg-blue-900 text-white">
     <nav class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 text-sm">
-        <a href="{{ route('disposisi') }}" class="font-semibold">{{ config('app.name') }}</a>
+        <a href="{{ \App\Support\Beranda::url(auth()->user()) }}" class="font-semibold">{{ config('app.name') }}</a>
         <div class="flex items-center gap-4">
             <a href="{{ route('profil') }}" class="underline">Profil</a>
             <form method="POST" action="{{ route('logout') }}">@csrf <button type="submit" class="underline">Keluar</button></form>
