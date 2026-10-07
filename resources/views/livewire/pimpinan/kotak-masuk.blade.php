@@ -1,6 +1,6 @@
 <div class="space-y-4">
     <div class="flex gap-2 text-sm" role="tablist">
-        @foreach (['perlu' => 'Perlu tindakan', 'terkirim' => 'Terkirim', 'selesai' => 'Selesai'] as $kunci => $nama)
+        @foreach (['perlu' => 'Perlu tindakan', 'naskah' => 'Paraf & tanda tangan', 'terkirim' => 'Terkirim', 'selesai' => 'Selesai'] as $kunci => $nama)
             <button type="button" wire:click="pilihTab('{{ $kunci }}')" role="tab"
                     class="rounded-full px-4 py-2 {{ $tab === $kunci ? 'bg-blue-900 text-white' : 'bg-white shadow' }}">{{ $nama }}</button>
         @endforeach
@@ -92,6 +92,33 @@
         </article>
     @endforeach
 
+    {{-- Naskah menunggu paraf / tanda tangan --}}
+    @foreach ($naskahDaftar as $n)
+        @php($kunci = 'naskah:'.$n->id)
+        <article class="rounded-lg bg-white p-4 shadow" wire:key="{{ $kunci }}">
+            <button type="button" wire:click="buka('{{ $kunci }}')" class="w-full text-left">
+                <p class="text-xs text-slate-500">{{ $n->jenis->nama }} · dari {{ $n->penyusun->name }}</p>
+                <p class="font-medium">{{ $n->perihal }}</p>
+                <p class="mt-1 text-xs"><span class="rounded bg-slate-100 px-2 py-0.5">{{ $n->status->label() }}</span></p>
+            </button>
+            @if ($terbuka === $kunci)
+                <div class="mt-3 space-y-3 border-t pt-3 text-sm">
+                    <a href="{{ route('naskah.pratinjau', $n) }}" target="_blank" rel="noopener noreferrer" class="text-blue-800 underline">Pratinjau naskah</a>
+                    <textarea wire:model="catatanNaskah" rows="2" class="w-full rounded border px-3 py-2" placeholder="Catatan (wajib bila dikembalikan)"></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        @if ($n->status === \App\Enums\StatusNaskah::Paraf)
+                            <button type="button" wire:click="parafi('{{ $n->id }}')" class="rounded bg-blue-900 px-4 py-2 text-white">Paraf</button>
+                        @endif
+                        @if ($n->status === \App\Enums\StatusNaskah::MenungguTandaTangan)
+                            <button type="button" wire:click="tandatangani('{{ $n->id }}')" wire:confirm="Tandatangani naskah ini? Nomor akan diberikan dan isi dibekukan." class="rounded bg-green-700 px-4 py-2 text-white">Tandatangani</button>
+                        @endif
+                        <button type="button" wire:click="kembalikanNaskah('{{ $n->id }}')" class="rounded border border-red-700 px-4 py-2 text-red-700">Kembalikan</button>
+                    </div>
+                </div>
+            @endif
+        </article>
+    @endforeach
+
     {{-- Terkirim --}}
     @foreach ($terkirim as $d)
         <article class="rounded-lg bg-white p-4 shadow" wire:key="terkirim:{{ $d->id }}">
@@ -106,7 +133,7 @@
         </article>
     @endforeach
 
-    @if ($surat->isEmpty() && $penerimaDaftar->isEmpty() && $terkirim->isEmpty())
+    @if ($surat->isEmpty() && $penerimaDaftar->isEmpty() && $terkirim->isEmpty() && $naskahDaftar->isEmpty())
         <p class="rounded bg-white p-6 text-center text-slate-500 shadow">Tidak ada item.</p>
     @endif
 </div>

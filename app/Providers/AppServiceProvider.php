@@ -29,10 +29,16 @@ class AppServiceProvider extends ServiceProvider
             default => new TautanEksternal,
         });
 
-        $this->app->bind(PembangkitPdf::class, fn () => match (config('pdf.driver')) {
+        $this->app->bind(PembangkitPdf::class, fn () => $this->pembangkitPdf((string) config('pdf.driver')));
+        $this->app->bind('pdf.naskah', fn () => $this->pembangkitPdf((string) config('pdf.driver_naskah')));
+    }
+
+    private function pembangkitPdf(string $driver): PembangkitPdf
+    {
+        return match ($driver) {
             'dompdf' => new PembangkitPdfDompdf,
             default => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),
-        });
+        };
     }
 
     /**
@@ -48,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('masuk', fn (Request $request) => Limit::perMinute(5)
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('verifikasi', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('daftar', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
         // Hanya super-admin (lewat Gate::before) yang boleh masuk sebagai pengguna lain.

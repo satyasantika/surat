@@ -4,6 +4,22 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.5.0] - 2026-10-07
+
+Fase 5: naskah keluar dan verifikasi QR.
+
+### Ditambahkan
+- Naskah keluar: layout A4 dan templat per jenis, isian dinamis dari definisi variabel, isi kaya disanitasi (`symfony/html-sanitizer`, daftar tag putih) saat simpan dan saat render, satu komponen terpusat untuk keluaran HTML mentah, pratinjau ber-CSP.
+- Paraf berurutan, pengembalian dengan catatan, `riwayat_naskah` yang tidak dapat diubah; semua transisi lewat `TransisiNaskah` (kunci per naskah, FOR UPDATE).
+- Tanda tangan (`TandaTangani`): nomor dibentuk saat tanda tangan, snapshot beku, pembekuan kolom di model, mode basah dan visual (gambar diambil server, anti-SSRF, disimpan di snapshot), a.n./u.b./Plt, mode TTE belum didukung.
+- Render PDF dari snapshot dengan QR, hash SHA-256 deterministik (dompdf, `PDF_DRIVER_NASKAH`), job `TerbitkanNaskah`, unduh PDF, pencatatan pindaian tanda tangan basah.
+- Verifikasi publik `/verifikasi/{uuid}` (bidang putih, 30 permintaan/menit/IP, pencocokan hash di peramban tanpa unggah, 404 generik).
+- Pembatalan naskah (nomor tidak dipakai ulang), register surat keluar dan masuk hanya-baca dengan ekspor XLSX (tmp dihapus otomatis ≤ 24 jam, unduhan bertanda tangan).
+
+### Diubah
+- Pola register `sk-dekan` dan `surat-tugas` memakai `{kode_jenis}`; formulir register menolak pola ganda (nomor kembar antarregister).
+- Batas memori uji dinaikkan (1 GB) karena banyak render PDF.
+
 ## [0.4.0] - 2026-10-07
 
 Fase 4: surat masuk dan disposisi.

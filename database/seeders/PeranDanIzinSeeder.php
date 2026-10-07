@@ -13,7 +13,7 @@ class PeranDanIzinSeeder extends Seeder
     public const IZIN = [
         'masuk.lihat', 'masuk.registrasi',
         'disposisi.buat', 'disposisi.teruskan', 'disposisi.tindaklanjut',
-        'naskah.draf', 'naskah.paraf', 'naskah.tandatangan', 'naskah.templat',
+        'naskah.draf', 'naskah.paraf', 'naskah.tandatangan', 'naskah.templat', 'naskah.batalkan',
         'nomor.terbitkan',
         'arsip.lihat',
         'ormawa.lihat', 'ormawa.kelola', 'ormawa.kelola-binaan', 'ormawa.kelola-sendiri',
@@ -34,7 +34,7 @@ class PeranDanIzinSeeder extends Seeder
     public const PERAN = [
         'super-admin' => [],
         'admin-persuratan' => [
-            'masuk.lihat', 'masuk.registrasi', 'naskah.draf', 'naskah.templat', 'nomor.terbitkan', 'arsip.lihat',
+            'masuk.lihat', 'masuk.registrasi', 'naskah.draf', 'naskah.templat', 'naskah.batalkan', 'nomor.terbitkan', 'arsip.lihat',
             'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'kabar.kelola', 'galeri.kelola',
         ],
         'operator-layanan' => [],

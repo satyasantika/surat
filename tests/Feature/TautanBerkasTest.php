@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Rules\TautanBerkasValid;
 use App\Services\Berkas\PemeriksaTautan;
 use App\Services\Berkas\TautanEksternal;
+use App\Support\HostAman;
 use App\Support\UrlBerkas;
 use Database\Seeders\PeranDanIzinSeeder;
 use Illuminate\Database\Eloquent\Model;
@@ -26,10 +27,10 @@ const DRIVE = 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQr/view?usp=shar
 
 beforeEach(function () {
     $this->seed(PeranDanIzinSeeder::class);
-    PemeriksaTautan::$penyelesai = null;
+    HostAman::$penyelesai = null;
 });
 
-afterEach(fn () => PemeriksaTautan::$penyelesai = null);
+afterEach(fn () => HostAman::$penyelesai = null);
 
 function simpanTautan(?Model $pemilik = null, string $jenis = 'lampiran', string $url = DRIVE): TautanBerkas
 {
@@ -133,7 +134,7 @@ it('mengantrekan pemeriksaan di antrean tautan hanya saat dibuat atau url beruba
 describe('pemeriksaan tautan', function () {
     beforeEach(function () {
         Queue::fake();
-        PemeriksaTautan::$penyelesai = fn () => ['142.250.4.100'];
+        HostAman::$penyelesai = fn () => ['142.250.4.100'];
     });
 
     it('menandai dapat diakses untuk respons sukses tanpa mengunduh isi', function () {
@@ -155,7 +156,7 @@ describe('pemeriksaan tautan', function () {
 
     it('menolak host yang resolve ke IP pribadi (anti-SSRF) tanpa mengirim permintaan', function (array $ips) {
         Http::fake();
-        PemeriksaTautan::$penyelesai = fn () => $ips;
+        HostAman::$penyelesai = fn () => $ips;
         $t = simpanTautan(url: 'https://repo.unsil.ac.id/berkas.pdf');
 
         expect(app(PemeriksaTautan::class)->periksa($t))->toBe('tidak_dapat_diakses');

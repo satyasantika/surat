@@ -23,7 +23,14 @@ it('tidak menyediakan unggahan berkas di aplikasi (kebijakan tautan, STANDAR-TEK
     foreach ($berkas as $f) {
         $isi = file_get_contents($f->getPathname());
 
+        // Satu-satunya pengecualian: halaman verifikasi QR memilih berkas hanya untuk di-hash di peramban (tanpa form/unggah).
+        $verifikasi = str_ends_with($f->getPathname(), 'views/verifikasi/tampil.blade.php');
+
         foreach ($larangan as $regex => $nama) {
+            if ($verifikasi && str_contains($nama, 'type=file')) {
+                continue;
+            }
+
             expect(preg_match($regex, $isi))->toBe(0, "{$f->getPathname()} memuat {$nama}");
         }
     }
@@ -32,4 +39,12 @@ it('tidak menyediakan unggahan berkas di aplikasi (kebijakan tautan, STANDAR-TEK
 it('mendeteksi pelanggaran pada contoh buruk', function () {
     expect(preg_match('/\bFileUpload\b/', 'FileUpload::make("x")'))->toBe(1)
         ->and(preg_match('/type\s*=\s*["\']file["\']/i', '<input type="file">'))->toBe(1);
+});
+
+it('menjaga halaman verifikasi tidak mengunggah berkas', function () {
+    $isi = file_get_contents(resource_path('views/verifikasi/tampil.blade.php'));
+
+    expect($isi)->not->toContain('<form')->not->toContain('multipart')
+        ->and(preg_match('/<input[^>]*type="file"[^>]*name=/', $isi))->toBe(0)
+        ->and($isi)->toContain('crypto.subtle.digest');
 });

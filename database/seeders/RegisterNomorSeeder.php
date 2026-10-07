@@ -13,8 +13,8 @@ class RegisterNomorSeeder extends Seeder
         $register = [
             ['agenda-masuk', 'Nomor agenda surat masuk', '{urut:4}/AGD/{tahun}'],
             ['naskah-dekan', 'Naskah dinas Dekan', '{urut}/{kode_unit}/{klasifikasi}/{tahun}'],
-            ['sk-dekan', 'Keputusan Dekan', '{urut}/{kode_unit}/{klasifikasi}/{tahun}'],
-            ['surat-tugas', 'Surat tugas', '{urut}/{kode_unit}/{klasifikasi}/{tahun}'],
+            ['sk-dekan', 'Keputusan Dekan', '{urut}/{kode_unit}/{kode_jenis}/{klasifikasi}/{tahun}'],
+            ['surat-tugas', 'Surat tugas', '{urut}/{kode_unit}/{kode_jenis}/{klasifikasi}/{tahun}'],
             ['permohonan', 'Nomor permohonan ormawa', '{urut:4}/PMH/{bulan_romawi}/{tahun}'],
         ];
 

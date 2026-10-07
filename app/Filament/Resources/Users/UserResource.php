@@ -42,6 +42,11 @@ class UserResource extends Resource
         return UsersTable::configure($table);
     }
 
+    public static function getRelations(): array
+    {
+        return [PenggunaTautanRelationManager::class];
+    }
+
     public static function getPages(): array
     {
         return [
