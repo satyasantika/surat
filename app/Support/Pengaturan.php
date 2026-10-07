@@ -31,6 +31,8 @@ class Pengaturan
         'rumus_nilai_lpj' => ['nilai' => 'jumlah', 'grup' => 'lpj'],
         'wa_aktif' => ['nilai' => false, 'grup' => 'notifikasi'],
         'layanan_ruangan' => ['nilai' => 'lokal', 'grup' => 'ruangan'],
+        // [{nama, kategori}]: pilihan fasilitas rektorat pada permohonan (diisi impor OrmawaHub atau admin)
+        'fasilitas_rektorat_katalog' => ['nilai' => [], 'grup' => 'permohonan'],
     ];
 
     public static function get(string $kunci, mixed $bawaan = null): mixed

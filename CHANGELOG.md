@@ -4,6 +4,17 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.10.0] - 2026-10-09
+
+Fase 10: migrasi data OrmawaHub.
+
+### Ditambahkan
+- `ormawahub:impor {xlsx} --pemetaan= [--pelaksana=] [--dry-run]`: impor XLSX ekspor OrmawaHub dengan pemetaan CSV (pengguna, ormawa, ruangan, wd) yang divalidasi lengkap sebelum menulis; satu transaksi per sheet; dry-run = rollback; idempoten (kunci `sumber_id_lama`/`nomor_lama` dan log); XLSX dan CSV dihapus setelah impor sungguhan tanpa galat. Jejak tiap baris di `impor_ormawahub_log`.
+- Sheet yang diimpor: Users (peran, pemangku jabatan; kata sandi dan urlTte tidak dibaca), Ormawa_Profiles (logo/SK sebagai tautan; SK "perlu dilengkapi"), Pengurus (telepon terenkripsi, tanpa akun), Rooms/RektoratRooms (sesuai mode ruangan), Requests (permohonan bernomor baru berurut tanggal pengajuan, ruangan, riwayat dengan `pelaku_lama`, disposisi, persetujuan WD, tautan, naskah arsip dan klaim nomor register, booking manual), Laporan (LPJ dan nilai per penilai), Blogs (kabar disanitasi), Galleries (galeri tervalidasi). Data contoh templat (S-13) dibuang; pengurai tanggal campuran (id/ISO/serial Excel).
+- `ormawahub:verifikasi`: 8 cek §8 (jumlah per sheet, rekap status, ruangan, register nomor, sampel LPJ, pengguna, data contoh, privasi halaman publik) dengan kode keluar ≠ 0 bila gagal.
+- `ormawahub:undang-pengguna`: undangan atur kata sandi lewat antrean, sekali per akun (`users.diundang_pada`), `--surel` dan `--dry-run`.
+- Halaman panel "Log migrasi" (hanya super-admin) dengan filter status, sheet, dan batch.
+
 ## [0.9.0] - 2026-10-09
 
 Fase 9: kabar, galeri, dan halaman publik.
