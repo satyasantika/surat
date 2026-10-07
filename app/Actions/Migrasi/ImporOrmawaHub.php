@@ -2,11 +2,16 @@
 
 namespace App\Actions\Migrasi;
 
+use App\Actions\Migrasi\Impor\ImporKonten;
+use App\Actions\Migrasi\Impor\ImporLpj;
 use App\Actions\Migrasi\Impor\ImporOrmawa;
 use App\Actions\Migrasi\Impor\ImporPengguna;
 use App\Actions\Migrasi\Impor\ImporPengurus;
+use App\Actions\Migrasi\Impor\ImporPermohonan;
 use App\Actions\Migrasi\Impor\ImporRuangan;
 use App\Exceptions\PemetaanTidakLengkap;
+use App\Models\User;
+use App\Support\Migrasi\Bantu;
 use App\Support\Migrasi\KonteksImpor;
 use App\Support\Migrasi\Pemetaan;
 use App\Support\Pengaturan;
@@ -24,9 +29,9 @@ class ImporOrmawaHub
     /** Urutan impor (§7) dan sheet wajib/opsional. */
     private const WAJIB = ['Users', 'Ormawa_Profiles', 'Pengurus'];
 
-    private const OPSIONAL = ['Rooms', 'RektoratRooms'];
+    private const OPSIONAL = ['Rooms', 'RektoratRooms', 'Requests', 'Laporan', 'Blogs', 'Galleries'];
 
-    public function jalankan(string $xlsx, string $direktoriPemetaan, bool $dryRun = false): KonteksImpor
+    public function jalankan(string $xlsx, string $direktoriPemetaan, bool $dryRun = false, ?User $pelaksana = null): KonteksImpor
     {
         if (! is_file($xlsx)) {
             throw new InvalidArgumentException("Berkas XLSX tidak ditemukan: {$xlsx}");
@@ -42,7 +47,11 @@ class ImporOrmawaHub
             throw new PemetaanTidakLengkap($galat);
         }
 
-        $k = new KonteksImpor((string) Str::uuid(), $pemetaan, $mode);
+        $k = new KonteksImpor((string) Str::uuid(), $pemetaan, $mode, $pelaksana);
+
+        if ($pelaksana === null && array_intersect(['Requests', 'Blogs'], array_keys($sheet)) !== []) {
+            throw new InvalidArgumentException('Pelaksana impor (admin) wajib ditentukan untuk mengimpor permohonan dan kabar.');
+        }
 
         DB::beginTransaction();
 
@@ -53,6 +62,19 @@ class ImporOrmawaHub
                 'Pengurus' => fn ($b) => app(ImporPengurus::class)->jalankan($k, $b),
                 'Rooms' => fn ($b) => app(ImporRuangan::class)->rooms($k, $b),
                 'RektoratRooms' => fn ($b) => app(ImporRuangan::class)->rektorat($k, $b),
+                'Requests' => function ($b) use ($k, $sheet) {
+                    Bantu::petaNamaOrmawa($k, $sheet['Ormawa_Profiles']);
+                    app(ImporPermohonan::class)->jalankan($k, $b);
+                },
+                'Laporan' => fn ($b) => app(ImporLpj::class)->jalankan($k, $b),
+                'Blogs' => function ($b) use ($k, $sheet) {
+                    Bantu::petaNamaOrmawa($k, $sheet['Ormawa_Profiles']);
+                    app(ImporKonten::class)->blogs($k, $b);
+                },
+                'Galleries' => function ($b) use ($k, $sheet) {
+                    Bantu::petaNamaOrmawa($k, $sheet['Ormawa_Profiles']);
+                    app(ImporKonten::class)->galeri($k, $b);
+                },
             ];
 
             foreach ($langkah as $nama => $impor) {

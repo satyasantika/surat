@@ -4,13 +4,14 @@ namespace App\Console\Commands;
 
 use App\Actions\Migrasi\ImporOrmawaHub;
 use App\Exceptions\PemetaanTidakLengkap;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
 
 class ImporOrmawaHubCommand extends Command
 {
-    protected $signature = 'ormawahub:impor {xlsx : Berkas XLSX ekspor OrmawaHub} {--pemetaan= : Direktori CSV pemetaan} {--dry-run : Jalankan lalu rollback}';
+    protected $signature = 'ormawahub:impor {xlsx : Berkas XLSX ekspor OrmawaHub} {--pemetaan= : Direktori CSV pemetaan} {--pelaksana= : Surel admin pelaksana impor (bawaan: super-admin pertama)} {--dry-run : Jalankan lalu rollback}';
 
     protected $description = 'Mengimpor data OrmawaHub (XLSX + pemetaan CSV); XLSX dan CSV dihapus setelah impor sungguhan tanpa galat';
 
@@ -25,9 +26,17 @@ class ImporOrmawaHubCommand extends Command
         }
 
         $dry = (bool) $this->option('dry-run');
+        $surel = (string) $this->option('pelaksana');
+        $pelaksana = $surel !== '' ? User::firstWhere('email', $surel) : User::role('super-admin')->orderBy('created_at')->first();
+
+        if ($surel !== '' && $pelaksana === null) {
+            $this->components->error("Pelaksana '{$surel}' tidak ditemukan.");
+
+            return self::FAILURE;
+        }
 
         try {
-            $k = $impor->jalankan((string) $this->argument('xlsx'), $pemetaan, $dry);
+            $k = $impor->jalankan((string) $this->argument('xlsx'), $pemetaan, $dry, $pelaksana);
         } catch (PemetaanTidakLengkap $e) {
             $this->components->error('Pemetaan tidak lengkap; tidak ada data ditulis:');
 

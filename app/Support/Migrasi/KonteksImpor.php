@@ -3,6 +3,7 @@
 namespace App\Support\Migrasi;
 
 use App\Models\ImporLog;
+use App\Models\User;
 
 /** Keadaan satu kali impor: batch, pemetaan, peta id lama → baru, dan penghitung laporan. */
 class KonteksImpor
@@ -20,6 +21,7 @@ class KonteksImpor
         public readonly string $batch,
         public readonly Pemetaan $pemetaan,
         public readonly string $modeRuangan,
+        public readonly ?User $pelaksana = null,
     ) {}
 
     public function catat(string $sheet, string $idLama, string $status, ?string $pesan = null, ?string $tabel = null, ?string $idBaru = null): void

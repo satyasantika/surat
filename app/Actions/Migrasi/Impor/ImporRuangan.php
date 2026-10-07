@@ -40,6 +40,8 @@ class ImporRuangan
                 $k->peta['ruangan'][$id] = $kode;
             }
 
+            $k->peta['ruangan_nama'][$id] = (string) Sel::teks($r['nama'] ?? null);
+
             if ($k->modeRuangan === 'aset_api') {
                 $k->catat('Rooms', $id, ImporLog::LEWATI, "Mode aset_api: dicocokkan ke ruangan Aset '{$kode}'; tidak diimpor.");
 

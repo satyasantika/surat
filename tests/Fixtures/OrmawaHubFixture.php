@@ -8,7 +8,7 @@ use Spatie\SimpleExcel\SimpleExcelWriter;
 class OrmawaHubFixture
 {
     /** @return array{xlsx: string, pemetaan: string} */
-    public static function buat(string $direktori): array
+    public static function buat(string $direktori, bool $lengkap = true): array
     {
         @mkdir($direktori.'/pemetaan', 0777, true);
         $xlsx = $direktori.'/ormawahub.xlsx';
@@ -22,6 +22,12 @@ class OrmawaHubFixture
         self::sheet($w, 'Pengurus', self::pengurus());
         self::sheet($w, 'Rooms', self::rooms());
         self::sheet($w, 'RektoratRooms', self::rektorat());
+        if ($lengkap) {
+            self::sheet($w, 'Requests', self::requests());
+            self::sheet($w, 'Laporan', self::laporan());
+            self::sheet($w, 'Blogs', self::blogs());
+            self::sheet($w, 'Galleries', self::galeri());
+        }
         $w->close();
 
         self::csv($direktori.'/pemetaan/pengguna.csv', ['id_lama', 'email', 'peran', 'jabatan'], [
@@ -126,6 +132,71 @@ class OrmawaHubFixture
         return [
             ['id' => 'Q1', 'nama' => 'Gedung Serbaguna', 'kategori' => 'Aula', 'kontak' => 'Bu Kontak 0812'],
             ['id' => 'Q2', 'nama' => 'Sound System', 'kategori' => 'Peralatan', 'kontak' => ''],
+        ];
+    }
+
+    private static function steps(int $selesaiSampai, string $mulai = '2026-02-01'): string
+    {
+        $nama = [1 => 'Pengajuan', 2 => 'Validasi Admin', 3 => 'Disposisi Dekan', 4 => 'Persetujuan WD1', 5 => 'Persetujuan WD2', 6 => 'Rekomendasi Kasubag', 7 => 'Penerbitan Surat'];
+        $hasil = [];
+
+        foreach ($nama as $n => $label) {
+            $hasil[$n] = ['name' => $label, 'status' => $n <= $selesaiSampai ? 'completed' : 'pending', 'date' => $n <= $selesaiSampai ? date('Y-m-d', strtotime("{$mulai} +{$n} days")) : null, 'actor' => "Pelaku {$n}", 'notes' => "Catatan {$n}"];
+        }
+
+        return json_encode($hasil, JSON_THROW_ON_ERROR);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function requests(): array
+    {
+        $k = fn (array $a) => array_replace(['id' => '', 'jenisPermohonan' => 'Permohonan Kegiatan', 'ormawa' => '', 'namaKegiatan' => '', 'perihal' => 'Izin kegiatan', 'deskripsi' => 'Deskripsi rekaan', 'nomorSurat' => '', 'tanggal' => '', 'tanggalSelesai' => '', 'jamMulai' => '08:00', 'jamSelesai' => '12:00', 'tanggalPengajuan' => '', 'ketua' => '{"nama":"Ketua Rekaan","nim":"2012345678","hp":"081234567890"}', 'wakil' => '', 'sekretaris' => 'Sekretaris Rekaan', 'roomId' => '', 'sesiBooking' => '', 'fasilitasRektoratId' => '', 'fasilitas' => '', 'status' => 'pending', 'currentStep' => '', 'steps' => '', 'disposedTo' => '', 'approvedWD' => '', 'suratUrl' => '', 'proposalUrl' => '', 'suratName' => '', 'nomorSuratTerbit' => '', 'nomorSuratTerbit2' => '', 'officialLetterUrl' => '', 'nomorDisposisi' => '', 'draftSurat' => '', 'draftSuratContent' => '', 'dekanNotes' => '', 'wdNotes' => ''], $a);
+
+        return [
+            $k(['id' => 'PR-2026-001', 'jenisPermohonan' => 'Permohonan Kegiatan dan ruangan', 'ormawa' => 'HIMA Mat', 'namaKegiatan' => 'Seminar Nasional', 'tanggal' => '10 Mar 2026', 'tanggalSelesai' => '11 Mar 2026', 'tanggalPengajuan' => '1 Feb 2026', 'roomId' => 'R1', 'sesiBooking' => '["pagi","siang"]', 'status' => 'approved', 'currentStep' => 7, 'steps' => self::steps(7), 'disposedTo' => '["wd1","wd2"]', 'approvedWD' => '["wd1","wd2"]', 'suratUrl' => 'https://drive.google.com/file/d/1SuratSuratSurat12/view', 'proposalUrl' => 'https://drive.google.com/file/d/1ProposalProposal1/view', 'nomorSuratTerbit' => '321/UN58.10/KM.03.02/2026', 'nomorSuratTerbit2' => '322/UN58.10/KM.03.02/2026', 'officialLetterUrl' => 'https://drive.google.com/file/d/1ResmiResmiResmi12/view', 'nomorDisposisi' => 'D-001', 'draftSurat' => '<p>draf</p>', 'dekanNotes' => 'Silakan diproses', 'wdNotes' => 'Disetujui', 'fasilitas' => 'Kursi, Meja']),
+            $k(['id' => 'PR-2026-002', 'ormawa' => 'BEM FKIP', 'namaKegiatan' => 'Lomba Debat', 'tanggal' => '5 Apr 2026', 'tanggalPengajuan' => '5 Feb 2026', 'status' => 'rejected', 'currentStep' => 5, 'steps' => self::steps(5, '2026-02-05'), 'disposedTo' => '["wd1","wd2"]', 'approvedWD' => '["wd1"]', 'proposalUrl' => 'https://unsplash.com/foto', 'suratName' => 'surat.pdf']),
+            $k(['id' => 'PR-2026-003', 'jenisPermohonan' => 'Permohonan Kegiatan dan ruangan', 'ormawa' => 'HIMA Matematika', 'namaKegiatan' => 'Workshop Statistika', 'tanggal' => '20 Des 2026', 'tanggalSelesai' => '20 Des 2026', 'tanggalPengajuan' => '1 Mar 2026', 'roomId' => 'R1', 'sesiBooking' => 'Seharian', 'status' => 'pending', 'currentStep' => 4, 'steps' => self::steps(3, '2026-03-01'), 'disposedTo' => '["wd1","wd2"]', 'approvedWD' => '["wd1"]']),
+            $k(['id' => 'PR-2026-003', 'ormawa' => 'BEM FKIP', 'namaKegiatan' => 'Kegiatan Id Ganda', 'tanggal' => '1 Nov 2026', 'tanggalPengajuan' => '1 Apr 2026', 'status' => 'pending', 'currentStep' => 2, 'steps' => self::steps(1, '2026-04-01')]),
+            $k(['id' => 'PR-2026-004', 'ormawa' => 'HIMA Mat', 'namaKegiatan' => 'Lomba UKM Robotik', 'tanggal' => '1 Mei 2026', 'tanggalPengajuan' => '1 Mei 2026']),
+            $k(['id' => 'PR-2026-005', 'ormawa' => '', 'namaKegiatan' => 'Rapat Dosen', 'deskripsi' => 'Booking manual oleh admin.', 'tanggal' => '2 Apr 2026', 'tanggalSelesai' => '2 Apr 2026', 'tanggalPengajuan' => '1 Apr 2026', 'roomId' => 'R3', 'sesiBooking' => 'siang']),
+            $k(['id' => 'PR-2026-006', 'ormawa' => 'Ormawa Hantu', 'namaKegiatan' => 'Tak Dikenal', 'tanggal' => '1 Jun 2026', 'tanggalPengajuan' => '1 Jun 2026']),
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function laporan(): array
+    {
+        $k = fn (array $a) => array_replace(['id' => '', 'requestId' => '', 'tanggalPelaksanaan' => '', 'jumlahPeserta' => 50, 'kendala' => '', 'solusi' => '', 'rekomendasi' => '', 'fileUrl' => '', 'igUrl' => '', 'videoUrl' => '', 'submittedAt' => '', 'penilaian' => ''], $a);
+
+        return [
+            $k(['id' => 'LAP-PR-2026-001', 'requestId' => 'PR-2026-001', 'tanggalPelaksanaan' => '10 Mar 2026', 'jumlahPeserta' => 120, 'kendala' => 'Cuaca', 'solusi' => 'Tenda', 'rekomendasi' => 'Ulangi', 'fileUrl' => 'https://drive.google.com/file/d/1LpjLpjLpjLpjLpj12/view', 'igUrl' => 'https://www.instagram.com/p/AbC123/', 'videoUrl' => 'https://evil.example.com/v', 'submittedAt' => '20 Mar 2026', 'penilaian' => '{"dekan":{"ketepatan":18,"kepatuhan":4},"wd1":{"ketepatan":17,"kepatuhan":5},"wd2":{"ketepatan":16,"kepatuhan":3},"kasubag":{"kelengkapan":15,"fakultas":4}}']),
+            $k(['id' => 'LAP-PR-2026-003', 'requestId' => 'PR-2026-003', 'tanggalPelaksanaan' => '20 Des 2026', 'submittedAt' => '21 Des 2026', 'penilaian' => '{"dekan":{"ketepatan":18,"kepatuhan":9},"wd1":{"ketepatan":null}}']),
+            $k(['id' => 'LAP-PR-HANTU', 'requestId' => 'PR-HANTU', 'tanggalPelaksanaan' => '1 Jan 2026']),
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function blogs(): array
+    {
+        $k = fn (array $a) => array_replace(['id' => '', 'judul' => '', 'subjudul' => '', 'uraian' => '<p>Isi</p>', 'foto' => '', 'tag' => '', 'tanggal' => '', 'ormawa' => '', 'status' => 'approved', 'adminNote' => '', 'komentar_setting' => 'on'], $a);
+
+        return [
+            $k(['id' => 'B1', 'judul' => 'Kabar Terbit', 'uraian' => '<p>Isi aman</p><script>alert(1)</script><img src=x onerror=alert(2)>', 'foto' => 'https://drive.google.com/file/d/1FotoKabarKabar12/view', 'tag' => 'seminar, nasional', 'tanggal' => '3 Mar 2026', 'ormawa' => 'HIMA Mat']),
+            $k(['id' => 'B2', 'judul' => 'Kabar Menunggu', 'status' => 'pending', 'tanggal' => '4 Mar 2026']),
+            $k(['id' => 'B3', 'judul' => 'Kabar Ditolak', 'status' => 'rejected', 'adminNote' => 'Kurang foto', 'ormawa' => 'BEM FKIP']),
+            $k(['id' => 'B4', 'judul' => 'Foto Stok', 'foto' => 'https://images.unsplash.com/photo-5', 'tanggal' => '5 Mar 2026']),
+            $k(['id' => 'B5', 'judul' => 'Kabar Contoh', 'ormawa' => 'BEM FT']),
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public static function galeri(): array
+    {
+        return [
+            ['id' => 'G1', 'requestId' => 'PR-2026-001', 'title' => 'Foto Seminar', 'ormawa' => 'HIMA Mat', 'type' => 'photo', 'url' => 'https://drive.google.com/file/d/1GaleriGaleri12345/view', 'isActive' => 'TRUE'],
+            ['id' => 'G2', 'requestId' => '', 'title' => 'IG Seminar', 'ormawa' => 'HIMA Mat', 'type' => 'photo', 'url' => 'https://www.instagram.com/p/Zz9/', 'isActive' => 'TRUE'],
+            ['id' => 'G3', 'requestId' => '', 'title' => 'Video Seminar', 'ormawa' => '', 'type' => 'video', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'isActive' => 'FALSE'],
+            ['id' => 'G4', 'requestId' => '', 'title' => 'Foto Tak Sah', 'ormawa' => '', 'type' => 'photo', 'url' => 'https://evil.example.com/x.jpg', 'isActive' => 'TRUE'],
         ];
     }
 }

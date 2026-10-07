@@ -88,6 +88,7 @@ class Pemetaan
         $this->validasiOrmawa($sheet['Ormawa_Profiles'] ?? [], $galat);
         $this->validasiPengurus($sheet['Pengurus'] ?? [], $galat);
         $this->validasiRuangan($sheet['Rooms'] ?? [], $modeRuangan, $galat);
+        $this->validasiRequests($sheet['Requests'] ?? [], $modeRuangan, $galat);
 
         return $galat;
     }
@@ -276,6 +277,25 @@ class Pemetaan
                 $galat[] = "ruangan.csv: kode '{$k}' dipakai ganda.";
             }
             $kode[$k] = true;
+        }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $requests
+     * @param  list<string>  $galat
+     */
+    private function validasiRequests(array $requests, string $mode, array &$galat): void
+    {
+        if ($mode !== 'aset_api') {
+            return;
+        }
+
+        foreach ($requests as $r) {
+            $room = $this->teks($r['roomId'] ?? null);
+
+            if ($room !== null && ! PolaContoh::barisContoh($r) && $this->ruangan($room) === null) {
+                $galat[] = 'Requests '.($this->teks($r['id'] ?? null) ?? '?').": roomId '{$room}' tidak ada di ruangan.csv (mode aset_api).";
+            }
         }
     }
 

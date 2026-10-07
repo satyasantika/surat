@@ -27,7 +27,7 @@ beforeEach(function () {
     Queue::fake();
     $this->seed([PeranDanIzinSeeder::class, StrukturFkipSeeder::class]);
     $this->dir = sys_get_temp_dir().'/impor-'.bin2hex(random_bytes(4));
-    $this->fx = OrmawaHubFixture::buat($this->dir);
+    $this->fx = OrmawaHubFixture::buat($this->dir, lengkap: false);
 });
 
 afterEach(fn () => File::deleteDirectory($this->dir));

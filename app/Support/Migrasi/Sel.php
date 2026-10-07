@@ -26,6 +26,20 @@ class Sel
         return $t === '' ? null : $t;
     }
 
+    /** JSON dalam sel → array (atau null bila kosong/tak sah). */
+    public static function json(mixed $nilai): mixed
+    {
+        $t = self::teks($nilai);
+
+        if ($t === null) {
+            return null;
+        }
+
+        $hasil = json_decode($t, true);
+
+        return json_last_error() === JSON_ERROR_NONE ? $hasil : null;
+    }
+
     public static function bool(mixed $nilai, bool $bawaan = false): bool
     {
         $t = self::teks($nilai);
