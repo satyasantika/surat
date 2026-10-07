@@ -15,6 +15,7 @@ use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Ormawa\AjukanPermohonan;
 use App\Livewire\Ormawa\Beranda as BerandaOrmawa;
 use App\Livewire\Ormawa\IsiLpj;
+use App\Livewire\Ormawa\Kabar as KabarOrmawa;
 use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
 use App\Livewire\Pimpinan\KotakMasuk;
@@ -53,6 +54,7 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/ormawa/{ormawa}/profil', ProfilOrmawa::class)->whereUuid('ormawa')->name('ormawa.profil');
     Route::get('/ormawa/{ormawa}/permohonan', Progres::class)->whereUuid('ormawa')->name('ormawa.permohonan');
     Route::get('/ormawa/{ormawa}/permohonan/baru', AjukanPermohonan::class)->whereUuid('ormawa')->name('ormawa.permohonan.baru');
+    Route::get('/ormawa/{ormawa}/kabar', KabarOrmawa::class)->whereUuid('ormawa')->name('ormawa.kabar');
     Route::get('/ormawa/{ormawa}/lpj/{lpj}', IsiLpj::class)->whereUuid(['ormawa', 'lpj'])->name('ormawa.lpj');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');

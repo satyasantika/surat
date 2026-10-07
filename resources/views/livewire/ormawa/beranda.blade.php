@@ -39,6 +39,11 @@
             </p>
         </section>
 
+        <section class="rounded-lg bg-white p-4 shadow" aria-label="Kabar">
+            <h3 class="font-medium">Kabar</h3>
+            <p class="mt-1 text-sm"><a class="text-blue-800 underline" href="{{ route('ormawa.kabar', $ormawa) }}">Tulis dan kelola kabar ormawa</a></p>
+        </section>
+
         <section class="rounded-lg bg-white p-4 shadow" aria-label="LPJ jatuh tempo">
             <h3 class="font-medium">LPJ jatuh tempo</h3>
             @forelse ($lpjDaftar as $l)
