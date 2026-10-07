@@ -8,6 +8,7 @@ use App\Models\Disposisi;
 use App\Models\DisposisiPenerima;
 use App\Models\SuratMasuk;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -66,6 +67,8 @@ class BuatDisposisi
             activity('disposisi')->event($induk ? 'teruskan' : 'buat')->performedOn($surat)
                 ->withProperties(['disposisi_id' => $disposisi->getKey(), 'penerima' => $penerimaIds, 'instruksi' => $instruksi])
                 ->log($induk ? 'Disposisi diteruskan' : 'Disposisi dibuat');
+
+            app(NotifikasiAlur::class)->disposisiBaru($disposisi, $induk);
 
             return $disposisi;
         });

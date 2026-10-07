@@ -14,6 +14,7 @@ use App\Models\RegisterNomor;
 use App\Models\RiwayatPermohonan;
 use App\Models\User;
 use App\Rules\TautanBerkasValid;
+use App\Services\Notifikasi\NotifikasiAlur;
 use App\Services\Ruangan\KetersediaanRuangan;
 use App\Support\KunciRuangan;
 use App\Support\Pengaturan;
@@ -92,6 +93,7 @@ class AjukanPermohonan
             $permohonan->status = $tujuan;
             $permohonan->save();
             $this->catat($permohonan, StatusPermohonan::Diajukan, $tujuan, $pelaku, null);
+            app(NotifikasiAlur::class)->permohonanDiajukan($permohonan, $pelaku);
 
             return $permohonan;
         }));

@@ -6,6 +6,7 @@ use App\Enums\StatusNaskah;
 use App\Models\Naskah;
 use App\Models\RiwayatNaskah;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Closure;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -51,5 +52,7 @@ class TransisiNaskah
             'oleh' => $oleh->getKey(),
             'catatan' => $catatan,
         ]);
+
+        app(NotifikasiAlur::class)->naskahBerubah($naskah, $ke, $oleh);
     }
 }

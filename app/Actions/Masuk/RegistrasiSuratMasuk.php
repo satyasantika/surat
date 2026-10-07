@@ -11,6 +11,7 @@ use App\Models\RegisterNomor;
 use App\Models\SuratMasuk;
 use App\Models\User;
 use App\Rules\TautanBerkasValid;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -59,6 +60,7 @@ class RegistrasiSuratMasuk
             $surat->save();
 
             $this->berkas->simpan($surat, 'pindaian', $data['pindaian_url'], 'Pindaian surat', $pelaku);
+            app(NotifikasiAlur::class)->suratMasukBaru($surat, $pelaku);
 
             return $surat;
         });

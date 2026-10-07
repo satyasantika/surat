@@ -6,6 +6,7 @@ use App\Enums\StatusNaskah;
 use App\Models\Naskah;
 use App\Models\NaskahParaf;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 
@@ -34,6 +35,7 @@ class ParafiNaskah
             if ($segar->parafBerjalan() === null) {
                 $this->transisi->ke($segar, StatusNaskah::MenungguTandaTangan, $pelaku, 'Paraf lengkap');
             } else {
+                app(NotifikasiAlur::class)->naskahBerubah($segar, StatusNaskah::Paraf, $pelaku);
                 activity('naskah')->event('paraf')->performedOn($segar)->withProperties(['urutan' => $giliran->urutan])->log('Naskah diparaf');
             }
 
