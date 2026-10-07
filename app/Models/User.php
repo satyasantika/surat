@@ -73,6 +73,38 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->pluck('jabatan');
     }
 
+    /** @return HasMany<PengurusOrmawa, $this> */
+    public function keanggotaanOrmawa(): HasMany
+    {
+        return $this->hasMany(PengurusOrmawa::class);
+    }
+
+    /**
+     * Ormawa tempat pengguna menjadi pengurus aktif dengan SK berlaku (BR-02). Hanya ormawa ini yang
+     * boleh dipakai bertindak atas nama organisasi.
+     *
+     * @return Collection<int, Ormawa>
+     */
+    public function ormawaAktif(?CarbonInterface $tanggal = null): Collection
+    {
+        return $this->keanggotaanOrmawa()->with(['ormawa', 'sk'])->get()
+            ->filter(fn (PengurusOrmawa $p) => $p->aktifPada($tanggal))
+            ->map(fn (PengurusOrmawa $p) => $p->ormawa)
+            ->unique('id')
+            ->values();
+    }
+
+    /** Ketua/sekretaris aktif ormawa ini yang berhak mengubah profil dan pengurusnya. */
+    public function dapatMengelolaOrmawa(Ormawa $ormawa): bool
+    {
+        if (! $this->can('ormawa.kelola-sendiri')) {
+            return false;
+        }
+
+        return $this->keanggotaanOrmawa()->with(['ormawa', 'sk'])->where('ormawa_id', $ormawa->getKey())->get()
+            ->contains(fn (PengurusOrmawa $p) => $p->dapatMengelola() && $p->aktifPada());
+    }
+
     public function wajibMfa(): bool
     {
         return $this->hasAnyRole(config('unsil.peran_wajib_mfa'));

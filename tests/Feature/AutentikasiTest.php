@@ -40,7 +40,7 @@ it('tidak memiliki kredensial bawaan', function () {
 it('memasukkan pengurus yang aktif dan terverifikasi', function () {
     $user = akun('pengurus-ormawa');
 
-    $this->post('/masuk', ['email' => $user->email, 'password' => 'Rahasia12345'])->assertRedirect('/profil');
+    $this->post('/masuk', ['email' => $user->email, 'password' => 'Rahasia12345'])->assertRedirect('/ormawa');
     $this->assertAuthenticatedAs($user);
 });
 

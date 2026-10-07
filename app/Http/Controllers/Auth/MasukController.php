@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Beranda;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class MasukController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(route($user->hasRole('pegawai') ? 'disposisi' : 'profil'));
+        return redirect()->intended(Beranda::url($user));
     }
 
     public function destroy(Request $request): RedirectResponse
