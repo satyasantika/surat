@@ -8,7 +8,7 @@ use Spatie\SimpleExcel\SimpleExcelWriter;
 class OrmawaHubFixture
 {
     /** @return array{xlsx: string, pemetaan: string} */
-    public static function buat(string $direktori, bool $lengkap = true): array
+    public static function buat(string $direktori, bool $lengkap = true, bool $bersih = false): array
     {
         @mkdir($direktori.'/pemetaan', 0777, true);
         $xlsx = $direktori.'/ormawahub.xlsx';
@@ -23,10 +23,12 @@ class OrmawaHubFixture
         self::sheet($w, 'Rooms', self::rooms());
         self::sheet($w, 'RektoratRooms', self::rektorat());
         if ($lengkap) {
-            self::sheet($w, 'Requests', self::requests());
-            self::sheet($w, 'Laporan', self::laporan());
+            // $bersih: tanpa baris yang sengaja galat (ormawa hantu, LPJ tanpa permohonan, tautan galeri tak sah)
+            $buang = fn (array $baris, string $kunci, array $id) => $bersih ? array_values(array_filter($baris, fn ($r) => ! in_array($r[$kunci], $id, true))) : $baris;
+            self::sheet($w, 'Requests', $buang(self::requests(), 'id', ['PR-2026-006']));
+            self::sheet($w, 'Laporan', $buang(self::laporan(), 'id', ['LAP-PR-HANTU']));
             self::sheet($w, 'Blogs', self::blogs());
-            self::sheet($w, 'Galleries', self::galeri());
+            self::sheet($w, 'Galleries', $buang(self::galeri(), 'id', ['G4']));
         }
         $w->close();
 
