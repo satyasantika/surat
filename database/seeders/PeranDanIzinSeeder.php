@@ -51,7 +51,7 @@ class PeranDanIzinSeeder extends Seeder
             'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
         ],
         'pembina-ormawa' => [
-            'ormawa.lihat', 'ormawa.kelola-binaan', 'permohonan.setujui-pembina', 'lpj.lihat',
+            'ormawa.kelola-binaan', 'permohonan.setujui-pembina', 'lpj.lihat',
         ],
         'pengurus-ormawa' => [
             'permohonan.ajukan', 'lpj.isi', 'ormawa.kelola-sendiri', 'kabar.usul',
