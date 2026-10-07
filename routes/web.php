@@ -9,6 +9,7 @@ use App\Http\Controllers\ImpersonasiController;
 use App\Http\Controllers\LembarDisposisiPdfController;
 use App\Http\Controllers\NaskahPdfController;
 use App\Http\Controllers\PratinjauNaskahController;
+use App\Http\Controllers\Publik\VerifikasiController;
 use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/verifikasi/{id}', VerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi');
 
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [MasukController::class, 'create'])->name('login');

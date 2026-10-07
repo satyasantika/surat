@@ -54,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('masuk', fn (Request $request) => Limit::perMinute(5)
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('verifikasi', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('daftar', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
 
         // Hanya super-admin (lewat Gate::before) yang boleh masuk sebagai pengguna lain.

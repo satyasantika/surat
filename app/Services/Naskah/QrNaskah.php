@@ -11,7 +11,7 @@ class QrNaskah
 {
     public static function url(Naskah $naskah): string
     {
-        return url('verifikasi/'.$naskah->getKey());
+        return route('verifikasi', $naskah->getKey());
     }
 
     public function dataUri(Naskah $naskah): string

@@ -26,6 +26,9 @@ use LogicException;
  * @property array<string, mixed> $data
  * @property array<string, mixed>|null $snapshot
  * @property CarbonImmutable|null $tanggal_naskah
+ * @property CarbonImmutable|null $dibatalkan_pada
+ * @property CarbonImmutable|null $ditandatangani_pada
+ * @property CarbonImmutable|null $diterbitkan_pada
  */
 #[Fillable(['jenis_naskah_id', 'klasifikasi_arsip_id', 'klasifikasi_keamanan', 'derajat_kecepatan', 'perihal', 'data', 'isi', 'status', 'penyusun_id', 'penanda_tangan_jabatan_id', 'atas_nama', 'mode_tanda_tangan', 'permohonan_id'])]
 class Naskah extends Model
