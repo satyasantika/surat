@@ -4,6 +4,18 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.9.0] - 2026-10-09
+
+Fase 9: kabar, galeri, dan halaman publik.
+
+### Ditambahkan
+- Kabar: pengurus mengusulkan dari `/ormawa/{id}/kabar` (draf → diajukan), admin/operator (`kabar.kelola`) menerbitkan atau menolak dengan catatan di panel; isi disanitasi saat simpan dan saat render; foto sampul berupa tautan (Drive lewat lh3).
+- Galeri berbasis tautan (foto/video/instagram) dengan validasi per tipe, panel `GaleriResource`, dan saran nonaktif otomatis dari LPJ yang sudah dinilai.
+- Halaman publik tanpa login: beranda, `/kabar`, `/kabar/{slug}`, `/galeri`, `/organisasi`, `/organisasi/{slug}`, formulir `/verifikasi`. Hanya kabar terbit dan galeri aktif; pengurus hanya nama dan jabatan (tanpa NIM/telepon/surel); video YouTube tanpa cookie, Instagram hanya tautan; CSP ketat; HTML jadi di-cache maksimal 5 menit dan disegarkan saat konten berubah.
+
+### Diubah
+- `/` kini beranda publik; `/verifikasi` menjadi formulir kode (K-04).
+
 ## [0.8.0] - 2026-10-07
 
 Fase 8: LPJ dan penilaian.

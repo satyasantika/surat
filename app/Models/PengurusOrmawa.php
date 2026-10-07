@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MenyegarkanCachePublik;
 use App\Models\Concerns\TercatatAktivitas;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -22,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 #[Fillable(['ormawa_id', 'user_id', 'sk_kepengurusan_id', 'nama', 'nim', 'prodi', 'jabatan', 'jabatan_teks', 'telepon', 'tampil_publik', 'narahubung', 'mulai', 'selesai'])]
 class PengurusOrmawa extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MenyegarkanCachePublik, TercatatAktivitas;
 
     public const JABATAN = [
         'ketua' => 'Ketua', 'wakil_ketua' => 'Wakil ketua', 'sekretaris' => 'Sekretaris',

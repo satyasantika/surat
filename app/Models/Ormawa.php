@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MenyegarkanCachePublik;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Support\Pengaturan;
 use Carbon\CarbonInterface;
@@ -18,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 #[Fillable(['slug', 'nama', 'singkatan', 'tingkat', 'prodi', 'akun_media', 'surel_organisasi', 'visi', 'misi', 'pembina_user_id', 'aktif', 'sumber_id_lama'])]
 class Ormawa extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MenyegarkanCachePublik, TercatatAktivitas;
 
     public const TINGKAT = ['fakultas' => 'Fakultas', 'jurusan' => 'Jurusan', 'prodi' => 'Program studi', 'ukm' => 'UKM'];
 
@@ -102,6 +103,12 @@ class Ormawa extends Model
         return $this->lpj()->where('lpj.status', Lpj::DRAF)
             ->whereDate('lpj.batas_waktu', '<', now()->startOfDay()->subDays($toleransi)->toDateString())
             ->exists();
+    }
+
+    /** Logo (tautan jenis logo) sebagai URL gambar publik. */
+    public function logoUrl(): ?string
+    {
+        return $this->tautan->firstWhere('jenis', 'logo')?->gambarUrl();
     }
 
     /** @return HasMany<PengurusOrmawa, $this> */

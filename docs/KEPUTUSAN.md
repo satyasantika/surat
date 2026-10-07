@@ -11,3 +11,7 @@ Pengguna mengonfirmasi (7 Oktober 2026) bahwa nilai bawaan dokumen (domain surel
 ## K-03 — MariaDB sebagai pengganti MySQL
 
 Basis data memakai MariaDB 10.11 di host; kolom `uuid()` Laravel dipetakan ke tipe native `uuid` MariaDB.
+
+## K-04 — Halaman publik: /organisasi dan formulir /verifikasi
+
+Profil publik ormawa berada di `/organisasi` (bukan `/ormawa`) karena `/ormawa` sudah dipakai beranda pengurus yang memerlukan login. `/verifikasi` kini formulir kode/tautan yang mengalihkan ke `/verifikasi/{id}`; ia tidak pernah menampilkan daftar naskah (uji di `VerifikasiTest`).

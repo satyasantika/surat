@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Jobs\PeriksaTautanBerkas;
+use App\Models\Concerns\MenyegarkanCachePublik;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Support\UrlBerkas;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 #[Fillable(['pemilik_type', 'pemilik_id', 'jenis', 'label', 'url', 'ditambahkan_oleh'])]
 class TautanBerkas extends Model
 {
-    use HasUuids, SoftDeletes, TercatatAktivitas;
+    use HasUuids, MenyegarkanCachePublik, SoftDeletes, TercatatAktivitas;
 
     protected $table = 'tautan_berkas';
 
@@ -52,6 +53,20 @@ class TautanBerkas extends Model
 
         static::created($periksa);
         static::updated(fn (self $tautan) => $tautan->wasChanged('url') ? $periksa($tautan) : null);
+    }
+
+    /** URL gambar untuk halaman publik: Drive lewat lh3, selain itu hanya domain unsil.ac.id; jenis tertutup tidak pernah. */
+    public function gambarUrl(): ?string
+    {
+        if ($this->tertutup()) {
+            return null;
+        }
+
+        if ($this->drive_file_id) {
+            return 'https://lh3.googleusercontent.com/d/'.$this->drive_file_id;
+        }
+
+        return $this->penyedia === 'unsil' && UrlBerkas::urai($this->url) !== null ? $this->url : null;
     }
 
     /** Jenis yang tidak pernah dirender sebagai URL ke klien. */

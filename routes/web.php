@@ -10,19 +10,30 @@ use App\Http\Controllers\ImpersonasiController;
 use App\Http\Controllers\LembarDisposisiPdfController;
 use App\Http\Controllers\NaskahPdfController;
 use App\Http\Controllers\PratinjauNaskahController;
+use App\Http\Controllers\Publik\FormVerifikasiController;
+use App\Http\Controllers\Publik\HalamanController;
 use App\Http\Controllers\Publik\VerifikasiController;
+use App\Http\Middleware\HeaderHalamanPublik;
 use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Ormawa\AjukanPermohonan;
 use App\Livewire\Ormawa\Beranda as BerandaOrmawa;
 use App\Livewire\Ormawa\IsiLpj;
+use App\Livewire\Ormawa\Kabar as KabarOrmawa;
 use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
 use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware(HeaderHalamanPublik::class)->group(function () {
+    Route::get('/', [HalamanController::class, 'beranda'])->name('beranda');
+    Route::get('/kabar', [HalamanController::class, 'kabarIndex'])->name('kabar');
+    Route::get('/kabar/{slug}', [HalamanController::class, 'kabarShow'])->name('kabar.tampil');
+    Route::get('/galeri', [HalamanController::class, 'galeri'])->name('galeri');
+    // /ormawa sudah dipakai beranda pengurus (butuh login), maka profil publik di /organisasi.
+    Route::get('/organisasi', [HalamanController::class, 'organisasiIndex'])->name('organisasi');
+    Route::get('/organisasi/{slug}', [HalamanController::class, 'organisasiShow'])->name('organisasi.tampil');
+    Route::get('/verifikasi', FormVerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi.form');
 });
 
 Route::get('/verifikasi/{id}', VerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi');
@@ -53,6 +64,7 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/ormawa/{ormawa}/profil', ProfilOrmawa::class)->whereUuid('ormawa')->name('ormawa.profil');
     Route::get('/ormawa/{ormawa}/permohonan', Progres::class)->whereUuid('ormawa')->name('ormawa.permohonan');
     Route::get('/ormawa/{ormawa}/permohonan/baru', AjukanPermohonan::class)->whereUuid('ormawa')->name('ormawa.permohonan.baru');
+    Route::get('/ormawa/{ormawa}/kabar', KabarOrmawa::class)->whereUuid('ormawa')->name('ormawa.kabar');
     Route::get('/ormawa/{ormawa}/lpj/{lpj}', IsiLpj::class)->whereUuid(['ormawa', 'lpj'])->name('ormawa.lpj');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
