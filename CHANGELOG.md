@@ -4,7 +4,24 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
-## [0.11.0] - 2026-10-09
+## [1.0.0] - 2026-10-07
+
+Fase 12: pengerasan, produksi, uji penerimaan, dan panduan. Rilis pertama yang siap produksi.
+
+### Ditambahkan
+- Keamanan (`docs/KEAMANAN.md`): header keamanan global (`HeaderKeamanan`: nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS produksi) dan CSP bernonce untuk halaman aplikasi tanpa `unsafe-inline` pada skrip; uji lintas-permukaan `MatriksAksesTest` (seluruh izin × peran PRD §3.1), `KlasifikasiRahasiaTest`, `IdorTest`, `VerifikasiPublikTest`, `RateLimitTest`, `XssTest`, `Arch/TanpaHtmlMentahTest`, `TanpaUnggahTest`, `TanpaKredensialBawaanTest`, `KonkurensiTest`, `HeaderKeamananTest`.
+- Produksi (`docs/DEPLOY.md`): `Dockerfile` bertahap (php-fpm 8.5, nginx + aset berawalan `/surat/`), `docker-compose.prod.yml` (app, nginx, queue Horizon, scheduler, redis, gotenberg internal, cadangan, profil basis data lokal), `.env.production.example`, cadangan harian `mariadb-dump` retensi 30 hari dengan verifikasi, uji pulih, rotasi token, dan langkah cutover.
+- Uji penerimaan: `php artisan surat:siapkan-uat` (data rekaan: akun per peran, 3 ormawa, surat masuk, permohonan di tiap tahap, LPJ, kabar, galeri; idempoten; ditolak di produksi).
+- Panduan pengguna HTML per peran dengan 59 tangkapan layar otomatis (Playwright) di `public/panduan/` (`/panduan/`), ditautkan dari halaman publik, masuk, aplikasi, dan panel; `PanduanSeeder` (hanya lokal), `composer panduan`, `PanduanTest`.
+
+### Diubah
+- Dependensi dev `concurrently` dihapus (kerentanan kritis `shell-quote`); `npm audit` dan `composer audit` bersih. Tambahan dev: `playwright-core` (hanya untuk panduan).
+- Panduan Markdown lama (`docs/PANDUAN-*.md`) menjadi tautan ke versi HTML.
+
+### Langkah manusia sebelum go-live
+Cutover OrmawaHub (impor final, `ormawahub:verifikasi`, hapus deployment Web App GAS), uji pulih cadangan, verifikasi nilai bawaan terhadap Permendiktisaintek 42/2025 (05-UJI §5), dan MFA seluruh pejabat/admin.
+
+## [0.11.0] - 2026-10-07
 
 Fase 11: notifikasi, penjadwal, laporan, dan arsip.
 
@@ -17,7 +34,7 @@ Fase 11: notifikasi, penjadwal, laporan, dan arsip.
 ### Diperbaiki
 - Ekspor register XLSX tidak lagi menulis baris header ganda.
 
-## [0.10.0] - 2026-10-09
+## [0.10.0] - 2026-10-07
 
 Fase 10: migrasi data OrmawaHub.
 
@@ -28,7 +45,7 @@ Fase 10: migrasi data OrmawaHub.
 - `ormawahub:undang-pengguna`: undangan atur kata sandi lewat antrean, sekali per akun (`users.diundang_pada`), `--surel` dan `--dry-run`.
 - Halaman panel "Log migrasi" (hanya super-admin) dengan filter status, sheet, dan batch.
 
-## [0.9.0] - 2026-10-09
+## [0.9.0] - 2026-10-07
 
 Fase 9: kabar, galeri, dan halaman publik.
 
