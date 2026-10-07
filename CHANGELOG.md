@@ -4,6 +4,20 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.6.0] - 2026-10-07
+
+Fase 6: ormawa.
+
+### Ditambahkan
+- Profil ormawa (slug unik otomatis, pembina berperan pembina-ormawa, logo sebagai tautan) dan SK kepengurusan dengan `Ormawa::skBerlaku()` dihitung dari periode.
+- Pengurus per orang (`PengurusOrmawa`): telepon terenkripsi, NIM dan telepon disembunyikan dari serialisasi dan jejak audit (BR-18), `PengurusOrmawa::aktifPada()`, `User::ormawaAktif()`, `User::dapatMengelolaOrmawa()` (BR-02).
+- `TautkanAkunPengurus`: penautan akun lewat NIM oleh admin atau ketua/sekretaris, hanya akun aktif bersurel terverifikasi; tidak otomatis saat pendaftaran.
+- Kebijakan `OrmawaPolicy`, `PengurusOrmawaPolicy` (hak data pribadi), `SkKepengurusanPolicy`; pembina hanya melihat binaannya.
+- Ruang ormawa `/ormawa` dan `/ormawa/{id}/profil` (Livewire): beranda dengan pilihan ormawa, ubah profil dan pengurus oleh ketua/sekretaris, penjaga agar ormawa tidak kehilangan pengelola.
+
+### Diubah
+- Peran pembina-ormawa tidak lagi memiliki `ormawa.lihat` (hanya `ormawa.kelola-binaan`).
+
 ## [0.5.0] - 2026-10-07
 
 Fase 5: naskah keluar dan verifikasi QR.
