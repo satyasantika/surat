@@ -4,6 +4,19 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.11.0] - 2026-10-09
+
+Fase 11: notifikasi, penjadwal, laporan, dan arsip.
+
+### Ditambahkan
+- Notifikasi tahap (BR-21) lewat satu pintu `PengirimNotifikasi`: database (juga lonceng panel), surel, dan WhatsApp opsional (kontrak `GerbangWhatsapp`, implementasi HTTP ke `WA_GATEWAY_URL`/token `.env`, aktif bila pengaturan `wa_aktif`; isi hanya ringkasan + tautan). Peristiwa: surat masuk perlu disposisi, disposisi diterima/diteruskan/dilaporkan, naskah perlu paraf/tanda tangan/dikembalikan/terbit, setiap transisi permohonan ke pihak berikutnya dan ormawa, LPJ diajukan/dinilai, kabar diajukan/diputuskan. Perihal surat/naskah non-biasa tidak pernah disertakan. Preferensi per kategori dan nomor WhatsApp di `/profil`, daftar notifikasi di `/notifikasi`. Kegagalan notifikasi tidak menggagalkan alur bisnis.
+- Penjadwal (02-ARSITEKTUR §8, tanpa tumpang tindih dan satu server): `surat:pengingat-disposisi` (tiap jam; menandai terlambat), `surat:pengingat-permohonan` (07:00; tertahan > N hari), `surat:pengingat-lpj` (07:00; H-3, H, terlambat mingguan), `surat:tandai-blokir-lpj` (01:00; blokir dan pencabutan, juga langsung saat LPJ diajukan), `surat:periksa-tautan` (Senin 06:00; admin diberi tahu saat tautan mati), `surat:bersihkan-tmp`, `surat:laporan-retensi` (bulanan). Pengingat tepat sekali per kunci (`pengingat_terkirim`).
+- Dasbor panel per peran (surat masuk belum didisposisikan, disposisi terlambat per pejabat, naskah menunggu tanda tangan, permohonan per tahap, LPJ terlambat, ormawa terblokir) dan halaman Laporan LAP-01–LAP-06 dengan filter periode serta ekspor XLSX lewat antrean (tmp ≤ 24 jam, unduhan bertanda tangan milik pemohon); izin `laporan.lihat`; laporan tanpa data pribadi dan perihal rahasia dirahasiakan.
+- Arsip: aksi admin "Arsipkan" untuk surat masuk selesai, peninjauan retensi aktif/inaktif per klasifikasi (hanya laporan, tidak ada penghapusan otomatis), dan halaman Arsip untuk mencari nomor, perihal, asal/tujuan, klasifikasi yang menghormati klasifikasi keamanan.
+
+### Diperbaiki
+- Ekspor register XLSX tidak lagi menulis baris header ganda.
+
 ## [0.10.0] - 2026-10-09
 
 Fase 10: migrasi data OrmawaHub.

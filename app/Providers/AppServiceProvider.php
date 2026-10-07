@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contracts\GerbangWhatsapp;
 use App\Contracts\LayananRuangan;
 use App\Contracts\PembangkitPdf;
 use App\Contracts\PenyimpananBerkas;
 use App\Events\NaskahTerbit;
 use App\Listeners\SelesaikanPermohonanDariNaskah;
 use App\Services\Berkas\TautanEksternal;
+use App\Services\Notifikasi\GerbangWhatsappHttp;
 use App\Services\Pdf\PembangkitPdfDompdf;
 use App\Services\Pdf\PembangkitPdfGotenberg;
 use App\Services\Ruangan\LayananRuanganAset;
@@ -32,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(GerbangWhatsapp::class, fn () => new GerbangWhatsappHttp(config('whatsapp.url'), config('whatsapp.token'), (int) config('whatsapp.timeout')));
+
         // Pilihan layanan dibaca dari pengaturan saat dipakai (bukan saat boot). API Aset hanya bila URL & token terisi.
         $this->app->bind(LayananRuangan::class, function () {
             $aset = config('layanan.aset');

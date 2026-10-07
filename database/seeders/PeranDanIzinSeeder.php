@@ -22,6 +22,7 @@ class PeranDanIzinSeeder extends Seeder
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
         'kabar.kelola', 'kabar.usul',
         'galeri.kelola',
+        'laporan.lihat',
         'master.kelola',
         'pengguna.kelola',
         'pengaturan.kelola',
@@ -35,20 +36,20 @@ class PeranDanIzinSeeder extends Seeder
         'super-admin' => [],
         'admin-persuratan' => [
             'masuk.lihat', 'masuk.registrasi', 'naskah.draf', 'naskah.templat', 'naskah.batalkan', 'nomor.terbitkan', 'arsip.lihat',
-            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'kabar.kelola', 'galeri.kelola',
+            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'kabar.kelola', 'galeri.kelola', 'laporan.lihat',
         ],
         'operator-layanan' => [],
         'dekan' => [
             'masuk.lihat', 'disposisi.buat', 'naskah.draf', 'naskah.tandatangan', 'arsip.lihat',
-            'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
+            'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai', 'laporan.lihat',
         ],
         'wakil-dekan' => [
             'masuk.lihat', 'disposisi.teruskan', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
-            'naskah.tandatangan', 'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
+            'naskah.tandatangan', 'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai', 'laporan.lihat',
         ],
         'kasubag' => [
             'masuk.lihat', 'disposisi.teruskan', 'disposisi.tindaklanjut', 'naskah.draf', 'naskah.paraf',
-            'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai',
+            'arsip.lihat', 'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai', 'laporan.lihat',
         ],
         'pembina-ormawa' => [
             'ormawa.kelola-binaan', 'permohonan.setujui-pembina', 'lpj.lihat',

@@ -77,6 +77,8 @@ class PengaturanSistem extends Page
             ]),
             Section::make('Notifikasi')->schema([
                 Toggle::make('wa_aktif')->label('Kirim notifikasi WhatsApp'),
+                TextInput::make('jam_pengingat_disposisi')->label('Pengingat disposisi mendekati batas (jam)')->numeric()->integer()->minValue(1)->maxValue(720)->required(),
+                TextInput::make('hari_tertahan_permohonan')->label('Pengingat permohonan tertahan (hari)')->numeric()->integer()->minValue(1)->maxValue(90)->required(),
             ]),
         ]);
     }

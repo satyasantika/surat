@@ -4,6 +4,7 @@ namespace App\Actions\Kabar;
 
 use App\Models\Kabar;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -20,6 +21,7 @@ class TolakKabar
             Gate::forUser($pelaku)->authorize('tolak', $kabar);
 
             $kabar->forceFill(['status' => Kabar::DITOLAK, 'catatan_admin' => $valid['catatan']])->save();
+            app(NotifikasiAlur::class)->kabarDiputuskan($kabar, $pelaku);
 
             return $kabar;
         });

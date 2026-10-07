@@ -12,6 +12,7 @@
     <nav class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 text-sm">
         <a href="{{ \App\Support\Beranda::url(auth()->user()) }}" class="font-semibold">{{ config('app.name') }}</a>
         <div class="flex items-center gap-4">
+            <a href="{{ route('notifikasi') }}" class="underline">Notifikasi @if (($n = auth()->user()->unreadNotifications()->count()) > 0)<span class="rounded-full bg-amber-400 px-1.5 text-xs text-blue-950">{{ $n }}</span>@endif</a>
             <a href="{{ route('profil') }}" class="underline">Profil</a>
             <form method="POST" action="{{ route('logout') }}">@csrf <button type="submit" class="underline">Keluar</button></form>
         </div>

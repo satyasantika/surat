@@ -111,6 +111,30 @@ class Ormawa extends Model
         return $this->tautan->firstWhere('jenis', 'logo')?->gambarUrl();
     }
 
+    /**
+     * Menyelaraskan penanda blokir dengan keadaan LPJ dan kebijakan (BR-16).
+     *
+     * @return 'diblokir'|'dibuka'|null perubahan yang terjadi
+     */
+    public function segarkanBlokirLpj(): ?string
+    {
+        $harusBlokir = (bool) Pengaturan::get('blokir_lpj_terlambat') && $this->lpjTerlambat();
+
+        if ($harusBlokir && ! $this->diblokir_lpj) {
+            $this->forceFill(['diblokir_lpj' => true, 'diblokir_sejak' => now()])->saveQuietly();
+
+            return 'diblokir';
+        }
+
+        if (! $harusBlokir && $this->diblokir_lpj) {
+            $this->forceFill(['diblokir_lpj' => false, 'diblokir_sejak' => null])->saveQuietly();
+
+            return 'dibuka';
+        }
+
+        return null;
+    }
+
     /** @return HasMany<PengurusOrmawa, $this> */
     public function pengurus(): HasMany
     {

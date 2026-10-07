@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Notifikasi\SimpanPreferensiNotifikasi;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,13 @@ class ProfilController extends Controller
     public function show(Request $request): View
     {
         return view('auth.profil', ['user' => $request->user()]);
+    }
+
+    public function updateNotifikasi(Request $request, SimpanPreferensiNotifikasi $simpan): RedirectResponse
+    {
+        $simpan->jalankan($request->user(), $request->only(['telepon', 'pref']));
+
+        return back()->with('status', 'Preferensi notifikasi disimpan.');
     }
 
     public function updateSandi(Request $request): RedirectResponse

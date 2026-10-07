@@ -7,6 +7,7 @@ use App\Models\Permohonan;
 use App\Models\PermohonanRuangan;
 use App\Models\RiwayatPermohonan;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use App\Support\AlurPermohonan;
 use Closure;
 use Illuminate\Support\Facades\Cache;
@@ -65,6 +66,8 @@ class TransisiPermohonan
         if (! AlurPermohonan::menahanRuangan($ke)) {
             $this->lepasRuangan($permohonan);
         }
+
+        app(NotifikasiAlur::class)->permohonanBerubah($permohonan, $ke, $oleh);
     }
 
     /** Ruangan yang ditahan dilepas (ditolak/dibatalkan); yang sudah dikonfirmasi tidak disentuh. */

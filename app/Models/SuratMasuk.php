@@ -38,6 +38,7 @@ class SuratMasuk extends Model
     {
         return [
             'tanggal_terima' => 'datetime',
+            'diarsipkan_pada' => 'datetime',
             'tanggal_surat' => 'date',
             'klasifikasi_keamanan' => KlasifikasiKeamanan::class,
             'derajat_kecepatan' => DerajatKecepatan::class,

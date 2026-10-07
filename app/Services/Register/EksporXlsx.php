@@ -30,17 +30,52 @@ class EksporXlsx
 
         $nama = "{$awalan}-{$pemilik->getKey()}-".Str::uuid7().'.xlsx';
         $penulis = SimpleExcelWriter::create(storage_path(self::FOLDER.'/'.$nama));
-        $penulis->addRow(array_combine($judul, $judul));
+        $penulis->addHeader($judul);
 
-        $query->chunk(500, function ($kumpulan) use ($penulis, $judul, $baris) {
+        $query->chunk(500, function ($kumpulan) use ($penulis, $baris) {
             foreach ($kumpulan as $model) {
-                $penulis->addRow(array_combine($judul, array_map(self::netralkan(...), $baris($model))));
+                $penulis->addRow(array_map(self::netralkan(...), $baris($model)));
             }
         });
 
         $penulis->close();
 
         return $nama;
+    }
+
+    /**
+     * Beberapa tabel laporan menjadi satu berkas XLSX (satu lembar per tabel).
+     *
+     * @param  list<array{judul: string, kolom: list<string>, baris: list<list<mixed>>}>  $tabel
+     * @return string nama berkas (tanpa path)
+     */
+    public function tulisTabel(array $tabel, User $pemilik, string $awalan): string
+    {
+        File::ensureDirectoryExists(storage_path(self::FOLDER));
+
+        $nama = "laporan-{$awalan}-{$pemilik->getKey()}-".Str::uuid7().'.xlsx';
+        $penulis = SimpleExcelWriter::create(storage_path(self::FOLDER.'/'.$nama));
+
+        foreach ($tabel as $i => $t) {
+            $i === 0 ? $penulis->nameCurrentSheet(self::namaLembar($t['judul'], $i)) : $penulis->addNewSheetAndMakeItCurrent(self::namaLembar($t['judul'], $i));
+            $penulis->addHeader($t['kolom']);
+
+            foreach ($t['baris'] as $baris) {
+                $penulis->addRow(array_map(self::netralkan(...), $baris));
+            }
+        }
+
+        $penulis->close();
+
+        return $nama;
+    }
+
+    /** Nama lembar XLSX: maks. 31 karakter, tanpa karakter terlarang, unik berdasarkan urutan. */
+    private static function namaLembar(string $judul, int $urutan): string
+    {
+        $bersih = trim((string) preg_replace('/[\\[\\]:*?\\/\\\\]/', ' ', $judul));
+
+        return mb_substr(($urutan + 1).'. '.$bersih, 0, 31);
     }
 
     public static function netralkan(mixed $nilai): mixed

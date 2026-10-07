@@ -8,6 +8,7 @@ use App\Models\TautanBerkas;
 use App\Models\User;
 use App\Rules\TautanBerkasValid;
 use App\Rules\TautanMediaValid;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -41,13 +42,15 @@ class IsiLpj
             'tanggal_pelaksanaan.before_or_equal' => 'Tanggal pelaksanaan tidak boleh di masa depan.',
         ])->validate();
 
-        return DB::transaction(function () use ($lpj, $pelaku, $valid) {
+        return DB::transaction(function () use ($lpj, $pelaku, $valid, $permohonan) {
             $lpj->update(collect($valid)->except('berkas_lpj')->all());
 
             $tautan = TautanBerkas::where('pemilik_type', $lpj->getMorphClass())->where('pemilik_id', $lpj->getKey())->where('jenis', 'lpj')->first();
             $tautan ? $tautan->update(['url' => $valid['berkas_lpj']]) : $this->berkas->simpan($lpj, 'lpj', $valid['berkas_lpj'], 'Berkas LPJ', $pelaku);
 
             $lpj->forceFill(['status' => Lpj::DIAJUKAN, 'diajukan_pada' => now()])->save();
+            $permohonan->loadMissing('ormawa')->ormawa->segarkanBlokirLpj();
+            app(NotifikasiAlur::class)->lpjDiajukan($lpj, $pelaku);
 
             return $lpj;
         });

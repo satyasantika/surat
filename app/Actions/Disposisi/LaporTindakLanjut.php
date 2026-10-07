@@ -5,6 +5,7 @@ namespace App\Actions\Disposisi;
 use App\Enums\StatusDisposisiPenerima;
 use App\Models\DisposisiPenerima;
 use App\Models\User;
+use App\Services\Notifikasi\NotifikasiAlur;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 
@@ -32,6 +33,8 @@ class LaporTindakLanjut
             'dibaca_pada' => $penerima->dibaca_pada ?? now(),
             'ditindaklanjuti_pada' => now(),
         ]);
+
+        app(NotifikasiAlur::class)->tindakLanjutDilaporkan($penerima);
 
         return $penerima;
     }

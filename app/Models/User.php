@@ -25,6 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property string|null $app_authentication_secret
  * @property array<string>|null $app_authentication_recovery_codes
+ * @property array<string, array{mail?: bool, whatsapp?: bool}>|null $preferensi_notifikasi
  */
 #[Fillable(['name', 'email', 'password', 'nip_nim', 'telepon', 'unit_kerja_id', 'aktif', 'sumber_id_lama'])]
 #[Hidden(['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'])]
@@ -105,6 +106,18 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->contains(fn (PengurusOrmawa $p) => $p->dapatMengelola() && $p->aktifPada());
     }
 
+    /**
+     * Preferensi kanal per kategori; bawaan: surel aktif, WhatsApp mati (opt-in).
+     *
+     * @return array{mail: bool, whatsapp: bool}
+     */
+    public function preferensiNotifikasi(string $kategori): array
+    {
+        $pref = $this->preferensi_notifikasi[$kategori] ?? [];
+
+        return ['mail' => (bool) ($pref['mail'] ?? true), 'whatsapp' => (bool) ($pref['whatsapp'] ?? false)];
+    }
+
     public function wajibMfa(): bool
     {
         return $this->hasAnyRole(config('unsil.peran_wajib_mfa'));
@@ -158,6 +171,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'aktif' => 'boolean',
+            'diundang_pada' => 'datetime',
+            'preferensi_notifikasi' => 'array',
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
         ];

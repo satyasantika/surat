@@ -9,6 +9,7 @@ use App\Http\Controllers\EksporUnduhController;
 use App\Http\Controllers\ImpersonasiController;
 use App\Http\Controllers\LembarDisposisiPdfController;
 use App\Http\Controllers\NaskahPdfController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PratinjauNaskahController;
 use App\Http\Controllers\Publik\FormVerifikasiController;
 use App\Http\Controllers\Publik\HalamanController;
@@ -72,4 +73,8 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::post('/impersonasi/selesai', [ImpersonasiController::class, 'selesai'])->name('impersonasi.selesai');
     Route::post('/impersonasi/{user}', [ImpersonasiController::class, 'mulai'])->whereUuid('user')->name('impersonasi.mulai');
     Route::put('/profil/sandi', [ProfilController::class, 'updateSandi'])->name('profil.sandi');
+    Route::put('/profil/notifikasi', [ProfilController::class, 'updateNotifikasi'])->name('profil.notifikasi');
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi');
+    Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua'])->name('notifikasi.baca-semua');
+    Route::get('/notifikasi/{id}/buka', [NotifikasiController::class, 'buka'])->whereUuid('id')->name('notifikasi.buka');
 });
