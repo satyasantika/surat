@@ -10,7 +10,10 @@ use App\Http\Controllers\ImpersonasiController;
 use App\Http\Controllers\LembarDisposisiPdfController;
 use App\Http\Controllers\NaskahPdfController;
 use App\Http\Controllers\PratinjauNaskahController;
+use App\Http\Controllers\Publik\FormVerifikasiController;
+use App\Http\Controllers\Publik\HalamanController;
 use App\Http\Controllers\Publik\VerifikasiController;
+use App\Http\Middleware\HeaderHalamanPublik;
 use App\Http\Middleware\PastikanAktif;
 use App\Livewire\Ormawa\AjukanPermohonan;
 use App\Livewire\Ormawa\Beranda as BerandaOrmawa;
@@ -22,8 +25,15 @@ use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware(HeaderHalamanPublik::class)->group(function () {
+    Route::get('/', [HalamanController::class, 'beranda'])->name('beranda');
+    Route::get('/kabar', [HalamanController::class, 'kabarIndex'])->name('kabar');
+    Route::get('/kabar/{slug}', [HalamanController::class, 'kabarShow'])->name('kabar.tampil');
+    Route::get('/galeri', [HalamanController::class, 'galeri'])->name('galeri');
+    // /ormawa sudah dipakai beranda pengurus (butuh login), maka profil publik di /organisasi.
+    Route::get('/organisasi', [HalamanController::class, 'organisasiIndex'])->name('organisasi');
+    Route::get('/organisasi/{slug}', [HalamanController::class, 'organisasiShow'])->name('organisasi.tampil');
+    Route::get('/verifikasi', FormVerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi.form');
 });
 
 Route::get('/verifikasi/{id}', VerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi');

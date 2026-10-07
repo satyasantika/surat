@@ -99,10 +99,12 @@ it('mengembalikan 404 generik untuk id tak valid, tak ada, dan naskah yang belum
 });
 
 it('tidak menyediakan daftar naskah publik', function () {
-    naskahTerbit();
+    $n = naskahTerbit();
 
-    $this->get('/verifikasi')->assertNotFound();
-    $this->get('/verifikasi/')->assertNotFound();
+    // /verifikasi hanya formulir kode (F9.3), bukan daftar: tidak memuat data naskah apa pun.
+    foreach (['/verifikasi', '/verifikasi/'] as $url) {
+        $this->get($url)->assertOk()->assertSee('Verifikasi surat')->assertDontSee($n->nomor)->assertDontSee($n->perihal);
+    }
 });
 
 it('membatasi 30 permintaan per menit per IP', function () {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MenyegarkanCachePublik;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Rules\TautanGaleriValid;
 use App\Support\UrlBerkas;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 #[Fillable(['ormawa_id', 'permohonan_id', 'judul', 'tipe', 'url', 'aktif', 'urutan'])]
 class Galeri extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MenyegarkanCachePublik, TercatatAktivitas;
 
     public const TIPE = ['foto' => 'Foto', 'video' => 'Video', 'instagram' => 'Instagram'];
 

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MenyegarkanCachePublik;
 use App\Models\Concerns\TercatatAktivitas;
 use App\Support\SanitasiHtml;
-use App\Support\UrlBerkas;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 #[Fillable(['ormawa_id', 'judul', 'subjudul', 'isi', 'tag'])]
 class Kabar extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MenyegarkanCachePublik, TercatatAktivitas;
 
     public const DRAF = 'draf';
 
@@ -67,20 +67,10 @@ class Kabar extends Model
         $query->where('status', self::TERBIT);
     }
 
-    /** Foto sampul (tautan jenis foto) sebagai URL gambar; Drive lewat lh3, selain itu hanya domain unsil. */
+    /** Foto sampul (tautan jenis foto) sebagai URL gambar publik. */
     public function sampulUrl(): ?string
     {
-        $tautan = $this->tautan->firstWhere('jenis', 'foto');
-
-        if ($tautan === null) {
-            return null;
-        }
-
-        if ($tautan->drive_file_id) {
-            return 'https://lh3.googleusercontent.com/d/'.$tautan->drive_file_id;
-        }
-
-        return $tautan->penyedia === 'unsil' && UrlBerkas::urai($tautan->url) !== null ? $tautan->url : null;
+        return $this->tautan->firstWhere('jenis', 'foto')?->gambarUrl();
     }
 
     /** @return BelongsTo<Ormawa, $this> */
