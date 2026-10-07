@@ -15,7 +15,7 @@ class RegisterNomorSeeder extends Seeder
             ['naskah-dekan', 'Naskah dinas Dekan', '{urut}/{kode_unit}/{klasifikasi}/{tahun}'],
             ['sk-dekan', 'Keputusan Dekan', '{urut}/{kode_unit}/{kode_jenis}/{klasifikasi}/{tahun}'],
             ['surat-tugas', 'Surat tugas', '{urut}/{kode_unit}/{kode_jenis}/{klasifikasi}/{tahun}'],
-            ['permohonan', 'Nomor permohonan ormawa', '{urut:4}/PMH/{bulan_romawi}/{tahun}'],
+            ['permohonan', 'Nomor permohonan ormawa', 'PMH-{tahun}-{urut:4}'],
         ];
 
         foreach ($register as [$kode, $nama, $pola]) {

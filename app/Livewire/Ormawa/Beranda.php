@@ -3,6 +3,7 @@
 namespace App\Livewire\Ormawa;
 
 use App\Models\Ormawa;
+use App\Models\Permohonan;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -48,6 +49,7 @@ class Beranda extends Component
             'daftar' => $daftar,
             'ormawa' => $terpilih,
             'sk' => $terpilih?->skBerlaku(),
+            'jumlahPermohonan' => $terpilih ? Permohonan::where('ormawa_id', $terpilih->getKey())->count() : 0,
             'bolehKelola' => $terpilih !== null && $user->dapatMengelolaOrmawa($terpilih),
             'adaKeanggotaan' => $user->keanggotaanOrmawa()->exists(),
         ])->title('Ruang Ormawa');

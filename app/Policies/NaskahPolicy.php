@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Naskah;
+use App\Models\Permohonan;
 use App\Models\User;
 
 class NaskahPolicy
@@ -17,7 +18,8 @@ class NaskahPolicy
         return $pelaku->can('nomor.terbitkan')
             || $naskah->penyusun_id === $pelaku->getKey()
             || $this->pemangkuPenandaTangan($pelaku, $naskah)
-            || $naskah->paraf()->where('user_id', $pelaku->getKey())->exists();
+            || $naskah->paraf()->where('user_id', $pelaku->getKey())->exists()
+            || $this->pengurusPemohon($pelaku, $naskah);
     }
 
     /** Pembatalan naskah yang sudah bernomor (BR-06); nomornya tidak dipakai ulang. */
@@ -49,6 +51,18 @@ class NaskahPolicy
     public function delete(User $pelaku, Naskah $naskah): bool
     {
         return $naskah->penyusun_id === $pelaku->getKey() && $naskah->status->value === 'draf';
+    }
+
+    /** Pengurus aktif ormawa pemohon boleh mengunduh surat izin yang sudah terbit. */
+    protected function pengurusPemohon(User $pelaku, Naskah $naskah): bool
+    {
+        if ($naskah->permohonan_id === null || $naskah->status->value !== 'terbit') {
+            return false;
+        }
+
+        $ormawaId = Permohonan::whereKey($naskah->permohonan_id)->value('ormawa_id');
+
+        return $ormawaId !== null && $pelaku->ormawaAktif()->contains('id', $ormawaId);
     }
 
     protected function pemangkuPenandaTangan(User $pelaku, Naskah $naskah): bool

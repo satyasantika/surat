@@ -1,6 +1,6 @@
 <div class="space-y-4">
     <div class="flex gap-2 text-sm" role="tablist">
-        @foreach (['perlu' => 'Perlu tindakan', 'naskah' => 'Paraf & tanda tangan', 'terkirim' => 'Terkirim', 'selesai' => 'Selesai'] as $kunci => $nama)
+        @foreach (['perlu' => 'Perlu tindakan', 'permohonan' => 'Permohonan ormawa', 'naskah' => 'Paraf & tanda tangan', 'terkirim' => 'Terkirim', 'selesai' => 'Selesai'] as $kunci => $nama)
             <button type="button" wire:click="pilihTab('{{ $kunci }}')" role="tab"
                     class="rounded-full px-4 py-2 {{ $tab === $kunci ? 'bg-blue-900 text-white' : 'bg-white shadow' }}">{{ $nama }}</button>
         @endforeach
@@ -119,6 +119,48 @@
         </article>
     @endforeach
 
+    {{-- Permohonan ormawa yang menunggu putusan --}}
+    @foreach ($permohonanDaftar as $pm)
+        @php($kunci = 'permohonan:'.$pm->id)
+        <article class="rounded-lg bg-white p-4 shadow" wire:key="{{ $kunci }}">
+            <button type="button" wire:click="buka('{{ $kunci }}')" class="w-full text-left">
+                <p class="text-xs text-slate-500">{{ $pm->nomor }} · {{ $pm->ormawa->nama }}</p>
+                <p class="font-medium">{{ $pm->nama_kegiatan }}</p>
+                <p class="mt-1 text-xs"><span class="rounded bg-slate-100 px-2 py-0.5">{{ $pm->status->label() }}</span>
+                    <span class="text-slate-500">{{ $pm->tanggal_mulai->translatedFormat('d M Y') }}</span></p>
+            </button>
+            @if ($terbuka === $kunci)
+                <div class="mt-3 space-y-3 border-t pt-3 text-sm">
+                    <p>{{ $pm->deskripsi }}</p>
+                    <a href="{{ \App\Filament\Resources\Permohonans\PermohonanResource::getUrl('view', ['record' => $pm]) }}" class="text-blue-800 underline">Buka rincian di panel</a>
+                    @can('disposisiDekan', $pm)
+                        <fieldset>
+                            <legend class="font-medium">Disposisikan ke</legend>
+                            @foreach ($wdPilihan as $j)
+                                <label class="flex items-center gap-2 py-1"><input type="checkbox" wire:model="jabatanWd" value="{{ $j->id }}"> {{ $j->nama }}</label>
+                            @endforeach
+                        </fieldset>
+                    @endcan
+                    <textarea wire:model="catatanPermohonan" rows="2" class="w-full rounded border px-3 py-2" placeholder="Catatan (wajib bila menolak)"></textarea>
+                    <div class="flex flex-wrap gap-2">
+                        @can('disposisiDekan', $pm)
+                            <button type="button" wire:click="disposisikanPermohonan('{{ $pm->id }}')" class="rounded bg-blue-900 px-4 py-2 text-white">Disposisikan</button>
+                            <button type="button" wire:click="tolakDekan('{{ $pm->id }}')" class="rounded border border-red-700 px-4 py-2 text-red-700">Tolak</button>
+                        @endcan
+                        @can('putusWd', $pm)
+                            <button type="button" wire:click="putusWd('{{ $pm->id }}', 'setuju')" class="rounded bg-green-700 px-4 py-2 text-white">Setuju</button>
+                            <button type="button" wire:click="putusWd('{{ $pm->id }}', 'tolak')" class="rounded border border-red-700 px-4 py-2 text-red-700">Tolak</button>
+                        @endcan
+                        @can('rekomendasiKasubag', $pm)
+                            <button type="button" wire:click="rekomendasi('{{ $pm->id }}')" class="rounded bg-green-700 px-4 py-2 text-white">Rekomendasikan terbit</button>
+                            <button type="button" wire:click="tolakKasubag('{{ $pm->id }}')" class="rounded border border-red-700 px-4 py-2 text-red-700">Tolak</button>
+                        @endcan
+                    </div>
+                </div>
+            @endif
+        </article>
+    @endforeach
+
     {{-- Terkirim --}}
     @foreach ($terkirim as $d)
         <article class="rounded-lg bg-white p-4 shadow" wire:key="terkirim:{{ $d->id }}">
@@ -133,7 +175,7 @@
         </article>
     @endforeach
 
-    @if ($surat->isEmpty() && $penerimaDaftar->isEmpty() && $terkirim->isEmpty() && $naskahDaftar->isEmpty())
+    @if ($surat->isEmpty() && $penerimaDaftar->isEmpty() && $terkirim->isEmpty() && $naskahDaftar->isEmpty() && $permohonanDaftar->isEmpty())
         <p class="rounded bg-white p-6 text-center text-slate-500 shadow">Tidak ada item.</p>
     @endif
 </div>

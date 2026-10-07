@@ -41,6 +41,12 @@ class Disposisi extends Model
         return $this->belongsTo(SuratMasuk::class);
     }
 
+    /** @return BelongsTo<Permohonan, $this> */
+    public function permohonan(): BelongsTo
+    {
+        return $this->belongsTo(Permohonan::class);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function dari(): BelongsTo
     {

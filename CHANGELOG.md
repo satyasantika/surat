@@ -4,6 +4,21 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+## [0.7.0] - 2026-10-07
+
+Fase 7: permohonan ormawa dan ruangan.
+
+### Ditambahkan
+- Jenis permohonan (4 jenis), layanan ruangan `LayananRuangan` dengan implementasi lokal dan klien Aset API (cache 60 detik, 409 → bentrok, 5xx/jaringan → `LayananRuanganTidakTersedia`, tanpa data palsu), sesi dari pengaturan ("seharian" bentrok dengan semua sesi), katalog ruangan lokal dan pemakaian manual.
+- `AjukanPermohonan`: hanya pengurus aktif ber-SK berlaku, blokir LPJ, nomor `PMH-{tahun}-{urut}`, BR-15 (alasan mendesak), tautan berkas wajib, penahanan ruangan atomik per ruangan+tanggal (GET_LOCK MariaDB, teruji 8 pengajuan paralel → satu pemenang), batas laju 10/jam, data pribadi penanggung jawab terenkripsi.
+- Peta transisi `AlurPermohonan` dan aksi: persetujuan pembina, validasi, pengembalian dan ajukan ulang, penolakan (melepas ruangan), pembatalan oleh ormawa; disposisi dekan ke satu/lebih WD, putusan WD (semua setuju → rekomendasi, satu tolak → ditolak, Plt dapat memutus), rekomendasi kasubag.
+- Penerbitan surat izin: draf naskah otomatis (cek bentrok ulang di dalam kunci), surat pengantar rektorat terpisah, listener `NaskahTerbit` menyelesaikan permohonan dan mengonfirmasi ruangan, job `CatatPemakaianRuangan` idempoten dengan retry dan notifikasi admin.
+- UI: `/ormawa/{id}/permohonan/baru` (formulir bertahap dengan ketersediaan langsung), progres dengan linimasa, tab "Permohonan ormawa" di `/disposisi`, resource panel dengan tab per status dan riwayat, halaman "Plot ruangan".
+
+### Diubah
+- Kunci asing `pemakaian_ruangan_lokal.permohonan_id` dilepas dan kolomnya menjadi string (referensi buram).
+- Pola register permohonan menjadi `PMH-{tahun}-{urut:4}`.
+
 ## [0.6.0] - 2026-10-07
 
 Fase 6: ormawa.

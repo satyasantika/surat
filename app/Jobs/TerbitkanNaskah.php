@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Actions\Naskah\TransisiNaskah;
 use App\Enums\StatusNaskah;
+use App\Events\NaskahTerbit;
 use App\Models\Naskah;
 use App\Models\User;
 use App\Services\Naskah\RenderNaskah;
@@ -27,9 +28,9 @@ class TerbitkanNaskah implements ShouldQueue
 
     public function handle(RenderNaskah $render, TransisiNaskah $transisi): void
     {
-        $transisi->dalamKunci($this->naskah, function (Naskah $segar) use ($render, $transisi) {
+        $terbit = $transisi->dalamKunci($this->naskah, function (Naskah $segar) use ($render, $transisi) {
             if ($segar->status !== StatusNaskah::Ditandatangani || $segar->hash_pdf !== null) {
-                return; // sudah terbit/dibatalkan: tidak ada yang dikerjakan
+                return false; // sudah terbit/dibatalkan: tidak ada yang dikerjakan
             }
 
             $segar->hash_pdf = RenderNaskah::hash($render->pdf($segar));
@@ -38,6 +39,12 @@ class TerbitkanNaskah implements ShouldQueue
             /** @var User $pelaku */
             $pelaku = $segar->penandaTanganUser ?? $segar->penyusun;
             $transisi->ke($segar, StatusNaskah::Terbit, $pelaku, 'Diterbitkan; hash PDF dicatat');
+
+            return true;
         });
+
+        if ($terbit) {
+            NaskahTerbit::dispatch($this->naskah->fresh());
+        }
     }
 }
