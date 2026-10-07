@@ -25,7 +25,6 @@
 | WhatsApp | Gateway HTTP (mis. Fonnte, sudah dipakai OrmawaHub) | Bungkus sebagai *Notification Channel* kustom, dikirim via antrean |
 | Uji | **Pest 4** + plugin Laravel | Feature test per alur bisnis, minimal jalur sukses + gagal otorisasi |
 | Kualitas kode | **Laravel Pint** (PSR-12 preset laravel), **Larastan** level 6 | Dijalankan sebelum setiap commit |
-| Bantuan AI | **Laravel Boost** (`laravel/boost`) | Memberi agen AI (Claude Code, Cursor, dsb.) MCP server + pedoman versi-spesifik Laravel/Filament/Livewire |
 
 ## 1a. Kebijakan berkas: tautan, bukan unggahan (keputusan 6 Oktober 2026)
 
@@ -208,7 +207,7 @@ server {
 }
 ```
 
-Membuat proyek Laravel baru tanpa PHP di host (folder repo sudah berisi `docs/`, `CLAUDE.md`, dsb.):
+Membuat proyek Laravel baru tanpa PHP di host (folder repo sudah berisi `docs/`):
 ```bash
 cd ~/code/<app>
 docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/app -w /app composer:2 \

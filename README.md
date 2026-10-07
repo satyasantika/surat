@@ -6,7 +6,7 @@ Stack: Laravel 13, MariaDB, Redis, Filament 5, Livewire 4, Tailwind 4, Gotenberg
 
 ## Dokumentasi
 
-Lihat `docs/`: analisis sistem berjalan, PRD, arsitektur, skema database, prompt bertahap, uji penerimaan, rekomendasi regulasi, migrasi data, standar teknis & git. Konteks agen AI ada di `CLAUDE.md`.
+Lihat `docs/`: keputusan teknis (`KEPUTUSAN.md`), panduan pengguna, keamanan, dan deploy.
 
 ## Menjalankan lokal
 
@@ -62,7 +62,7 @@ Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Tambahkan s
 ## Uji penerimaan (staging)
 
 `php artisan surat:siapkan-uat` menyiapkan data **rekaan** (ditolak di produksi): akun per peran (`uat.<peran>@contoh.test`, kata sandi acak dicetak sekali),
-3 ormawa, surat masuk, permohonan di setiap tahap, LPJ (terlambat/diajukan/dinilai), kabar, dan galeri; idempoten. Skenario uji per peran: **docs/05-UJI-PENERIMAAN.md**.
+3 ormawa, surat masuk, permohonan di setiap tahap, LPJ (terlambat/diajukan/dinilai), kabar, dan galeri; idempoten.
 Panduan pengguna: **docs/PANDUAN-ADMIN.md**, **docs/PANDUAN-PIMPINAN.md**, **docs/PANDUAN-ORMAWA.md** (versi HTML dengan tangkapan layar di `public/panduan/`).
 
 ## Memperbarui panduan
