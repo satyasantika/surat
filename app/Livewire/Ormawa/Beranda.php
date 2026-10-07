@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Ormawa;
 
+use App\Models\Lpj;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
 use App\Models\User;
@@ -49,6 +50,7 @@ class Beranda extends Component
             'daftar' => $daftar,
             'ormawa' => $terpilih,
             'sk' => $terpilih?->skBerlaku(),
+            'lpjDaftar' => $terpilih ? Lpj::with('permohonan')->whereHas('permohonan', fn ($q) => $q->where('ormawa_id', $terpilih->getKey()))->where('status', 'draf')->orderBy('batas_waktu')->get() : collect(),
             'jumlahPermohonan' => $terpilih ? Permohonan::where('ormawa_id', $terpilih->getKey())->count() : 0,
             'bolehKelola' => $terpilih !== null && $user->dapatMengelolaOrmawa($terpilih),
             'adaKeanggotaan' => $user->keanggotaanOrmawa()->exists(),

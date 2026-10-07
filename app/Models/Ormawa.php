@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\TercatatAktivitas;
+use App\Support\Pengaturan;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -81,6 +83,25 @@ class Ormawa extends Model
     public function sk(): HasMany
     {
         return $this->hasMany(SkKepengurusan::class);
+    }
+
+    /** @return HasManyThrough<Lpj, Permohonan, $this> */
+    public function lpj(): HasManyThrough
+    {
+        return $this->hasManyThrough(Lpj::class, Permohonan::class);
+    }
+
+    /**
+     * LPJ terlambat (BR-16): ada LPJ belum diajukan yang melewati batas waktu + toleransi. Dasar blokir
+     * pengajuan permohonan baru bila kebijakan blokir_lpj_terlambat aktif.
+     */
+    public function lpjTerlambat(): bool
+    {
+        $toleransi = (int) Pengaturan::get('toleransi_lpj_hari');
+
+        return $this->lpj()->where('lpj.status', Lpj::DRAF)
+            ->whereDate('lpj.batas_waktu', '<', now()->startOfDay()->subDays($toleransi)->toDateString())
+            ->exists();
     }
 
     /** @return HasMany<PengurusOrmawa, $this> */

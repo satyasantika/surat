@@ -58,6 +58,10 @@ class TransisiPermohonan
             'oleh' => $oleh->getKey(), 'catatan' => $catatan,
         ]);
 
+        if ($ke === StatusPermohonan::Selesai) {
+            app(BuatLpj::class)->jalankan($permohonan);
+        }
+
         if (! AlurPermohonan::menahanRuangan($ke)) {
             $this->lepasRuangan($permohonan);
         }
