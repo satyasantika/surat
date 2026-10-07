@@ -1,0 +1,108 @@
+# Produksi Persuratan & Layanan FKIP (pola docker-apps).
+#   cp .env.production.example .env   → isi rahasia (jangan commit .env)
+#   docker compose -f docker-compose.prod.yml build
+#   docker compose -f docker-compose.prod.yml up -d
+# Basis data MariaDB/MySQL berjalan native di host (DB_HOST=host.docker.internal); profil `db-lokal` hanya untuk uji coba.
+name: surat
+
+x-app: &app
+  image: surat-app:${SURAT_VERSI:-latest}
+  env_file: .env
+  restart: unless-stopped
+  extra_hosts: ["host.docker.internal:host-gateway"]
+  networks: [internal]
+  volumes:
+    - storage:/var/www/html/storage
+  environment:
+    PHP_MEMORY_LIMIT: 512M
+
+services:
+  app:
+    <<: *app
+    build:
+      context: .
+      target: app
+      args:
+        ASSET_URL: ${ASSET_URL:-https://supportfkip.unsil.ac.id/surat}
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(file_exists(\"/var/www/html/vendor/autoload.php\") ? 0 : 1);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: surat-web:${SURAT_VERSI:-latest}
+    build:
+      context: .
+      target: web
+      args:
+        ASSET_URL: ${ASSET_URL:-https://supportfkip.unsil.ac.id/surat}
+    restart: unless-stopped
+    depends_on: [app]
+    # Hanya loopback: reverse proxy fakultas yang membuka ke publik (TLS di sana).
+    ports: ["127.0.0.1:${HTTP_PORT:-8028}:80"]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/up || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  queue:
+    <<: *app
+    command: ["php", "artisan", "horizon"]
+    stop_grace_period: 60s
+    depends_on: [redis]
+
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+    depends_on: [redis]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?isi REDIS_PASSWORD di .env}"]
+    volumes: [redis-data:/data]
+    networks: [internal]
+
+  # PDF presisi: hanya jaringan internal (tidak diekspos). Cadangan: PDF_DRIVER=dompdf.
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    command: ["gotenberg", "--api-timeout=30s", "--chromium-disable-javascript=true", "--chromium-allow-list=^file:///tmp/.*"]
+    networks: [internal]
+
+  # Cadangan terjadwal: dipanggil host (cron/systemd) — lihat docs/DEPLOY.md §6.
+  backup:
+    image: mariadb:10.11
+    profiles: ["backup"]
+    env_file: .env
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    volumes:
+      - ./docker/backup:/skrip:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+    entrypoint: ["/bin/sh"]
+    command: ["/skrip/backup.sh"]
+    networks: [internal]
+
+  # Hanya untuk uji coba bila tidak ada basis data host.
+  db:
+    image: mariadb:10.11
+    profiles: ["db-lokal"]
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-db_surat}
+      MARIADB_USER: ${DB_USERNAME:-app}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    volumes: [db-data:/var/lib/mysql]
+    networks: [internal]
+
+networks:
+  internal: {}
+
+volumes:
+  storage: {}
+  redis-data: {}
+  db-data: {}

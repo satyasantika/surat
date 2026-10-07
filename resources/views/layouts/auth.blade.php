@@ -24,6 +24,7 @@
         @endif
         @yield('isi')
     </div>
+    <p class="mt-4 text-center text-sm"><a href="{{ asset('panduan/index.html') }}" class="text-blue-800 underline">Panduan Pengguna</a></p>
 </main>
 </body>
 </html>

@@ -56,6 +56,10 @@
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
         ],
+        "panduan": [
+            "Composer\\Config::disableProcessTimeout",
+            "bash tests/panduan/jalankan.sh"
+        ],
         "cek": [
             "./vendor/bin/pint --test",
             "./vendor/bin/phpstan analyse --memory-limit=1G",

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dosen pembina ormawa — Panduan Persuratan FKIP</title>
+<style>
+:root{--biru:#1e3a8a;--abu:#475569;--garis:#e2e8f0;--latar:#f8fafc}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1e293b;background:var(--latar)}
+header{background:var(--biru);color:#fff;padding:14px 16px}header a{color:#fff}
+main{max-width:860px;margin:0 auto;padding:16px}h1{font-size:1.5rem;color:var(--biru);margin:.4em 0}h2{font-size:1.15rem;margin:1.6em 0 .4em;color:var(--biru)}
+.kartu{background:#fff;border:1px solid var(--garis);border-radius:10px;padding:14px 16px;margin:12px 0}
+.langkah{display:grid;gap:8px}.langkah figure{margin:0}.langkah img{display:block;max-width:100%;height:auto;border:1px solid var(--garis);border-radius:8px}
+.langkah figcaption{font-size:.85rem;color:var(--abu);margin-top:4px}
+.daftar{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:0;list-style:none}
+.daftar a{display:block;text-decoration:none;color:inherit}.daftar .kartu{margin:0;height:100%}.daftar strong{color:var(--biru)}
+code{background:#eef2ff;padding:1px 5px;border-radius:4px;font-size:.9em}details{margin:6px 0}summary{cursor:pointer;font-weight:600}
+footer{max-width:860px;margin:0 auto;padding:16px;color:var(--abu);font-size:.85rem}nav a{margin-right:12px}
+@media print{header,nav{display:none}body{background:#fff}.kartu{break-inside:avoid}img{max-height:480px}}
+</style>
+</head>
+<body>
+<header><strong>Panduan Persuratan &amp; Layanan FKIP Unsil</strong></header>
+<main>
+<nav><a href="index.html">&larr; Semua panduan</a></nav>
+<h1>Dosen pembina ormawa</h1>
+<h2>Tujuan</h2><p>Memantau ormawa binaan, menyetujui permohonan (bila tahap persetujuan pembina diaktifkan fakultas), dan melihat LPJ.</p>
+<h2>Cara masuk</h2><p>Admin membuatkan akun dengan peran pembina dan menautkannya ke ormawa binaan. Masuk lewat <strong>Masuk</strong>; panel admin dapat dibuka dari <code>/admin</code> sesuai izin.</p>
+<h2>Langkah-langkah</h2>
+<ol style="padding-left:1.2em">
+<li class="kartu langkah"><div><strong>Profil akun</strong><br>Atur kata sandi dan preferensi notifikasi. Anda menerima notifikasi saat permohonan binaan menunggu persetujuan Anda.</div><figure><img src="img/pembina-ormawa/01-profil.png" alt="Dosen pembina ormawa: Profil akun" loading="lazy"><figcaption>Langkah 1 — Profil akun</figcaption></figure></li>
+<li class="kartu langkah"><div><strong>Dasbor panel</strong><br>Panel hanya menampilkan menu yang diizinkan untuk peran pembina.</div><figure><img src="img/pembina-ormawa/02-dasbor.png" alt="Dosen pembina ormawa: Dasbor panel" loading="lazy"><figcaption>Langkah 2 — Dasbor panel</figcaption></figure></li>
+<li class="kartu langkah"><div><strong>Ormawa binaan</strong><br>Daftar ormawa yang Anda bina beserta profilnya. Anda dapat memperbarui profil ormawa binaan.</div><figure><img src="img/pembina-ormawa/03-ormawa.png" alt="Dosen pembina ormawa: Ormawa binaan" loading="lazy"><figcaption>Langkah 3 — Ormawa binaan</figcaption></figure></li>
+<li class="kartu langkah"><div><strong>LPJ ormawa binaan</strong><br>Pantau LPJ ormawa binaan (hanya binaan Anda yang tampil). Penilaian dilakukan pimpinan.</div><figure><img src="img/pembina-ormawa/04-lpj.png" alt="Dosen pembina ormawa: LPJ ormawa binaan" loading="lazy"><figcaption>Langkah 4 — LPJ ormawa binaan</figcaption></figure></li>
+</ol>
+<h2>Tanya jawab</h2>
+<details><summary>Mengapa ormawa lain tidak tampil?</summary><p>Pembina hanya melihat ormawa dan LPJ binaannya.</p></details>
+<details><summary>Di mana menyetujui permohonan?</summary><p>Tahap persetujuan pembina hanya muncul bila diaktifkan di Pengaturan sistem; notifikasi akan menautkan permohonan terkait.</p></details>
+<p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>
+</main>
+<footer>Versi aplikasi 0.11.0 · dibuat 2026-10-07 · Kendala? Hubungi admin persuratan FKIP. Data pada tangkapan layar adalah data rekaan.</footer>
+</body>
+</html>

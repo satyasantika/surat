@@ -120,6 +120,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function wajibMfa(): bool
     {
+        // Akun demo panduan (contoh.test) bebas MFA HANYA di lokal dengan flag eksplisit; tidak pernah di staging/produksi.
+        if (config('panduan.tanpa_mfa') && app()->environment('local') && str_ends_with((string) $this->email, '@contoh.test')) {
+            return false;
+        }
+
         return $this->hasAnyRole(config('unsil.peran_wajib_mfa'));
     }
 

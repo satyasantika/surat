@@ -58,3 +58,44 @@ Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Tambahkan s
     command: php artisan horizon
     networks: [laranet]
 ```
+
+## Uji penerimaan (staging)
+
+`php artisan surat:siapkan-uat` menyiapkan data **rekaan** (ditolak di produksi): akun per peran (`uat.<peran>@contoh.test`, kata sandi acak dicetak sekali),
+3 ormawa, surat masuk, permohonan di setiap tahap, LPJ (terlambat/diajukan/dinilai), kabar, dan galeri; idempoten. Skenario uji per peran: **docs/05-UJI-PENERIMAAN.md**.
+Panduan pengguna: **docs/PANDUAN-ADMIN.md**, **docs/PANDUAN-PIMPINAN.md**, **docs/PANDUAN-ORMAWA.md** (versi HTML dengan tangkapan layar di `public/panduan/`).
+
+## Memperbarui panduan
+
+Panduan pengguna HTML per peran ada di `public/panduan/` (tersaji di `/panduan/`, ditautkan dari landing page, halaman masuk, aplikasi, dan panel).
+Alurnya didefinisikan di `tests/panduan/alur.json`; `tangkap.mjs` menangkap layar (Playwright) dan `bangun.mjs` menulis HTML statis.
+
+```bash
+npm install            # sekali: playwright-core (browser berasal dari image Playwright)
+composer panduan       # = bash tests/panduan/jalankan.sh (dijalankan dari host)
+```
+
+Skrip menyiapkan basis data **sementara** (`db_surat_testing`), mengisinya dengan `PanduanSeeder` (akun `panduan.<peran>@contoh.test`, data rekaan,
+hanya `APP_ENV=local`), menjalankan server artisan sementara di container `surat-php`, menangkap layar lewat container
+`mcr.microsoft.com/playwright`, lalu membangun HTML. `PANDUAN_PASSWORD` dibuat acak per proses (atau set sendiri). Akun demo hanya dikecualikan dari MFA di
+lokal (`PANDUAN_TANPA_MFA`). Untuk satu peran saja: `PANDUAN_PERAN=dekan,kasubag composer panduan`.
+
+Bila ingin menjalankannya sebagai service compose pusat (`~/code/docker-compose.yml`, di luar repo) seperti STANDAR-TEKNIS §2.5:
+
+```yaml
+  surat-panduan:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    profiles: ["panduan"]
+    working_dir: /work
+    volumes: ["./surat:/work"]
+    ipc: host
+    environment:
+      PANDUAN_BASE_URL: http://gateway/surat
+      PANDUAN_PASSWORD: ${PANDUAN_PASSWORD}
+    command: node tests/panduan/tangkap.mjs
+    networks: [laranet]
+```
+
+## Produksi
+
+Citra dan compose produksi (pola docker-apps), cadangan harian + uji pulih, rotasi token, dan cutover: **docs/DEPLOY.md**. Pengerasan keamanan dan audit dependensi: **docs/KEAMANAN.md**.
