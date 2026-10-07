@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SuratMasuks;
 
+use App\Actions\Masuk\ArsipkanSuratMasuk;
 use App\Enums\DerajatKecepatan;
 use App\Enums\KlasifikasiKeamanan;
 use App\Enums\StatusSuratMasuk;
@@ -13,12 +14,14 @@ use App\Models\SuratMasuk;
 use App\Models\UnitKerja;
 use App\Rules\TautanBerkasValid;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -100,7 +103,16 @@ class SuratMasukResource extends Resource
                 SelectFilter::make('klasifikasi_keamanan')->label('Keamanan')->options(KlasifikasiKeamanan::pilihan()),
                 SelectFilter::make('status')->options(StatusSuratMasuk::pilihan()),
             ])
-            ->recordActions([EditAction::make()]);
+            ->recordActions([
+                EditAction::make(),
+                Action::make('arsipkan')->label('Arsipkan')->icon(Heroicon::OutlinedArchiveBox)->requiresConfirmation()
+                    ->modalDescription('Surat selesai ini dipindahkan ke arsip; retensi dihitung sejak hari ini.')
+                    ->visible(fn (SuratMasuk $record) => $record->status === StatusSuratMasuk::Selesai && (auth()->user()?->can('arsipkan', $record) ?? false))
+                    ->action(function (SuratMasuk $record) {
+                        app(ArsipkanSuratMasuk::class)->jalankan($record, auth()->user());
+                        Notification::make()->title('Surat diarsipkan')->success()->send();
+                    }),
+            ]);
     }
 
     public static function getRelations(): array

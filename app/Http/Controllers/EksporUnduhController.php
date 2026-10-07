@@ -13,7 +13,7 @@ class EksporUnduhController extends Controller
     {
         $pengguna = $request->user();
 
-        abort_unless(preg_match('/^(register-(?:keluar|masuk)|laporan-lap-0[1-5])-([0-9a-f-]{36})-[0-9a-f-]{36}\.xlsx$/', $berkas, $m) === 1, 404);
+        abort_unless(preg_match('/^(register-(?:keluar|masuk)|laporan-lap-0[1-6])-([0-9a-f-]{36})-[0-9a-f-]{36}\.xlsx$/', $berkas, $m) === 1, 404);
         abort_unless($m[2] === $pengguna->getKey(), 403);
         abort_unless($pengguna->can(str_starts_with($m[1], 'laporan-') ? 'laporan.lihat' : 'arsip.lihat'), 403);
 

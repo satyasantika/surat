@@ -235,6 +235,11 @@ class NotifikasiAlur
         });
     }
 
+    public function retensiArsip(int $total, int $masaInaktif, int $melewatiInaktif): void
+    {
+        $this->aman(fn () => $this->kirim->kirim(Penerima::izin('masuk.registrasi'), 'pengingat', 'Arsip melewati retensi', "{$total} arsip melewati retensi: {$masaInaktif} masuk masa inaktif, {$melewatiInaktif} melewati retensi inaktif dan perlu penentuan nasib akhir. Pemusnahan hanya melalui prosedur resmi.", url('/admin/arsip')));
+    }
+
     private function ringkasDisposisi(DisposisiPenerima $penerima): string
     {
         $penerima->loadMissing(['disposisi.suratMasuk', 'user']);

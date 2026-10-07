@@ -45,6 +45,12 @@ class SuratMasukPolicy
         return $pelaku->can('masuk.registrasi') && $this->view($pelaku, $surat);
     }
 
+    /** Mengarsipkan surat selesai (RS-09): metadata saja, jadi admin boleh walau suratnya rahasia. */
+    public function arsipkan(User $pelaku, SuratMasuk $surat): bool
+    {
+        return $pelaku->can('masuk.registrasi') && $this->lihatMetadata($pelaku, $surat);
+    }
+
     public function delete(User $pelaku, SuratMasuk $surat): bool
     {
         return false;
