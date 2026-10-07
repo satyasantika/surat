@@ -80,6 +80,18 @@ class Permohonan extends Model
         return $this->hasMany(PermohonanRuangan::class)->orderBy('tanggal')->orderBy('sesi');
     }
 
+    /** @return HasMany<PersetujuanWd, $this> */
+    public function persetujuanWd(): HasMany
+    {
+        return $this->hasMany(PersetujuanWd::class);
+    }
+
+    /** @return HasMany<Disposisi, $this> */
+    public function disposisi(): HasMany
+    {
+        return $this->hasMany(Disposisi::class);
+    }
+
     /** @return HasMany<RiwayatPermohonan, $this> */
     public function riwayat(): HasMany
     {

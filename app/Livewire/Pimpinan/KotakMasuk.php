@@ -9,12 +9,18 @@ use App\Actions\Disposisi\TandaiDibaca;
 use App\Actions\Naskah\KembalikanNaskah;
 use App\Actions\Naskah\ParafiNaskah;
 use App\Actions\Naskah\TandaTangani;
+use App\Actions\Permohonan\DisposisiPermohonan;
+use App\Actions\Permohonan\PutusanWd;
+use App\Actions\Permohonan\RekomendasiKasubag;
 use App\Enums\StatusDisposisiPenerima;
 use App\Enums\StatusNaskah;
+use App\Enums\StatusPermohonan;
 use App\Enums\StatusSuratMasuk;
 use App\Models\Disposisi;
 use App\Models\DisposisiPenerima;
+use App\Models\Jabatan;
 use App\Models\Naskah;
+use App\Models\Permohonan;
 use App\Models\SuratMasuk;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -58,6 +64,11 @@ class KotakMasuk extends Component
 
     public string $catatanNaskah = '';
 
+    public string $catatanPermohonan = '';
+
+    /** @var list<string> */
+    public array $jabatanWd = [];
+
     public function mount(): void
     {
         abort_unless($this->pengguna()->hasAnyRole([...self::PERAN, 'super-admin']), 403);
@@ -65,7 +76,7 @@ class KotakMasuk extends Component
 
     public function pilihTab(string $tab): void
     {
-        $this->tab = in_array($tab, ['perlu', 'terkirim', 'selesai', 'naskah'], true) ? $tab : 'perlu';
+        $this->tab = in_array($tab, ['perlu', 'terkirim', 'selesai', 'naskah', 'permohonan'], true) ? $tab : 'perlu';
         $this->tutup();
     }
 
@@ -134,6 +145,36 @@ class KotakMasuk extends Component
         $this->tutup();
     }
 
+    public function disposisikanPermohonan(string $id): void
+    {
+        app(DisposisiPermohonan::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->jabatanWd, $this->catatanPermohonan ?: null);
+        $this->tutup();
+    }
+
+    public function tolakDekan(string $id): void
+    {
+        app(DisposisiPermohonan::class)->tolak(Permohonan::findOrFail($id), $this->pengguna(), $this->catatanPermohonan);
+        $this->tutup();
+    }
+
+    public function putusWd(string $id, string $putusan): void
+    {
+        app(PutusanWd::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $putusan, $this->catatanPermohonan ?: null);
+        $this->tutup();
+    }
+
+    public function rekomendasi(string $id): void
+    {
+        app(RekomendasiKasubag::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->catatanPermohonan ?: null);
+        $this->tutup();
+    }
+
+    public function tolakKasubag(string $id): void
+    {
+        app(RekomendasiKasubag::class)->tolak(Permohonan::findOrFail($id), $this->pengguna(), $this->catatanPermohonan);
+        $this->tutup();
+    }
+
     public function tandatangani(string $naskahId): void
     {
         app(TandaTangani::class)->jalankan(Naskah::findOrFail($naskahId), $this->pengguna());
@@ -153,7 +194,9 @@ class KotakMasuk extends Component
         return view('livewire.pimpinan.kotak-masuk', [
             'surat' => $this->tab === 'perlu' ? $this->suratBelumDidisposisikan() : collect(),
             'naskahDaftar' => $this->tab === 'naskah' ? $this->daftarNaskah() : collect(),
-            'penerimaDaftar' => in_array($this->tab, ['terkirim', 'naskah'], true) ? collect() : $this->daftarPenerima(),
+            'permohonanDaftar' => $this->tab === 'permohonan' ? $this->daftarPermohonan() : collect(),
+            'wdPilihan' => $this->tab === 'permohonan' ? Jabatan::where('kode', 'like', 'wd-%')->orderBy('urutan')->get() : collect(),
+            'penerimaDaftar' => in_array($this->tab, ['terkirim', 'naskah', 'permohonan'], true) ? collect() : $this->daftarPenerima(),
             'terkirim' => $this->tab === 'terkirim' ? $this->daftarTerkirim() : collect(),
             'calonPenerima' => $this->terbuka ? $this->calonPenerima() : collect(),
             'bolehDisposisi' => $pengguna->can('disposisi.buat') && $pengguna->hasAnyRole(['dekan', 'super-admin']),
@@ -177,7 +220,7 @@ class KotakMasuk extends Component
 
     private function resetForm(): void
     {
-        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan', 'catatanNaskah');
+        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan', 'catatanNaskah', 'catatanPermohonan', 'jabatanWd');
         $this->resetErrorBag();
     }
 
@@ -239,6 +282,18 @@ class KotakMasuk extends Component
             ->filter(fn (Naskah $n) => $n->status === StatusNaskah::Paraf
                 ? $n->paraf->firstWhere('status', 'menunggu')?->user_id === $pengguna->getKey()
                 : in_array($n->penanda_tangan_jabatan_id, $jabatanIds, true))
+            ->values();
+    }
+
+    /** @return Collection<int, Permohonan> permohonan ormawa yang menunggu putusan pengguna */
+    private function daftarPermohonan(): Collection
+    {
+        $pengguna = $this->pengguna();
+
+        return Permohonan::with(['ormawa', 'jenis', 'persetujuanWd.jabatan'])
+            ->whereIn('status', [StatusPermohonan::DisposisiDekan->value, StatusPermohonan::PersetujuanWd->value, StatusPermohonan::RekomendasiKasubag->value])
+            ->orderBy('diajukan_pada')->get()
+            ->filter(fn (Permohonan $p) => $pengguna->can('disposisiDekan', $p) || $pengguna->can('putusWd', $p) || $pengguna->can('rekomendasiKasubag', $p))
             ->values();
     }
 

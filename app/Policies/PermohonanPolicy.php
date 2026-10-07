@@ -66,4 +66,26 @@ class PermohonanPolicy
             && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id)
             && ($permohonan->diajukan_oleh === $pelaku->getKey() || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa));
     }
+
+    /** Dekan mendisposisikan (atau menolak) permohonan yang sudah divalidasi. */
+    public function disposisiDekan(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::DisposisiDekan
+            && $pelaku->can('disposisi.buat') && $pelaku->hasAnyRole(['dekan', 'super-admin']);
+    }
+
+    /** WD tujuan disposisi yang masih menunggu putusan (pemangku jabatan, termasuk Plt). */
+    public function putusWd(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::PersetujuanWd
+            && $pelaku->can('permohonan.putuskan')
+            && $permohonan->persetujuanWd()->where('putusan', 'menunggu')->whereIn('jabatan_id', $pelaku->jabatanAktif()->pluck('id'))->exists();
+    }
+
+    public function rekomendasiKasubag(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::RekomendasiKasubag
+            && $pelaku->can('permohonan.putuskan') && $pelaku->hasRole('kasubag')
+            && $pelaku->jabatanAktif()->contains('kode', 'kasubag-umum');
+    }
 }
