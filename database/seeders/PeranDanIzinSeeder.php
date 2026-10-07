@@ -18,7 +18,7 @@ class PeranDanIzinSeeder extends Seeder
         'arsip.lihat',
         'ormawa.lihat', 'ormawa.kelola', 'ormawa.kelola-binaan', 'ormawa.kelola-sendiri',
         'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
-        'ruangan.kelola',
+        'ruangan.kelola', 'ruangan.kelola-jadwal',
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
         'kabar.kelola', 'kabar.usul',
         'galeri.kelola',
@@ -35,7 +35,7 @@ class PeranDanIzinSeeder extends Seeder
         'super-admin' => [],
         'admin-persuratan' => [
             'masuk.lihat', 'masuk.registrasi', 'naskah.draf', 'naskah.templat', 'naskah.batalkan', 'nomor.terbitkan', 'arsip.lihat',
-            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'kabar.kelola', 'galeri.kelola',
+            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'kabar.kelola', 'galeri.kelola',
         ],
         'operator-layanan' => [],
         'dekan' => [
