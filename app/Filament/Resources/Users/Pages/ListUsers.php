@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Imports\PenggunaImporter;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListUsers extends ListRecords
@@ -13,6 +15,7 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportAction::make()->importer(PenggunaImporter::class)->label('Impor massal'),
             CreateAction::make(),
         ];
     }

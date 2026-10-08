@@ -43,7 +43,7 @@ class UsersTable
             ->recordActions([
                 EditAction::make(),
                 Action::make('masukSebagai')->label('Masuk sebagai')->icon('heroicon-o-arrow-right-end-on-rectangle')
-                    ->visible(fn (User $record) => auth()->user()->can('impersonasi') && ! $record->is(auth()->user()) && $record->aktif && ! $record->hasRole('super-admin'))
+                    ->visible(fn (User $record) => (bool) auth()->user()?->can('impersonasi') && ! $record->is(auth()->user()) && $record->aktif && ! $record->hasRole('super-admin'))
                     ->requiresConfirmation()
                     ->action(function (User $record, $livewire) {
                         app(MulaiImpersonasi::class)->jalankan(auth()->user(), $record);
