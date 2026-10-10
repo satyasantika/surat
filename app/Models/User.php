@@ -27,7 +27,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property array<string>|null $app_authentication_recovery_codes
  * @property array<string, array{mail?: bool, whatsapp?: bool}>|null $preferensi_notifikasi
  */
-#[Fillable(['name', 'email', 'password', 'nip_nim', 'telepon', 'unit_kerja_id', 'aktif', 'sumber_id_lama'])]
+#[Fillable(['name', 'email', 'password', 'nip_nim', 'telepon', 'unit_kerja_id', 'aktif', 'sumber_id_lama', 'wajib_ganti_sandi'])]
 #[Hidden(['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'])]
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, MustVerifyEmail
 {
@@ -176,6 +176,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'aktif' => 'boolean',
+            'wajib_ganti_sandi' => 'boolean',
             'diundang_pada' => 'datetime',
             'preferensi_notifikasi' => 'array',
             'app_authentication_secret' => 'encrypted',

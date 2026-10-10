@@ -25,6 +25,9 @@ class UserForm
                 TextInput::make('telepon')->label('Telepon')->tel()->maxLength(20)
                     ->helperText('Data pribadi; dipakai untuk notifikasi.'),
                 Toggle::make('aktif')->label('Aktif')->default(true),
+                Toggle::make('wajib_ganti_sandi')->label('Wajib ganti sandi saat masuk')
+                    ->helperText('Nyalakan untuk akun dengan kata sandi awal yang dibuat admin.')
+                    ->default(false),
             ]),
             Section::make('Hak akses')->schema([
                 Select::make('peran')->label('Peran')->multiple()->live()

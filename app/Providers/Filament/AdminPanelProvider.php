@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\EditProfil;
+use App\Http\Middleware\PaksaGantiSandi;
 use App\Http\Middleware\WajibMfa;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -32,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->passwordReset()
-            ->profile()
+            ->profile(EditProfil::class)
             ->multiFactorAuthentication(
                 [AppAuthentication::make()->recoverable()],
                 // Akun demo panduan (lokal) dapat dikecualikan; di staging/produksi selalu wajib (config panduan.tanpa_mfa hanya berlaku di local).
@@ -68,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                PaksaGantiSandi::class,
             ]);
     }
 }

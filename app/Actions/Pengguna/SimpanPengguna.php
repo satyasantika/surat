@@ -41,7 +41,7 @@ class SimpanPengguna
         }
 
         return DB::transaction(function () use ($user, $data, $peran, $izin) {
-            $profil = collect($data)->only(['name', 'email', 'nip_nim', 'telepon', 'aktif'])->all();
+            $profil = collect($data)->only(['name', 'email', 'nip_nim', 'telepon', 'aktif', 'wajib_ganti_sandi'])->all();
             $baru = $user === null;
 
             if ($baru) {
@@ -83,6 +83,7 @@ class SimpanPengguna
             'nip_nim' => ['nullable', 'string', 'max:30', Rule::unique('users', 'nip_nim')->ignore($user?->id)],
             'telepon' => ['nullable', 'string', 'max:20'],
             'aktif' => ['boolean'],
+            'wajib_ganti_sandi' => ['boolean'],
             'peran' => ['array'],
             'peran.*' => ['string', Rule::in(array_keys(PeranDanIzinSeeder::PERAN))],
             'izin_langsung' => ['array'],
