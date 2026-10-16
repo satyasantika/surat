@@ -4,6 +4,8 @@ Pola docker-apps: satu aplikasi di satu mesin, di belakang reverse proxy fakulta
 `https://supportfkip.unsil.ac.id/surat`. Berkas yang dipakai: `Dockerfile`, `docker-compose.prod.yml`,
 `.env.production.example`, `docker/` (php, nginx, backup).
 
+> **Profil Ringan berlaku setelah Fase B; kondisi saat ini:** dokumen ini menggambarkan produksi yang sedang berjalan (v1.0.0: Horizon, Redis, Gotenberg). Setelah Fase B (STANDAR-TEKNIS §1b): antrean, cache, sesi, dan lock di MariaDB (driver `database`); tidak ada container `queue`, `redis`, maupun `gotenberg`; satu container `scheduler` menjalankan jadwal sekaligus worker antrean (`--stop-when-empty` tiap menit); PDF memakai dompdf (Gotenberg hanya cadangan lewat ADR); pemantauan lewat `/api/health` (db, job tertunda, `failed_jobs`, detak penjadwal) dan `php artisan queue:failed` / `queue:retry`, tanpa `/horizon`; `REDIS_PASSWORD` tidak lagi diperlukan; pemuatan ulang worker setelah rilis cukup dengan `php artisan queue:restart`. Keputusan 16 Oktober 2026: produksi memakai MariaDB native di host (`host.docker.internal`, `extra_hosts: host-gateway`) dan compose produksi tidak boleh memuat container database; compose saat ini masih memuat service `db` (profil `db-lokal`) yang dihapus pada Fase B. Alat dump `mariadb-dump`; nama basis data `db_surat` (uji `db_surat_testing`); `composer.json` `"php": "^8.5"` (kondisi saat ini `^8.3`; Dockerfile sudah `PHP_VERSION=8.5`) adalah butir Fase B. Bagian di bawah diperbarui saat Fase B selesai.
+
 ## 1. Arsitektur
 
 ```
@@ -21,7 +23,7 @@ Port yang dibuka ke host hanya `127.0.0.1:${HTTP_PORT}`; Redis dan Gotenberg tid
 | Hal | Ketentuan |
 |---|---|
 | Server | Linux, Docker Engine ≥ 26 + plugin compose, 2 vCPU / 4 GB RAM / 20 GB disk minimal |
-| Basis data | MariaDB 10.11 (atau MySQL 8.4) native; DB `db_surat` dan pengguna `app` khusus (hanya hak atas DB itu) |
+| Basis data | MariaDB 10.11 LTS atau lebih baru, native; DB `db_surat` dan pengguna `app` khusus (hanya hak atas DB itu) |
 | DNS dan TLS | `supportfkip.unsil.ac.id` sudah ada; sertifikat TLS dikelola di reverse proxy (bukan di aplikasi). Aktifkan HTTP→HTTPS dan HSTS di proxy; aplikasi juga mengirim HSTS pada produksi |
 | Surel keluar | Akun SMTP fakultas (host, port, pengguna, kata sandi) |
 | Jaringan keluar | Aplikasi memerlukan akses keluar ke `fonts.bunny.net` hanya saat **build** aset; saat berjalan hanya SMTP, API Aset, gerbang WhatsApp (bila dipakai), dan pemeriksaan tautan Drive |

@@ -24,7 +24,7 @@
 |---|---|---|
 | `feat` | Fitur baru untuk pengguna | `feat(peminjaman): tambah pengajuan peminjaman ruangan` |
 | `fix` | Perbaikan bug | `fix(nomor-surat): cegah nomor ganda saat terbit bersamaan` |
-| `docs` | Dokumentasi saja | `docs(readme): tambah cara menjalankan horizon` |
+| `docs` | Dokumentasi saja | `docs(readme): tambah cara menjalankan worker antrean` |
 | `style` | Format kode tanpa ubah logika | `style: jalankan laravel pint` |
 | `refactor` | Ubah struktur tanpa ubah perilaku | `refactor(mutasi): pindahkan logika ke action SetujuiMutasi` |
 | `perf` | Peningkatan kinerja | `perf(inventaris): tambah indeks lokasi dan kondisi` |
@@ -127,4 +127,4 @@ git config core.hooksPath .githooks
 
 ## 8. CI minimal (GitHub Actions / GitLab CI)
 
-Jalankan pada setiap PR: `composer install` → `pint --test` → `phpstan` → `pest` dengan service MySQL 8.4 dan Redis 7. PR tidak boleh di-merge bila CI merah.
+Jalankan pada setiap PR: `composer install` → `pint --test` → `phpstan` → `pest` dengan service MariaDB 10.11. (Profil Ringan, STANDAR-TEKNIS §1b: tanpa Redis; CI yang sedang berjalan masih menyertakan Redis 7 sampai Fase B.) PR tidak boleh di-merge bila CI merah.

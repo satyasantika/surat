@@ -34,7 +34,7 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 | Halaman publik (`/`, `/kabar`, `/galeri`, `/organisasi`) | `script-src 'self'`; gambar hanya `lh3.googleusercontent.com` dan `*.unsil.ac.id`; bingkai hanya `youtube-nocookie.com`/Drive; `frame-ancestors 'none'` |
 | Verifikasi QR | `default-src 'none'`, skrip hanya ber-nonce, `frame-ancestors 'none'`, `no-store`, `noindex` |
 | Pratinjau naskah | `default-src 'none'` (tanpa skrip) |
-| Panel Filament, update Livewire, Horizon | Tidak diberi CSP aplikasi: Filament menyuntikkan skrip/gaya inline tanpa nonce. Header dasar tetap berlaku; akses panel dibatasi login + MFA + Policy |
+| Panel Filament, update Livewire, Horizon (Horizon hilang pada Profil Ringan, setelah Fase B) | Tidak diberi CSP aplikasi: Filament menyuntikkan skrip/gaya inline tanpa nonce. Header dasar tetap berlaku; akses panel dibatasi login + MFA + Policy |
 
 ## 3. Audit dependensi
 

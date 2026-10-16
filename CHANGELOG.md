@@ -4,6 +4,11 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+### Diubah
+- Dokumentasi diselaraskan dengan keputusan lanjutan 16 Oktober 2026 (`docs/KEPUTUSAN.md` K-08; rujukan: STANDAR-TEKNIS §2.1, §2.2, §4a, §7): nama basis data seragam `db_<app>` (`db_surat`, `db_surat_testing`); kolom UUID memakai tipe `UUID` native MariaDB lewat Blueprint Laravel 13 (klaim `CHAR(36)` dihapus; `char('id',36)`/`binary(16)` eksplisit dilarang; gerbang uji tipe kolom, urutan UUIDv7, FK, dan morph); produksi memakai MariaDB native di host tanpa container database (CI boleh service container sementara, variabel `MARIADB_*`); butir Fase B: `ARG PHP_VERSION=8.5` dan `"php": "^8.5"`.
+- Dokumentasi diselaraskan dengan keputusan 16 Oktober 2026 (`docs/KEPUTUSAN.md` K-07): PHP 8.5, MariaDB 10.11+ native di host (bukan MySQL), tanpa SQLite, kolasi `utf8mb4_unicode_ci`, `DB_CONNECTION=mariadb`.
+- Dokumentasi: spesifikasi (`vibecoding/`, `docs/STANDAR-TEKNIS.md` §1b) dialihkan ke Profil Ringan (keputusan 15 Oktober 2026): tanpa Horizon/Redis/Octane; antrean, cache, sesi, dan lock di MySQL; satu container penjadwal yang menjalankan worker; `/api/health` untuk pemantauan; dompdf bawaan, Gotenberg cadangan. `docs/DEPLOY.md`, `README.md`, `docs/KEAMANAN.md`, `docs/STANDAR-GIT.md` diberi penanda "berlaku setelah Fase B". Kode dan konfigurasi belum berubah.
+
 ## [1.0.0] - 2026-10-07
 
 Fase 12: pengerasan, produksi, uji penerimaan, dan panduan. Rilis pertama yang siap produksi.

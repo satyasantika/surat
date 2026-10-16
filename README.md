@@ -2,7 +2,9 @@
 
 Sistem persuratan fakultas berbasis tata naskah dinas (surat masuk & disposisi, naskah keluar dengan nomor otomatis dan QR verifikasi, register & arsip) dengan **Layanan Ormawa** di atasnya. Pengganti OrmawaHub / SipOrmawa-FKIP.
 
-Stack: Laravel 13, MariaDB, Redis, Filament 5, Livewire 4, Tailwind 4, Gotenberg.
+Stack: Laravel 13, MariaDB, Filament 5, Livewire 4, Tailwind 4, dompdf.
+
+> **Profil Ringan berlaku setelah Fase B; kondisi saat ini:** kode yang berjalan masih memakai Redis, Horizon, dan driver PDF Gotenberg (dompdf sebagai cadangan). Sasaran (STANDAR-TEKNIS §1b): antrean, cache, sesi, dan lock di MariaDB (driver `database`); satu container `surat-scheduler` yang juga menjalankan worker; dompdf bawaan, Gotenberg hanya cadangan; pemantauan lewat `/api/health`. Bagian "Menjalankan lokal" dan "Layanan tambahan" di bawah menggambarkan kondisi saat ini.
 
 ## Dokumentasi
 
@@ -10,7 +12,7 @@ Lihat `docs/`: keputusan teknis (`KEPUTUSAN.md`), panduan pengguna, keamanan, da
 
 ## Menjalankan lokal
 
-Aplikasi memakai container yang dikelola compose pusat `~/code/docker-compose.yml` (`surat-php` PHP 8.5, `surat-nginx`, jaringan `laranet`), **MariaDB** native di host (DB `db_surat`, `db_surat_testing`), dan Redis bersama (`redis`, DB 52/53/54). Tidak ada container milik repo ini.
+Aplikasi memakai container yang dikelola compose pusat `~/code/docker-compose.yml` (`surat-php` PHP 8.5, `surat-nginx`, jaringan `laranet`), **MariaDB** native di host (DB `db_surat`, `db_surat_testing`), dan Redis bersama (`redis`, DB 52/53/54; hanya sampai Fase B). **Berlaku setelah Fase B; kondisi saat ini:** `Dockerfile` produksi sudah `ARG PHP_VERSION=8.5` tetapi `composer.json` masih `"php": "^8.3"` (diubah ke `^8.5` pada Fase B), dan `docker-compose.prod.yml` masih memuat service `db` (profil `db-lokal`) yang harus dihapus pada Fase B. Sasaran: produksi memakai MariaDB native di host lewat `host.docker.internal` (`extra_hosts: host-gateway`) tanpa container database, nama basis data seragam `db_surat`/`db_surat_testing`, dan kolom `id`/FK/morph bertipe `UUID` native lewat Blueprint Laravel (UUIDv7 dibuat aplikasi lewat `HasUuids`). Tidak ada container milik repo ini.
 
 ```bash
 alias srp='docker exec -w /var/www/html surat-php'
@@ -41,7 +43,7 @@ location /surat/ {
 
 ## Layanan tambahan di compose pusat
 
-Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Tambahkan service berikut bila ingin Gotenberg (PDF presisi) dan Horizon berjalan; tanpa itu set `PDF_DRIVER=dompdf` dan jalankan antrean manual (`srp php artisan horizon`).
+Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Kondisi saat ini: tambahkan service berikut bila ingin Gotenberg (PDF presisi) dan Horizon berjalan; tanpa itu set `PDF_DRIVER=dompdf` dan jalankan antrean manual (`srp php artisan horizon`). Setelah Fase B: yang diperlukan hanya `surat-scheduler` (`php artisan schedule:work`); `surat-horizon` dan `surat-gotenberg` tidak lagi dipasang.
 
 ```yaml
   surat-gotenberg:
