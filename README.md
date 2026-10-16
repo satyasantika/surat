@@ -4,7 +4,7 @@ Sistem persuratan fakultas berbasis tata naskah dinas (surat masuk & disposisi, 
 
 Stack: Laravel 13, MariaDB, Filament 5, Livewire 4, Tailwind 4, dompdf.
 
-> **Profil Ringan berlaku setelah Fase B; kondisi saat ini:** kode yang berjalan masih memakai Redis, Horizon, dan driver PDF Gotenberg (dompdf sebagai cadangan). Sasaran (STANDAR-TEKNIS §1b): antrean, cache, sesi, dan lock di MariaDB (driver `database`); satu container `surat-scheduler` yang juga menjalankan worker; dompdf bawaan, Gotenberg hanya cadangan; pemantauan lewat `/api/health`. Bagian "Menjalankan lokal" dan "Layanan tambahan" di bawah menggambarkan kondisi saat ini.
+> **Profil Ringan** (STANDAR-TEKNIS §1b): antrean, cache, sesi, dan lock di MariaDB (driver `database`); tanpa Redis, Horizon, dan Gotenberg. Satu container `surat-scheduler` menjalankan jadwal sekaligus worker antrean; PDF memakai dompdf; pemantauan lewat `/api/health`. PHP 8.5 dan UUID native MariaDB (STANDAR-TEKNIS §4a). Peralihan produksi dari v1.0.0: `docs/DEPLOY.md` §11.
 
 ## Dokumentasi
 
@@ -12,7 +12,7 @@ Lihat `docs/`: keputusan teknis (`KEPUTUSAN.md`), panduan pengguna, keamanan, da
 
 ## Menjalankan lokal
 
-Aplikasi memakai container yang dikelola compose pusat `~/code/docker-compose.yml` (`surat-php` PHP 8.5, `surat-nginx`, jaringan `laranet`), **MariaDB** native di host (DB `db_surat`, `db_surat_testing`), dan Redis bersama (`redis`, DB 52/53/54; hanya sampai Fase B). **Berlaku setelah Fase B; kondisi saat ini:** `Dockerfile` produksi sudah `ARG PHP_VERSION=8.5` tetapi `composer.json` masih `"php": "^8.3"` (diubah ke `^8.5` pada Fase B), dan `docker-compose.prod.yml` masih memuat service `db` (profil `db-lokal`) yang harus dihapus pada Fase B. Sasaran: produksi memakai MariaDB native di host lewat `host.docker.internal` (`extra_hosts: host-gateway`) tanpa container database, nama basis data seragam `db_surat`/`db_surat_testing`, dan kolom `id`/FK/morph bertipe `UUID` native lewat Blueprint Laravel (UUIDv7 dibuat aplikasi lewat `HasUuids`). Tidak ada container milik repo ini.
+Aplikasi memakai container yang dikelola compose pusat `~/code/docker-compose.yml` (`surat-php` PHP 8.5, `surat-nginx`, jaringan `laranet`) dan **MariaDB** native di host (DB `db_surat` dan `db_surat_testing`, dijangkau lewat `host.docker.internal`). Tidak ada Redis.
 
 ```bash
 alias srp='docker exec -w /var/www/html surat-php'
@@ -41,25 +41,25 @@ location /surat/ {
 }
 ```
 
-## Layanan tambahan di compose pusat
+## Worker antrean di lokal
 
-Compose pusat (`~/code/docker-compose.yml`) berada di luar repo ini. Kondisi saat ini: tambahkan service berikut bila ingin Gotenberg (PDF presisi) dan Horizon berjalan; tanpa itu set `PDF_DRIVER=dompdf` dan jalankan antrean manual (`srp php artisan horizon`). Setelah Fase B: yang diperlukan hanya `surat-scheduler` (`php artisan schedule:work`); `surat-horizon` dan `surat-gotenberg` tidak lagi dipasang.
+Antrean memakai driver `database`. Compose pusat (`~/code/docker-compose.yml`, di luar repo ini) cukup ditambah satu service penjadwal yang sekaligus
+menyalakan worker (`routes/console.php`); tidak perlu Redis, Horizon, maupun Gotenberg:
 
 ```yaml
-  surat-gotenberg:
-    image: gotenberg/gotenberg:8
-    restart: unless-stopped
-    networks: [laranet]
-
-  surat-horizon:
+  surat-scheduler:
     build: { context: ., dockerfile: php/laravel8.5.Dockerfile }
     restart: unless-stopped
     working_dir: /var/www/html
     volumes: ["./surat:/var/www/html"]
     extra_hosts: ["host.docker.internal:host-gateway"]
-    command: php artisan horizon
+    command: php artisan schedule:work
     networks: [laranet]
 ```
+
+Tanpa service itu, proses antrean secara manual: `srp php artisan queue:work database --queue=default --stop-when-empty`
+(job berat: `queue:work database-berat --queue=berat --stop-when-empty`). Pantau dengan `curl http://localhost:8028/api/health`
+dan `srp php artisan queue:failed`.
 
 ## Uji penerimaan (staging)
 

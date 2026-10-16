@@ -4,7 +4,11 @@ Pola docker-apps: satu aplikasi di satu mesin, di belakang reverse proxy fakulta
 `https://supportfkip.unsil.ac.id/surat`. Berkas yang dipakai: `Dockerfile`, `docker-compose.prod.yml`,
 `.env.production.example`, `docker/` (php, nginx, backup).
 
-> **Profil Ringan berlaku setelah Fase B; kondisi saat ini:** dokumen ini menggambarkan produksi yang sedang berjalan (v1.0.0: Horizon, Redis, Gotenberg). Setelah Fase B (STANDAR-TEKNIS §1b): antrean, cache, sesi, dan lock di MariaDB (driver `database`); tidak ada container `queue`, `redis`, maupun `gotenberg`; satu container `scheduler` menjalankan jadwal sekaligus worker antrean (`--stop-when-empty` tiap menit); PDF memakai dompdf (Gotenberg hanya cadangan lewat ADR); pemantauan lewat `/api/health` (db, job tertunda, `failed_jobs`, detak penjadwal) dan `php artisan queue:failed` / `queue:retry`, tanpa `/horizon`; `REDIS_PASSWORD` tidak lagi diperlukan; pemuatan ulang worker setelah rilis cukup dengan `php artisan queue:restart`. Keputusan 16 Oktober 2026: produksi memakai MariaDB native di host (`host.docker.internal`, `extra_hosts: host-gateway`) dan compose produksi tidak boleh memuat container database; compose saat ini masih memuat service `db` (profil `db-lokal`) yang dihapus pada Fase B. Alat dump `mariadb-dump`; nama basis data `db_surat` (uji `db_surat_testing`); `composer.json` `"php": "^8.5"` (kondisi saat ini `^8.3`; Dockerfile sudah `PHP_VERSION=8.5`) adalah butir Fase B. Bagian di bawah diperbarui saat Fase B selesai.
+> **Profil Ringan** (STANDAR-TEKNIS §1b dan §7, keputusan 15–16 Oktober 2026): antrean, cache, sesi, dan lock di MariaDB
+> (driver `database`); tidak ada container `queue`, `redis`, `gotenberg`, maupun `db`. Satu container `scheduler` menjalankan jadwal
+> sekaligus worker antrean (`--stop-when-empty` tiap menit). MariaDB berjalan native di host (`host.docker.internal`,
+> `extra_hosts: host-gateway`). PDF memakai dompdf (Gotenberg hanya cadangan lewat ADR). Pemantauan lewat `/api/health` dan
+> `php artisan queue:failed` / `queue:retry`, tanpa `/horizon`. Peralihan dari v1.0.0 (Horizon/Redis): lihat §11.
 
 ## 1. Arsitektur
 
@@ -12,11 +16,11 @@ Pola docker-apps: satu aplikasi di satu mesin, di belakang reverse proxy fakulta
 internet ─TLS─▶ reverse proxy fakultas (/surat/ → 127.0.0.1:8028, awalan dipotong)
                     └▶ nginx (container `nginx`, aset statis + FastCGI)
                           └▶ app (php-fpm 8.5)        ─▶ MariaDB native di host (host.docker.internal:3306)
-                    queue (Horizon)  scheduler (schedule:work)  ─▶ redis (internal, berkata sandi)
-                    gotenberg (internal, tanpa port ke host)    backup (profil `backup`, dijalankan cron host)
+                    scheduler (schedule:work → queue:work tiap menit)  ─▶ MariaDB (antrean, cache, sesi, lock)
+                    backup (profil `backup`, klien mariadb-dump, dijalankan cron host)
 ```
 
-Port yang dibuka ke host hanya `127.0.0.1:${HTTP_PORT}`; Redis dan Gotenberg tidak punya port ke host.
+Port yang dibuka ke host hanya `127.0.0.1:${HTTP_PORT}`. Tidak ada container database, Redis, atau Gotenberg.
 
 ## 2. Prasyarat
 
@@ -72,7 +76,7 @@ location /surat/ {
 
 ```bash
 git clone <repo> /opt/surat && cd /opt/surat && git checkout v1.0.0
-cp .env.production.example .env && chmod 600 .env     # isi DB_PASSWORD, REDIS_PASSWORD, SMTP, TRUSTED_PROXIES
+cp .env.production.example .env && chmod 600 .env     # isi DB_PASSWORD, SMTP, TRUSTED_PROXIES
 docker compose -f docker-compose.prod.yml build        # ASSET_URL dibaca dari .env/lingkungan; build gagal bila kosong
 docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate --show   # salin ke APP_KEY, SIMPAN cadangan kunci
 docker compose -f docker-compose.prod.yml up -d
@@ -85,7 +89,7 @@ docker compose -f docker-compose.prod.yml exec app php artisan optimize
 Build memanggil `composer install --no-dev`, `npm run build` dengan `ASSET_URL` terisi, `filament:upgrade`; entrypoint menghangatkan
 `optimize` dan `filament:optimize` dari lingkungan **runtime**. Migrasi tidak pernah berjalan otomatis.
 
-Verifikasi: `curl -fsS http://127.0.0.1:8028/up`, `…/api/health` (db, redis, gotenberg), dan `docker compose … exec app php artisan schedule:list`.
+Verifikasi: `curl -fsS http://127.0.0.1:8028/up`, `…/api/health` (db, job_tertunda, job_gagal_24j, detak_penjadwal; detak `ok` setelah ±1 menit), dan `docker compose … exec app php artisan schedule:list`.
 
 Lengkapi master sebelum go-live (05-UJI §5): jabatan dan pemangku, kode klasifikasi arsip (`KlasifikasiArsipResource` → impor CSV), pola register, kop surat, kebijakan LPJ.
 
@@ -97,7 +101,7 @@ SURAT_VERSI=X.Y.Z docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml run --rm backup            # cadangan sebelum migrasi (profil backup)
 SURAT_VERSI=X.Y.Z docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
-docker compose -f docker-compose.prod.yml exec queue php artisan horizon:terminate      # muat ulang pekerja
+docker compose -f docker-compose.prod.yml exec scheduler php artisan queue:restart      # muat ulang worker (yang berjalan selesai dulu)
 ```
 
 Pembatalan: `git checkout vSEBELUMNYA`, `SURAT_VERSI=… up -d`; bila migrasi sudah berjalan dan merusak, pulihkan cadangan §6 (migrasi tidak pernah diubah setelah ditandai tag, jadi mundur skema = pulihkan cadangan).
@@ -127,9 +131,9 @@ docker compose -f docker-compose.prod.yml --profile backup run --rm --entrypoint
 
 | Rahasia | Cara |
 |---|---|
-| Token gerbang WhatsApp (`WA_GATEWAY_TOKEN`) | Terbitkan token baru di gerbang → ubah `.env` → `docker compose … up -d` (queue dan app dimuat ulang) → cabut token lama. Tiap 90 hari atau saat petugas berganti |
+| Token gerbang WhatsApp (`WA_GATEWAY_TOKEN`) | Terbitkan token baru di gerbang → ubah `.env` → `docker compose … up -d` (scheduler dan app dimuat ulang) → cabut token lama. Tiap 90 hari atau saat petugas berganti |
 | Token API Aset (`ASET_API_TOKEN`) | Sama; koordinasi dengan pengelola sistem Aset |
-| `DB_PASSWORD`, `REDIS_PASSWORD`, SMTP | Ubah di sumber → `.env` → `up -d`; Redis: restart `redis` (sesi berakhir, pengguna masuk ulang) |
+| `DB_PASSWORD`, SMTP | Ubah di sumber → `.env` → `up -d` (app dan scheduler dimuat ulang) |
 | `APP_KEY` | **Jangan diganti sembarangan**: data terenkripsi (telepon pengurus, penanggung jawab, rahasia MFA) tak terbaca. Bila terpaksa, lakukan migrasi enkripsi terencana dan MFA diatur ulang |
 | Kata sandi pengguna | Pengguna sendiri; admin dapat memicu atur ulang. Tidak ada kata sandi bawaan |
 
@@ -139,7 +143,7 @@ Rahasia hanya di `.env` server (chmod 600), tidak pernah di repo, citra, atau lo
 
 1. Umumkan jadwal; bekukan OrmawaHub (pesan pemeliharaan).
 2. Ekspor final XLSX dan siapkan pemetaan CSV → `php artisan ormawahub:impor … --dry-run` → perbaiki pemetaan → impor sungguhan → `php artisan ormawahub:verifikasi` harus hijau.
-3. `php artisan ormawahub:undang-pengguna` (surel atur kata sandi; antrean `notifikasi`).
+3. `php artisan ormawahub:undang-pengguna` (surel atur kata sandi; antrean `default`).
 4. **Hapus deployment Web App Google Apps Script OrmawaHub** (bukan hanya membatasi) agar `doGet`/`doPost` tidak dapat dipanggil; ganti kata sandi akun lama.
 5. Ubah berbagi spreadsheet dan folder Drive menjadi terbatas; arsipkan baca-saja ≥ 1 tahun.
 6. Alihkan alamat lama (alias) ke sistem baru; ormawa membuat akun pribadi dan ditautkan lewat NIM.
@@ -150,12 +154,12 @@ Bukti (tangkapan layar penghapusan deployment, hasil `ormawahub:verifikasi`, log
 
 | Hal | Cara |
 |---|---|
-| Kesehatan | `/surat/up` (proses hidup), `/surat/api/health` (db, redis, gotenberg → 503 bila gagal); pantau dari alat monitoring fakultas |
-| Antrean | `/surat/horizon` (hanya super-admin); `docker compose … logs -f queue` |
+| Kesehatan | `/surat/up` (proses hidup), `/surat/api/health` (db → 503 bila gagal; `job_tertunda` > 10 menit, `job_gagal_24j`, dan `detak_penjadwal` `terlambat`/`belum-ada` adalah peringatan, tidak membuat 503); pantau dari alat monitoring fakultas |
+| Antrean | `/api/health` (job tertunda dan gagal); `exec app php artisan queue:failed` dan `queue:retry <id>`; `docker compose … logs -f scheduler`. Super-admin menerima notifikasi harian bila ada job gagal |
 | Penjadwal | `exec app php artisan schedule:list`; tugas berjalan oleh container `scheduler` |
 | Log | `docker compose … exec app tail -f storage/logs/laravel.log` (level `warning`); log aktivitas audit di DB (retensi 1825 hari) |
 | Kebijakan fakultas | Panel → Pengaturan sistem (min hari pengajuan, batas LPJ, blokir, sesi, WhatsApp, pengingat) |
-| Pembaruan keamanan | `composer audit` dan `npm audit` tiap rilis (docs/KEAMANAN.md); perbarui citra dasar (`php`, `nginx`, `redis`, `mariadb`, `gotenberg`) dan OS host berkala |
+| Pembaruan keamanan | `composer audit` dan `npm audit` tiap rilis (docs/KEAMANAN.md); perbarui citra dasar (`php`, `nginx`, klien `mariadb`) dan OS host berkala |
 
 ## 10. Pemecahan masalah
 
@@ -164,5 +168,27 @@ Bukti (tangkapan layar penghapusan deployment, hasil `ormawahub:verifikasi`, log
 | Aset 404 / halaman tanpa gaya | `ASSET_URL` saat **build** harus sama dengan `APP_URL` (`docker compose … build --no-cache`), blok proxy memotong `/surat/` |
 | Tautan/redirect menuju `http://` atau tanpa `/surat` | `TRUSTED_PROXIES` salah, header `X-Forwarded-Proto/Prefix` tidak diteruskan proxy |
 | Logout otomatis / cookie tidak tersimpan | `SESSION_PATH=/surat`, `SESSION_SECURE_COOKIE=true` hanya bila diakses lewat HTTPS |
-| Notifikasi/PDF/ekspor tidak jalan | Container `queue` hidup, Redis berkata sandi sama dengan `.env`, `/api/health` |
+| Notifikasi/PDF/ekspor tidak jalan | Container `scheduler` hidup, `exec app php artisan schedule:list` memuat dua `queue:work`, `/api/health` (`detak_penjadwal` harus `ok`), `queue:failed`; ekspor besar memakai antrean `berat` (jeda ±1 menit) |
+| `/api/health` `detak_penjadwal` = `belum-ada` | Scheduler belum berjalan ≥ 1 menit atau `CACHE_STORE` bukan `database`; periksa `.env` |
+| Memori server menipis | `docker stats`; bila perlu ganti container `scheduler` dengan crontab host (STANDAR-TEKNIS §1b) |
 | Galat enkripsi setelah pulih | `APP_KEY` berbeda dari saat data ditulis |
+
+## 11. Peralihan dari v1.0.0 (Horizon/Redis) ke Profil Ringan
+
+**Jangan merge ke `main` sebelum langkah 1–4 selesai.** `.github/workflows/deploy.yml` men-deploy otomatis setiap push ke `main`
+(`~/docker-apps/deploy.sh surat`); compose baru tidak punya Redis, sehingga `.env` lama (`SESSION_DRIVER=redis`) membuat aplikasi mati.
+
+| # | Langkah | Bukti |
+|---|---|---|
+| 1 | Jadwalkan di luar jam kerja dan umumkan: **semua sesi berakhir**, pengguna masuk ulang | Pengumuman |
+| 2 | Cadangan penuh: `run --rm backup`, `uji-pulih.sh`, serta salinan `.env` dan `APP_KEY` di luar server. Simpan juga `.env` lama sebagai `.env.v1.0.0` | Log uji pulih |
+| 3 | **Kuras antrean lama**: di `/surat/horizon` tunggu job tertunda dan berjalan = 0, lalu `exec queue php artisan horizon:terminate`. Job yang tersisa di Redis **tidak** berpindah dan akan hilang | Tangkapan layar Horizon kosong |
+| 4 | Ubah `.env` di server: `SESSION_DRIVER=database`, `QUEUE_CONNECTION=database`, `CACHE_STORE=database`, tambah `APP_KODE=surat`, `PDF_DRIVER=dompdf`; hapus `REDIS_*`, `HORIZON_*`, `GOTENBERG_URL` (lihat `.env.production.example`) | `diff` terhadap `.env.production.example` |
+| 5 | Merge ke `main` (atau `git checkout` rilis baru), lalu `up -d --remove-orphans` agar container `queue`, `redis`, `gotenberg`, dan `db` lama dihapus; `exec app php artisan migrate --force` (tabel `jobs`, `cache`, `cache_locks`, `sessions` sudah ada dari migrasi dasar) | `docker compose ps` |
+| 6 | Verifikasi: `/api/health` → `db: ok`, `detak_penjadwal: ok` (≤ 2 menit); `schedule:list` memuat dua `queue:work`; kirim notifikasi uji dan terbitkan satu naskah uji (PDF dompdf); `docker stats` | Keluaran perintah |
+| 7 | Ukur memori `docker stats` selama jam sibuk; sesuaikan `mem_limit` (nilai awal: app 512m, nginx 64m, scheduler 768m) | Catatan ukur |
+| 8 | Setelah 7 hari tanpa masalah: hapus volume `redis-data` dan `db-data` lama (`docker volume ls`) | — |
+
+**Pembatalan:** `git checkout v1.0.0`, kembalikan `.env.v1.0.0` ke `.env`, `docker compose -f docker-compose.prod.yml up -d --remove-orphans`.
+Data basis data tidak berubah oleh peralihan ini (hanya tabel `jobs`/`cache`/`sessions` yang mulai terpakai), jadi tidak ada pemulihan DB; job yang
+sempat dikirim ke antrean `database` selama percobaan dapat hilang saat mundur.

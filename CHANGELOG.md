@@ -4,7 +4,26 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 
 ## [Belum dirilis]
 
+### Dihapus
+- Horizon (`laravel/horizon` beserta `laravel/sentinel` dan `symfony/polyfill-php83`), `config/horizon.php`, `HorizonServiceProvider`, gerbang `viewHorizon`, `HORIZON_EMAILS`, pengecualian CSP `/horizon`, dan rute `/horizon`.
+- Redis: `/api/health` tidak lagi memeriksa Redis; variabel `REDIS_*` dihapus dari contoh env; phpredis dihapus dari `Dockerfile`.
+- Container `queue`, `redis`, `gotenberg`, dan `db` (profil `db-lokal`) dari `docker-compose.prod.yml`.
+
+### Ditambahkan
+- Antrean database dua jalur: koneksi `database` dan `database-berat` (`retry_after` 960), worker dinyalakan penjadwal tiap menit (`--stop-when-empty`), detak penjadwal, serta `queue:prune-failed` dan `queue:prune-batches`.
+- `/api/health` memuat `job_tertunda` (> 10 menit), `job_gagal_24j`, dan `detak_penjadwal`; 503 hanya bila DB (atau Gotenberg yang diaktifkan lewat ADR) gagal.
+- `APP_KODE`, `mem_limit` dan rotasi log (`json-file`, 10m x 3) pada setiap container produksi.
+- Gerbang uji: skema UUID native (tipe kolom, kecocokan FK, urutan 100 id UUIDv7, relasi polimorfik), antrean hanya `default`/`berat`, tanpa `Redis::` di `app/`, contoh env dan compose produksi tanpa Redis/Horizon/database, PHP-FPM `ondemand`.
+- `.env.production.example` kini dilacak git (sebelumnya terabaikan oleh pola `.env.*`).
+
 ### Diubah
+- Batas PHP `composer.json` menjadi `^8.5` (`composer.lock` hanya berubah pada hash dan platform).
+- Nama antrean `notifikasi`, `pdf`, `tautan`, `integrasi` menjadi `default`; ekspor laporan memakai koneksi `database-berat`.
+- Driver PDF bawaan dompdf (Gotenberg hanya bila `PDF_DRIVER=gotenberg`); sesi, antrean, dan cache memakai driver `database`.
+- Pool PHP-FPM `ondemand` dengan 4 worker (sebelumnya `dynamic`, 20 worker).
+- Peralihan produksi dari v1.0.0 didokumentasikan di `docs/DEPLOY.md` §11. **Ubah `.env` server sebelum merge ke `main`** (deploy otomatis).
+
+### Diubah (dokumentasi)
 - Dokumentasi diselaraskan dengan keputusan lanjutan 16 Oktober 2026 (`docs/KEPUTUSAN.md` K-08; rujukan: STANDAR-TEKNIS §2.1, §2.2, §4a, §7): nama basis data seragam `db_<app>` (`db_surat`, `db_surat_testing`); kolom UUID memakai tipe `UUID` native MariaDB lewat Blueprint Laravel 13 (klaim `CHAR(36)` dihapus; `char('id',36)`/`binary(16)` eksplisit dilarang; gerbang uji tipe kolom, urutan UUIDv7, FK, dan morph); produksi memakai MariaDB native di host tanpa container database (CI boleh service container sementara, variabel `MARIADB_*`); butir Fase B: `ARG PHP_VERSION=8.5` dan `"php": "^8.5"`.
 - Dokumentasi diselaraskan dengan keputusan 16 Oktober 2026 (`docs/KEPUTUSAN.md` K-07): PHP 8.5, MariaDB 10.11+ native di host (bukan MySQL), tanpa SQLite, kolasi `utf8mb4_unicode_ci`, `DB_CONNECTION=mariadb`.
 - Dokumentasi: spesifikasi (`vibecoding/`, `docs/STANDAR-TEKNIS.md` §1b) dialihkan ke Profil Ringan (keputusan 15 Oktober 2026): tanpa Horizon/Redis/Octane; antrean, cache, sesi, dan lock di MySQL; satu container penjadwal yang menjalankan worker; `/api/health` untuk pemantauan; dompdf bawaan, Gotenberg cadangan. `docs/DEPLOY.md`, `README.md`, `docs/KEAMANAN.md`, `docs/STANDAR-GIT.md` diberi penanda "berlaku setelah Fase B". Kode dan konfigurasi belum berubah.
