@@ -33,7 +33,7 @@ class CatatPemakaianRuangan implements ShouldQueue
 
     public function __construct(public Permohonan $permohonan)
     {
-        $this->onQueue('integrasi');
+        $this->onQueue('default');
     }
 
     public function handle(LayananRuangan $layanan): void

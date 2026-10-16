@@ -41,7 +41,17 @@ return [
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
             'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
+            'after_commit' => true,
+        ],
+
+        // Job berat (ekspor, render besar). retry_after harus > --timeout worker (900 detik).
+        'database-berat' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'berat',
+            'retry_after' => 960,
+            'after_commit' => true,
         ],
 
         'beanstalkd' => [

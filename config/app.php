@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // nama pendek aplikasi: kunci cache bersama (detak penjadwal) dan awalan lain (STANDAR-TEKNIS §1b)
+    'kode' => env('APP_KODE', 'surat'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

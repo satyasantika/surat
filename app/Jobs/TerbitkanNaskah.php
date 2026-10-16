@@ -23,7 +23,7 @@ class TerbitkanNaskah implements ShouldQueue
 
     public function __construct(public Naskah $naskah)
     {
-        $this->onQueue('pdf');
+        $this->onQueue('default');
     }
 
     public function handle(RenderNaskah $render, TransisiNaskah $transisi): void

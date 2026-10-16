@@ -69,10 +69,10 @@ function ditandatangani(User $dekan, array $ubah = [], ?User $penyusun = null): 
     return app(TandaTangani::class)->jalankan(app(AjukanParaf::class)->jalankan($n, $penyusun, []), $dekan);
 }
 
-it('mengantrekan penerbitan di antrean pdf setelah tanda tangan', function () {
+it('mengantrekan penerbitan di antrean default setelah tanda tangan', function () {
     ditandatangani(dekanAktif());
 
-    Queue::assertPushedOn('pdf', TerbitkanNaskah::class);
+    Queue::assertPushedOn('default', TerbitkanNaskah::class);
 });
 
 it('menerbitkan: hash PDF dicatat, status terbit, dan idempoten', function () {

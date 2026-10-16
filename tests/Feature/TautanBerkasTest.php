@@ -121,7 +121,7 @@ it('mengantrekan pemeriksaan di antrean tautan hanya saat dibuat atau url beruba
     Queue::fake();
     $t = simpanTautan();
 
-    Queue::assertPushedOn('tautan', PeriksaTautanBerkas::class);
+    Queue::assertPushedOn('default', PeriksaTautanBerkas::class);
     Queue::assertPushed(PeriksaTautanBerkas::class, 1);
 
     $t->update(['label' => 'Label baru']);

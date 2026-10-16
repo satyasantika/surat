@@ -25,7 +25,7 @@ class NotifikasiTahap extends Notification implements ShouldQueue
         public readonly string $ringkas,
         public readonly ?string $url = null,
     ) {
-        $this->onQueue('notifikasi');
+        $this->onQueue('default');
         $this->afterCommit();
     }
 

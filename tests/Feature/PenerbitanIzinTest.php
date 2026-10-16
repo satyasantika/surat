@@ -184,7 +184,7 @@ describe('setelah surat izin terbit', function () {
             ->and($p->status)->toBe(StatusPermohonan::Selesai)->and($p->selesai_pada)->not->toBeNull()
             ->and($p->ruangan->pluck('status')->all())->toBe(['dikonfirmasi'])
             ->and($p->riwayat->last()->catatan)->toContain($n->nomor);
-        Queue::assertPushedOn('integrasi', CatatPemakaianRuangan::class);
+        Queue::assertPushedOn('default', CatatPemakaianRuangan::class);
     });
 
     it('mencatat pemakaian ke layanan satu kali walau job diulang', function () {

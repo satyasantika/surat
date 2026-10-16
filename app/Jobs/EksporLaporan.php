@@ -24,7 +24,7 @@ class EksporLaporan implements ShouldQueue
 
     public function __construct(public string $kode, public string $dari, public string $sampai, public string $penggunaId)
     {
-        $this->onQueue('default');
+        $this->onConnection('database-berat')->onQueue('berat');
     }
 
     public function handle(EksporXlsx $ekspor): void
