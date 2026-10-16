@@ -13,6 +13,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Data & cadangan (tidak boleh masuk repo)
 *.sql

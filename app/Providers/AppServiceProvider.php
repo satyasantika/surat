@@ -58,8 +58,8 @@ class AppServiceProvider extends ServiceProvider
     private function pembangkitPdf(string $driver): PembangkitPdf
     {
         return match ($driver) {
-            'dompdf' => new PembangkitPdfDompdf,
-            default => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),
+            'gotenberg' => new PembangkitPdfGotenberg((string) config('pdf.gotenberg_url')),
+            default => new PembangkitPdfDompdf,
         };
     }
 

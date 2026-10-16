@@ -1,8 +1,8 @@
 <?php
 
 return [
-    // gotenberg (default) | dompdf (cadangan)
-    'driver' => env('PDF_DRIVER', 'gotenberg'),
+    // dompdf (bawaan) | gotenberg (cadangan, hanya lewat ADR; STANDAR-TEKNIS §1b)
+    'driver' => env('PDF_DRIVER', 'dompdf'),
 
     // Driver naskah resmi: harus deterministik agar hash_pdf dapat diverifikasi ulang (dompdf).
     'driver_naskah' => env('PDF_DRIVER_NASKAH', 'dompdf'),

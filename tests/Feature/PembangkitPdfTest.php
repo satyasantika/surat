@@ -32,3 +32,9 @@ it('melempar galat bila gotenberg gagal', function () {
 
     app(PembangkitPdf::class)->render('<p>x</p>');
 })->throws(RuntimeException::class);
+
+it('memakai dompdf bila driver tidak dikenal', function () {
+    config(['pdf.driver' => 'apa-saja']);
+
+    expect(app(PembangkitPdf::class))->toBeInstanceOf(PembangkitPdfDompdf::class);
+});
