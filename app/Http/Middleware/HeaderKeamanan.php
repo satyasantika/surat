@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Header keamanan semua respons web (F12.1): nosniff, bingkai hanya dari asal sama, kebijakan perujuk dan perangkat,
  * HSTS (produksi, HTTPS), serta CSP berbasis nonce untuk halaman aplikasi (skrip inline tanpa nonce diblokir).
  *
- * Panel Filament/Livewire-update/Horizon dikecualikan dari CSP: Filament menyuntikkan skrip dan gaya inline tanpa nonce.
+ * Panel Filament/Livewire-update dikecualikan dari CSP: Filament menyuntikkan skrip dan gaya inline tanpa nonce.
  * Halaman publik, verifikasi, dan pratinjau menetapkan CSP-nya sendiri dan tidak ditimpa. `unsafe-eval` masih dibutuhkan
  * Alpine/Livewire edisi standar; peralihan ke edisi CSP-aman Livewire dicatat sebagai pekerjaan lanjutan (docs/KEAMANAN.md).
  */
@@ -53,6 +53,6 @@ class HeaderKeamanan
 
     private function panel(Request $request): bool
     {
-        return $request->is('admin', 'admin/*', 'livewire', 'livewire/*', 'livewire-*', 'horizon', 'horizon/*', 'filament/*');
+        return $request->is('admin', 'admin/*', 'livewire', 'livewire/*', 'livewire-*', 'filament/*');
     }
 }
