@@ -1,5 +1,5 @@
 #!/bin/sh
-# Cadangan harian basis data (mysqldump) dengan retensi 30 hari. Dijalankan dalam container `backup`:
+# Cadangan harian basis data (mariadb-dump) dengan retensi 30 hari. Dijalankan dalam container `backup`:
 #   docker compose -f docker-compose.prod.yml --profile backup run --rm backup
 # Kredensial dari .env (DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD). Berkas dump berisi data pribadi: simpan terbatas.
 set -eu
