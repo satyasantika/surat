@@ -54,7 +54,7 @@ function arsipKlasifikasi(string $kode, ?int $aktif, ?int $inaktif, ?string $akh
 function arsipSurat(User $admin, string $agenda, string $status, array $ubah = []): SuratMasuk
 {
     $s = (new SuratMasuk(['nomor_surat' => "S/{$agenda}", 'tanggal_surat' => '2020-01-10', 'asal' => 'Dinas Asal', 'perihal' => 'Perihal '.$agenda, 'klasifikasi_keamanan' => 'biasa', 'derajat_kecepatan' => 'biasa']))
-        ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => '2020-01-12 09:00:00', 'status' => $status, 'diregistrasi_oleh' => $admin->id, ...$ubah]);
+        ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => '2020-01-12 09:00:00', 'status' => $status, 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00', ...$ubah]);
     $s->save();
 
     return $s;

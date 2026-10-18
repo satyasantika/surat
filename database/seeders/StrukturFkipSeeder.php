@@ -21,6 +21,7 @@ class StrukturFkipSeeder extends Seeder
             ['wd-umum-keuangan', 'Wakil Dekan Bidang Umum dan Keuangan', 'umum_keuangan', true, 3],
             ['wd-kemahasiswaan', 'Wakil Dekan Bidang Kemahasiswaan', 'kemahasiswaan', true, 4],
             ['kasubag-umum', 'Kepala Subbagian Umum', null, false, 5],
+            ['staf-khusus-dekan', 'Staf Khusus Dekan', null, false, 6],
         ];
 
         foreach ($jabatan as [$kode, $nama, $bidang, $ttd, $urutan]) {

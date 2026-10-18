@@ -20,7 +20,7 @@ function penggunaDenganPeran(string $peran): User
 
 it('membuat seluruh peran PRD §3', function () {
     expect(array_keys(PeranDanIzinSeeder::PERAN))->toBe([
-        'super-admin', 'admin-persuratan', 'operator-layanan', 'dekan', 'wakil-dekan',
+        'super-admin', 'admin-persuratan', 'operator-layanan', 'staf-khusus', 'dekan', 'wakil-dekan',
         'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai',
     ]);
 });
@@ -28,7 +28,7 @@ it('membuat seluruh peran PRD §3', function () {
 it('idempoten saat dijalankan ulang', function () {
     $this->seed(PeranDanIzinSeeder::class);
 
-    expect(Role::count())->toBe(9)
+    expect(Role::count())->toBe(10)
         ->and(Permission::count())->toBe(count(PeranDanIzinSeeder::IZIN));
 });
 
@@ -44,7 +44,8 @@ it('memberi izin sesuai matriks per peran', function (string $peran, array $bole
 })->with([
     'admin-persuratan' => ['admin-persuratan', ['masuk.registrasi', 'nomor.terbitkan', 'permohonan.validasi', 'naskah.templat'], ['naskah.tandatangan', 'disposisi.buat', 'pengguna.kelola', 'lpj.nilai']],
     'operator-layanan' => ['operator-layanan', [], ['masuk.registrasi', 'kabar.kelola', 'ruangan.kelola']],
-    'dekan' => ['dekan', ['disposisi.buat', 'naskah.tandatangan', 'permohonan.putuskan', 'lpj.nilai'], ['nomor.terbitkan', 'masuk.registrasi', 'pengguna.kelola']],
+    'staf-khusus' => ['staf-khusus', ['masuk.registrasi', 'masuk.teruskan', 'permohonan.lihat'], ['disposisi.buat', 'permohonan.validasi', 'permohonan.putuskan', 'nomor.terbitkan', 'naskah.tandatangan', 'pengguna.kelola']],
+    'dekan' => ['dekan', ['disposisi.buat', 'naskah.tandatangan', 'permohonan.putuskan', 'lpj.nilai'], ['nomor.terbitkan', 'masuk.registrasi', 'masuk.teruskan', 'pengguna.kelola']],
     'wakil-dekan' => ['wakil-dekan', ['disposisi.tindaklanjut', 'naskah.paraf', 'naskah.tandatangan', 'lpj.nilai'], ['nomor.terbitkan', 'permohonan.validasi']],
     'kasubag' => ['kasubag', ['naskah.paraf', 'permohonan.putuskan', 'lpj.nilai'], ['naskah.tandatangan', 'nomor.terbitkan']],
     'pembina-ormawa' => ['pembina-ormawa', ['permohonan.setujui-pembina', 'lpj.lihat'], ['lpj.nilai', 'permohonan.ajukan', 'masuk.lihat']],

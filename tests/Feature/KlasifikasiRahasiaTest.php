@@ -58,7 +58,7 @@ function rhsPengguna(string $peran, ?string $jabatan = null): User
 function rhsData(User $admin): array
 {
     $surat = (new SuratMasuk(['nomor_surat' => 'S/9', 'tanggal_surat' => '2026-05-20', 'asal' => 'Instansi', 'perihal' => RAHASIA_SURAT, 'klasifikasi_keamanan' => 'rahasia', 'derajat_kecepatan' => 'biasa']))
-        ->forceFill(['nomor_agenda' => '0009/AGD/2026', 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id]);
+        ->forceFill(['nomor_agenda' => '0009/AGD/2026', 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00']);
     $surat->save();
 
     $naskah = new Naskah(['jenis_naskah_id' => JenisNaskah::firstWhere('kode', 'surat-dinas')->id, 'klasifikasi_keamanan' => 'rahasia', 'perihal' => RAHASIA_NASKAH, 'data' => [], 'status' => 'terbit',

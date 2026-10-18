@@ -54,6 +54,15 @@ class RegisterSuratMasukResource extends Resource
         return false;
     }
 
+    /** @return Builder<Model> */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<Model> $query */
+        $query = SuratMasuk::query()->tampakBagi(auth()->user());
+
+        return $query;
+    }
+
     public static function table(Table $table): Table
     {
         return $table

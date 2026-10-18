@@ -23,7 +23,7 @@ beforeEach(function () {
     $this->seed([PeranDanIzinSeeder::class, StrukturFkipSeeder::class, PengaturanSeeder::class, RegisterNomorSeeder::class, JenisNaskahSeeder::class]);
 });
 
-const MATRIKS_PERAN = ['super-admin', 'admin-persuratan', 'operator-layanan', 'dekan', 'wakil-dekan', 'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai'];
+const MATRIKS_PERAN = ['super-admin', 'admin-persuratan', 'operator-layanan', 'staf-khusus', 'dekan', 'wakil-dekan', 'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai'];
 
 /**
  * Matriks hak akses PRD §3.1 dalam bentuk izin → peran yang berhak (super-admin selalu lewat Gate::before;
@@ -34,11 +34,13 @@ const MATRIKS_PERAN = ['super-admin', 'admin-persuratan', 'operator-layanan', 'd
 function matriksIzin(): array
 {
     $admin = 'admin-persuratan';
+    $staf = 'staf-khusus';
     $pimpinan = ['dekan', 'wakil-dekan', 'kasubag'];
 
     return [
-        'masuk.registrasi' => [$admin],
-        'masuk.lihat' => [$admin, ...$pimpinan, 'pegawai'],
+        'masuk.registrasi' => [$admin, $staf],
+        'masuk.teruskan' => [$staf],
+        'masuk.lihat' => [$admin, $staf, ...$pimpinan, 'pegawai'],
         'disposisi.buat' => ['dekan'],
         'disposisi.teruskan' => ['wakil-dekan', 'kasubag'],
         'disposisi.tindaklanjut' => ['wakil-dekan', 'kasubag', 'pegawai'],
@@ -48,11 +50,12 @@ function matriksIzin(): array
         'naskah.templat' => [$admin],
         'naskah.batalkan' => [$admin],
         'nomor.terbitkan' => [$admin],
-        'arsip.lihat' => [$admin, ...$pimpinan],
-        'ormawa.lihat' => [$admin, ...$pimpinan],
+        'arsip.lihat' => [$admin, $staf, ...$pimpinan],
+        'ormawa.lihat' => [$admin, $staf, ...$pimpinan],
         'ormawa.kelola' => [$admin],
         'ormawa.kelola-binaan' => ['pembina-ormawa'],
         'ormawa.kelola-sendiri' => ['pengurus-ormawa'],
+        'permohonan.lihat' => [$staf],
         'permohonan.ajukan' => ['pengurus-ormawa'],
         'permohonan.setujui-pembina' => ['pembina-ormawa'],
         'permohonan.validasi' => [$admin],
@@ -106,7 +109,7 @@ function suratMatriks(string $keamanan = 'biasa'): SuratMasuk
 {
     $admin = User::factory()->create()->assignRole('admin-persuratan');
     $s = (new SuratMasuk(['nomor_surat' => 'S/1', 'tanggal_surat' => '2026-05-20', 'asal' => 'X', 'perihal' => 'P', 'klasifikasi_keamanan' => $keamanan, 'derajat_kecepatan' => 'biasa']))
-        ->forceFill(['nomor_agenda' => 'A/'.random_int(1000, 9999), 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id]);
+        ->forceFill(['nomor_agenda' => 'A/'.random_int(1000, 9999), 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00']);
     $s->save();
 
     return $s;

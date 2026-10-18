@@ -105,7 +105,7 @@ describe('LAP-01 register', function () {
     it('memuat surat masuk dan keluar pada periode, merahasiakan perihal non-biasa', function () {
         $admin = lapUser('admin-persuratan');
         $surat = fn (string $agenda, string $terima, string $keamanan, string $perihal) => (new SuratMasuk(['nomor_surat' => 'X/1', 'tanggal_surat' => '2026-03-01', 'asal' => 'Dinas A', 'perihal' => $perihal, 'klasifikasi_keamanan' => $keamanan, 'derajat_kecepatan' => 'biasa']))
-            ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => $terima, 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id])->save();
+            ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => $terima, 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00'])->save();
         $surat('0001/AGD/2026', '2026-03-05 09:00:00', 'biasa', 'Undangan Rapat');
         $surat('0002/AGD/2026', '2026-03-20 09:00:00', 'rahasia', 'RAHASIA-LAP-01');
         $surat('0003/AGD/2026', '2026-04-02 09:00:00', 'biasa', 'Di luar periode');
@@ -133,7 +133,7 @@ describe('LAP-02 disposisi', function () {
         $ids = [];
         foreach ([1, 2, 3] as $i) {
             $surat = (new SuratMasuk(['nomor_surat' => "S/{$i}", 'tanggal_surat' => '2026-05-20', 'asal' => 'X', 'perihal' => 'P', 'klasifikasi_keamanan' => 'biasa', 'derajat_kecepatan' => 'biasa']))
-                ->forceFill(['nomor_agenda' => "000{$i}/AGD/2026", 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id]);
+                ->forceFill(['nomor_agenda' => "000{$i}/AGD/2026", 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => 'diterima', 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00']);
             $surat->save();
             $d = app(BuatDisposisi::class)->jalankan($surat, $dekan, [$wd->id], ['tindak_lanjuti'], null, now()->addDays(10));
             $ids[$i] = $d->penerima->first()->id;
@@ -352,7 +352,7 @@ describe('dasbor', function () {
 
         $surat = function (string $agenda, string $status) use ($admin) {
             $s = (new SuratMasuk(['nomor_surat' => $agenda, 'tanggal_surat' => '2026-05-20', 'asal' => 'X', 'perihal' => 'P', 'klasifikasi_keamanan' => 'biasa', 'derajat_kecepatan' => 'biasa']))
-                ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => $status, 'diregistrasi_oleh' => $admin->id]);
+                ->forceFill(['nomor_agenda' => $agenda, 'tanggal_terima' => '2026-05-20 09:00:00', 'status' => $status, 'diregistrasi_oleh' => $admin->id, 'diteruskan_pada' => '2026-01-01 09:00:00']);
             $s->save();
 
             return $s;

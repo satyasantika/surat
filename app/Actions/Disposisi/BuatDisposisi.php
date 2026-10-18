@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Membuat disposisi atas surat masuk (BR-05). Disposisi awal hanya oleh dekan (izin disposisi.buat) atau
- * super-admin; disposisi lanjutan oleh penerima yang berhak meneruskan (izin disposisi.teruskan).
+ * super-admin, atas surat yang sudah diteruskan ke dekan; disposisi lanjutan oleh penerima yang berhak meneruskan (izin disposisi.teruskan).
  */
 class BuatDisposisi
 {
@@ -79,6 +79,11 @@ class BuatDisposisi
         if ($induk === null) {
             if (! ($pembuat->can('disposisi.buat') && ($pembuat->hasRole('dekan') || $pembuat->hasRole('super-admin')))) {
                 throw new AuthorizationException('Hanya dekan yang dapat membuat disposisi awal.');
+            }
+
+            // BR-24: dekan hanya mendisposisikan surat yang sudah diteruskan staf khusus (super-admin dikecualikan).
+            if (! $surat->sudahDiteruskan() && ! $pembuat->hasRole('super-admin')) {
+                throw new AuthorizationException('Surat belum diteruskan oleh staf khusus kepada dekan.');
             }
 
             return;

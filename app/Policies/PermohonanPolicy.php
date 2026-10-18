@@ -16,12 +16,14 @@ class PermohonanPolicy
 {
     public function viewAny(User $pelaku): bool
     {
-        return $pelaku->canAny(['permohonan.validasi', 'permohonan.putuskan', 'permohonan.setujui-pembina']);
+        return $pelaku->canAny(['permohonan.lihat', 'permohonan.validasi', 'permohonan.putuskan', 'permohonan.setujui-pembina'])
+            || $pelaku->unitPembuat()->exists();
     }
 
     public function view(User $pelaku, Permohonan $permohonan): bool
     {
-        return $pelaku->canAny(['permohonan.validasi', 'permohonan.putuskan'])
+        return $pelaku->canAny(['permohonan.lihat', 'permohonan.validasi', 'permohonan.putuskan'])
+            || $this->petugasUnit($pelaku, $permohonan)
             || $permohonan->ormawa->pembina_user_id === $pelaku->getKey()
             || $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id);
     }
@@ -63,7 +65,7 @@ class PermohonanPolicy
     public function batalkan(User $pelaku, Permohonan $permohonan): bool
     {
         return ! $permohonan->status->akhir()
-            && $permohonan->status !== StatusPermohonan::Penerbitan
+            && ! in_array($permohonan->status, [StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan], true)
             && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id)
             && ($permohonan->diajukan_oleh === $pelaku->getKey() || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa));
     }
@@ -90,16 +92,42 @@ class PermohonanPolicy
             && $pelaku->jabatanAktif()->contains('kode', 'kasubag-umum');
     }
 
-    /** Admin membuat draf surat izin setelah rekomendasi kasubag. */
+    /**
+     * Pembuat draf surat izin (BR-26). Bila kasubag menugaskan unit (status pembuatan, atau penerbitan dengan unit
+     * tertaut), hanya petugas unit itu (dan super-admin) yang boleh; admin persuratan tidak otomatis. Tanpa unit
+     * (jalur lama), admin dengan izin permohonan.validasi tetap membuat draf pada status penerbitan.
+     */
     public function terbitkanIzin(User $pelaku, Permohonan $permohonan): bool
     {
-        return $permohonan->status === StatusPermohonan::Penerbitan && $pelaku->can('permohonan.validasi') && $pelaku->can('naskah.draf')
-            && ($permohonan->naskah_izin_id === null || Naskah::whereKey($permohonan->naskah_izin_id)->where('status', 'dibatalkan')->exists());
+        if (! in_array($permohonan->status, [StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan], true) || ! $pelaku->can('naskah.draf')) {
+            return false;
+        }
+
+        if ($permohonan->naskah_izin_id !== null && ! Naskah::whereKey($permohonan->naskah_izin_id)->where('status', 'dibatalkan')->exists()) {
+            return false;
+        }
+
+        return $permohonan->unit_pembuat_id !== null
+            ? $this->petugasUnit($pelaku, $permohonan)
+            : $permohonan->status === StatusPermohonan::Penerbitan && $pelaku->can('permohonan.validasi');
+    }
+
+    /** Pengguna adalah petugas aktif unit pembuat yang ditugaskan pada permohonan. */
+    public function petugasUnit(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->unit_pembuat_id !== null
+            && $pelaku->unitPembuat()->whereKey($permohonan->unit_pembuat_id)->exists();
+    }
+
+    /** Petugas unit yang ditugaskan mengirim hasil cetak kepada pengirim (BR-28); super-admin lewat Gate::before. */
+    public function kirimHasil(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::Pembuatan && $this->petugasUnit($pelaku, $permohonan);
     }
 
     public function pengantarRektorat(User $pelaku, Permohonan $permohonan): bool
     {
-        return in_array($permohonan->status, [StatusPermohonan::Penerbitan, StatusPermohonan::Selesai], true)
-            && $pelaku->can('permohonan.validasi') && $pelaku->can('naskah.draf');
+        return in_array($permohonan->status, [StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan, StatusPermohonan::Selesai], true)
+            && ($pelaku->can('permohonan.validasi') || $this->petugasUnit($pelaku, $permohonan)) && $pelaku->can('naskah.draf');
     }
 }

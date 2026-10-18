@@ -48,7 +48,7 @@ it('menyemai struktur FKIP secara idempoten', function () {
     $this->seed(StrukturFkipSeeder::class);
 
     expect(UnitKerja::where('kode', 'UN58.10')->count())->toBe(1)
-        ->and(Jabatan::pluck('kode')->sort()->values()->all())->toBe(['dekan', 'kasubag-umum', 'wd-akademik', 'wd-kemahasiswaan', 'wd-umum-keuangan'])
+        ->and(Jabatan::pluck('kode')->sort()->values()->all())->toBe(['dekan', 'kasubag-umum', 'staf-khusus-dekan', 'wd-akademik', 'wd-kemahasiswaan', 'wd-umum-keuangan'])
         ->and(jabatan('wd-kemahasiswaan')->bidang)->toBe('kemahasiswaan');
 });
 

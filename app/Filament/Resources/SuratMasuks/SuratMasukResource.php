@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\SuratMasuks;
 
 use App\Actions\Masuk\ArsipkanSuratMasuk;
+use App\Actions\Masuk\TeruskanSuratKeDekan;
 use App\Enums\DerajatKecepatan;
+use App\Enums\JenisPengirim;
 use App\Enums\KlasifikasiKeamanan;
 use App\Enums\StatusSuratMasuk;
 use App\Filament\Resources\SuratMasuks\Pages\CreateSuratMasuk;
@@ -21,16 +23,20 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class SuratMasukResource extends Resource
 {
@@ -61,6 +67,31 @@ class SuratMasukResource extends Resource
                 Textarea::make('ringkasan')->label('Isi ringkas')->rows(3)->maxLength(5000)->columnSpanFull(),
                 TextInput::make('lampiran')->maxLength(100),
             ]),
+            Section::make('Pelacakan')->visibleOn('edit')->schema([
+                // Untuk diberikan kepada pengirim tanpa akun (BR-27); kode ini kunci akses halaman lacak publik.
+                TextEntry::make('tautan_lacak')->label('Tautan lacak publik')->copyable()
+                    ->state(fn (?SuratMasuk $record) => $record?->tautanLacak())
+                    ->helperText('Berikan kepada pengirim agar dapat memantau tahap dan mengambil hasil tanpa login.'),
+            ]),
+            Section::make('Pengirim')->columns(2)->schema([
+                Select::make('jenis_pengirim')->label('Jenis pengirim')->options(JenisPengirim::pilihan())->default('eksternal')->required()->live()
+                    ->helperText('Eksternal: UKM/umum yang tidak punya akun; staf khusus meregistrasi atas namanya.'),
+                Select::make('pengirim_unit_kerja_id')->label('Program studi / unit pengirim')
+                    ->options(fn () => UnitKerja::where('aktif', true)->orderBy('nama')->pluck('nama', 'id'))->searchable()
+                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'prodi')->required(fn (Get $get) => $get('jenis_pengirim') === 'prodi'),
+                TextInput::make('pengirim_nama')->label('Nama pengirim')->maxLength(150)
+                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'eksternal')
+                    ->required(fn (Get $get) => $get('jenis_pengirim') === 'eksternal' && (auth()->user()?->hasRole('staf-khusus') ?? false)),
+                TextInput::make('pengirim_instansi')->label('Instansi / organisasi')->maxLength(255)
+                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'eksternal'),
+                TextInput::make('pengirim_surel')->label('Surel pengirim')->email()->maxLength(150)
+                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'eksternal')
+                    ->required(fn (Get $get) => $get('jenis_pengirim') === 'eksternal' && (auth()->user()?->hasRole('staf-khusus') ?? false) && blank($get('pengirim_wa')))
+                    ->helperText('Untuk mengirim kode lacak. Data pribadi: tidak tampil publik.'),
+                TextInput::make('pengirim_wa')->label('WhatsApp pengirim')->tel()->maxLength(20)
+                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'eksternal')
+                    ->required(fn (Get $get) => $get('jenis_pengirim') === 'eksternal' && (auth()->user()?->hasRole('staf-khusus') ?? false) && blank($get('pengirim_surel'))),
+            ]),
             Section::make('Klasifikasi')->columns(2)->schema([
                 Select::make('klasifikasi_keamanan')->label('Klasifikasi keamanan')->options(KlasifikasiKeamanan::pilihan())->default('biasa')->required(),
                 Select::make('derajat_kecepatan')->label('Derajat kecepatan')->options(DerajatKecepatan::pilihan())->default('biasa')->required(),
@@ -83,6 +114,8 @@ class SuratMasukResource extends Resource
                 TextColumn::make('nomor_agenda')->label('No. agenda')->searchable()->sortable(),
                 TextColumn::make('tanggal_terima')->label('Diterima')->dateTime('d M Y H:i')->sortable(),
                 TextColumn::make('asal')->searchable()->wrap(),
+                TextColumn::make('jenis_pengirim')->label('Pengirim')->badge()->formatStateUsing(fn (JenisPengirim $state) => $state->label()),
+                IconColumn::make('diteruskan_pada')->label('Diteruskan')->boolean()->state(fn (SuratMasuk $record) => $record->sudahDiteruskan()),
                 TextColumn::make('perihal')->wrap()
                     ->formatStateUsing(fn (SuratMasuk $record) => $record->perihalUntuk(auth()->user()))
                     ->searchable(query: fn (Builder $query, string $search) => $query->where(fn (Builder $q) => $q
@@ -102,9 +135,19 @@ class SuratMasukResource extends Resource
                     ->query(fn (Builder $query, array $data): Builder => $query->when($data['asal'] ?? null, fn (Builder $q, string $a) => $q->where('asal', 'like', "%{$a}%"))),
                 SelectFilter::make('klasifikasi_keamanan')->label('Keamanan')->options(KlasifikasiKeamanan::pilihan()),
                 SelectFilter::make('status')->options(StatusSuratMasuk::pilihan()),
+                SelectFilter::make('jenis_pengirim')->label('Jenis pengirim')->options(JenisPengirim::pilihan()),
+                Filter::make('menunggu_diteruskan')->label('Menunggu diteruskan ke dekan')->query(fn (Builder $query): Builder => $query->whereNull('diteruskan_pada')),
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('teruskan')->label('Teruskan ke dekan')->icon(Heroicon::OutlinedPaperAirplane)
+                    ->schema([Textarea::make('catatan')->label('Catatan untuk dekan (opsional)')->rows(3)->maxLength(2000)])
+                    ->modalDescription('Setelah diteruskan, surat tampil di kotak masuk dekan untuk didisposisikan.')
+                    ->visible(fn (SuratMasuk $record) => auth()->user()?->can('teruskan', $record) ?? false)
+                    ->action(function (SuratMasuk $record, array $data) {
+                        app(TeruskanSuratKeDekan::class)->jalankan($record, auth()->user(), $data['catatan'] ?? null);
+                        Notification::make()->title('Surat diteruskan ke dekan')->success()->send();
+                    }),
                 Action::make('arsipkan')->label('Arsipkan')->icon(Heroicon::OutlinedArchiveBox)->requiresConfirmation()
                     ->modalDescription('Surat selesai ini dipindahkan ke arsip; retensi dihitung sejak hari ini.')
                     ->visible(fn (SuratMasuk $record) => $record->status === StatusSuratMasuk::Selesai && (auth()->user()?->can('arsipkan', $record) ?? false))
@@ -113,6 +156,15 @@ class SuratMasukResource extends Resource
                         Notification::make()->title('Surat diarsipkan')->success()->send();
                     }),
             ]);
+    }
+
+    /** @return Builder<Model> */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<Model> $query */
+        $query = SuratMasuk::query()->tampakBagi(auth()->user());
+
+        return $query;
     }
 
     public static function getRelations(): array

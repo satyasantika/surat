@@ -11,13 +11,13 @@ class PeranDanIzinSeeder extends Seeder
 {
     /** Permission granular per modul (PRD §3.1). */
     public const IZIN = [
-        'masuk.lihat', 'masuk.registrasi',
+        'masuk.lihat', 'masuk.registrasi', 'masuk.teruskan',
         'disposisi.buat', 'disposisi.teruskan', 'disposisi.tindaklanjut',
         'naskah.draf', 'naskah.paraf', 'naskah.tandatangan', 'naskah.templat', 'naskah.batalkan',
         'nomor.terbitkan',
         'arsip.lihat',
         'ormawa.lihat', 'ormawa.kelola', 'ormawa.kelola-binaan', 'ormawa.kelola-sendiri',
-        'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
+        'permohonan.lihat', 'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
         'ruangan.kelola', 'ruangan.kelola-jadwal',
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
         'kabar.kelola', 'kabar.usul',
@@ -39,6 +39,10 @@ class PeranDanIzinSeeder extends Seeder
             'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'kabar.kelola', 'galeri.kelola', 'laporan.lihat',
         ],
         'operator-layanan' => [],
+        // Penerima awal di dekanat: meregistrasi surat masuk (termasuk pengirim eksternal/prodi) dan meneruskannya ke dekan.
+        'staf-khusus' => [
+            'masuk.lihat', 'masuk.registrasi', 'masuk.teruskan', 'arsip.lihat', 'ormawa.lihat', 'permohonan.lihat',
+        ],
         'dekan' => [
             'masuk.lihat', 'disposisi.buat', 'naskah.draf', 'naskah.tandatangan', 'arsip.lihat',
             'ormawa.lihat', 'permohonan.putuskan', 'lpj.nilai', 'laporan.lihat',

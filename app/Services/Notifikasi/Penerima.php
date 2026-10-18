@@ -25,10 +25,22 @@ class Penerima
         return PemangkuJabatan::where('jabatan_id', $jabatan->getKey())->berlakuPada(now())->with('user')->get()->pluck('user')->filter()->values();
     }
 
+    /** @return Collection<int, User> pengguna aktif ber-peran tertentu */
+    public static function peran(string $peran): Collection
+    {
+        return User::role($peran)->where('aktif', true)->get();
+    }
+
     /** @return Collection<int, User> */
     public static function izin(string $izin): Collection
     {
         return User::permission($izin)->where('aktif', true)->get();
+    }
+
+    /** @return Collection<int, User> pemangku jabatan (mis. kaprodi) pada unit kerja tertentu hari ini */
+    public static function pimpinanUnit(string $unitKerjaId): Collection
+    {
+        return PemangkuJabatan::whereHas('jabatan', fn ($q) => $q->where('unit_kerja_id', $unitKerjaId))->berlakuPada(now())->with('user')->get()->pluck('user')->filter()->values();
     }
 
     /** @return Collection<int, User> akun pengurus aktif ormawa + pengaju (bila diberikan) */

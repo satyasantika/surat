@@ -11,5 +11,5 @@ return [
     'domain_mahasiswa' => ['student.unsil.ac.id'],
 
     // Peran pejabat/admin yang wajib MFA aplikasi (BR-01, S-02).
-    'peran_wajib_mfa' => ['super-admin', 'admin-persuratan', 'dekan', 'wakil-dekan'],
+    'peran_wajib_mfa' => ['super-admin', 'admin-persuratan', 'staf-khusus', 'dekan', 'wakil-dekan'],
 ];

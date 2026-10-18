@@ -67,6 +67,7 @@
                             @foreach ($d->suratMasuk->tautan as $t)<x-tautan-berkas :tautan="$t" />@endforeach
                         @endcan
                     @endif
+                    @if ($d->suratMasuk?->unitPembuat)<p class="text-slate-600">Unit pembuat surat: {{ $d->suratMasuk->unitPembuat->nama }}</p>@endif
                     @if ($p->laporan_tindak_lanjut)<p><strong>Laporan:</strong> {{ $p->laporan_tindak_lanjut }}</p>@endif
 
                     @if ($p->status !== \App\Enums\StatusDisposisiPenerima::Selesai)
@@ -75,11 +76,26 @@
                             <button type="button" wire:click="lapor('{{ $p->id }}')" class="rounded bg-blue-900 px-4 py-2 text-white">Kirim laporan</button>
                         @elseif ($mode === 'teruskan')
                             @include('livewire.pimpinan._form-disposisi', ['aksi' => "teruskan('{$p->id}')"])
+                        @elseif ($mode === 'pembuat')
+                            <label class="block">
+                                <span class="font-medium">Unit pembuat surat</span>
+                                <select wire:model="unitPembuatId" class="mt-1 w-full rounded border px-3 py-2">
+                                    <option value="">{{ $unitPilihan->isEmpty() ? 'Belum ada unit pembuat' : 'Pilih unit' }}</option>
+                                    @foreach ($unitPilihan as $uid => $unama)
+                                        <option value="{{ $uid }}">{{ $unama }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <textarea wire:model="catatan" rows="2" class="w-full rounded border px-3 py-2" placeholder="Catatan untuk petugas (opsional)"></textarea>
+                            <button type="button" wire:click="tugaskanPembuat('{{ $p->id }}')" class="rounded bg-green-700 px-4 py-2 text-white">Tugaskan</button>
                         @else
                             <div class="flex flex-wrap gap-2">
                                 <button type="button" wire:click="mulai('lapor')" class="rounded bg-blue-900 px-4 py-2 text-white">Lapor tindak lanjut</button>
                                 @if ($bolehTeruskan)
                                     <button type="button" wire:click="mulai('teruskan')" class="rounded border border-blue-900 px-4 py-2 text-blue-900">Teruskan</button>
+                                @endif
+                                @if ($d->suratMasuk && auth()->user()->can('tugaskanPembuat', $d->suratMasuk))
+                                    <button type="button" wire:click="mulai('pembuat')" class="rounded border border-green-700 px-4 py-2 text-green-800">Tugaskan pembuat surat</button>
                                 @endif
                                 @if ($p->status === \App\Enums\StatusDisposisiPenerima::Ditindaklanjuti)
                                     <button type="button" wire:click="selesai('{{ $p->id }}')" class="rounded bg-green-700 px-4 py-2 text-white">Selesaikan</button>
@@ -137,10 +153,32 @@
                         <fieldset>
                             <legend class="font-medium">Disposisikan ke</legend>
                             @foreach ($wdPilihan as $j)
-                                <label class="flex items-center gap-2 py-1"><input type="checkbox" wire:model="jabatanWd" value="{{ $j->id }}"> {{ $j->nama }}</label>
+                                <label class="flex items-center gap-2 py-1"><input type="checkbox" wire:model.live="jabatanWd" value="{{ $j->id }}"> {{ $j->nama }}</label>
                             @endforeach
                         </fieldset>
+                        @if (count($jabatanWd) > 1)
+                            <fieldset>
+                                <legend class="font-medium">Aturan persetujuan</legend>
+                                @foreach (\App\Models\Permohonan::MODE_WD as $nilai => $nama)
+                                    <label class="flex items-center gap-2 py-1"><input type="radio" wire:model="modeWd" value="{{ $nilai }}"> {{ $nama }}</label>
+                                @endforeach
+                            </fieldset>
+                        @endif
                     @endcan
+                    @can('rekomendasiKasubag', $pm)
+                        <label class="block">
+                            <span class="font-medium">Unit pembuat surat</span>
+                            <select wire:model="unitPembuatId" class="mt-1 w-full rounded border px-3 py-2">
+                                <option value="">{{ $unitPilihan->isEmpty() ? 'Belum ada unit (jalur admin persuratan)' : 'Pilih unit' }}</option>
+                                @foreach ($unitPilihan as $uid => $unama)
+                                    <option value="{{ $uid }}">{{ $unama }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    @endcan
+                    @if ($pm->unit_pembuat_id)
+                        <p class="text-slate-600">Unit pembuat: {{ $pm->unitPembuat->nama }}</p>
+                    @endif
                     <textarea wire:model="catatanPermohonan" rows="2" class="w-full rounded border px-3 py-2" placeholder="Catatan (wajib bila menolak)"></textarea>
                     <div class="flex flex-wrap gap-2">
                         @can('disposisiDekan', $pm)
@@ -152,7 +190,7 @@
                             <button type="button" wire:click="putusWd('{{ $pm->id }}', 'tolak')" class="rounded border border-red-700 px-4 py-2 text-red-700">Tolak</button>
                         @endcan
                         @can('rekomendasiKasubag', $pm)
-                            <button type="button" wire:click="rekomendasi('{{ $pm->id }}')" class="rounded bg-green-700 px-4 py-2 text-white">Rekomendasikan terbit</button>
+                            <button type="button" wire:click="rekomendasi('{{ $pm->id }}')" class="rounded bg-green-700 px-4 py-2 text-white">Rekomendasikan &amp; tugaskan</button>
                             <button type="button" wire:click="tolakKasubag('{{ $pm->id }}')" class="rounded border border-red-700 px-4 py-2 text-red-700">Tolak</button>
                         @endcan
                     </div>

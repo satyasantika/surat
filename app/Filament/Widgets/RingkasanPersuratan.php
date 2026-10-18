@@ -40,7 +40,11 @@ class RingkasanPersuratan extends StatsOverviewWidget
         $stats = [];
 
         if ($u->can('masuk.lihat')) {
-            $stats[] = Stat::make('Surat masuk belum didisposisikan', SuratMasuk::where('status', StatusSuratMasuk::Diterima->value)->count());
+            $stats[] = Stat::make('Surat masuk belum didisposisikan', SuratMasuk::tampakBagi($u)->whereNotNull('diteruskan_pada')->where('status', StatusSuratMasuk::Diterima->value)->count());
+        }
+
+        if ($u->can('masuk.teruskan')) {
+            $stats[] = Stat::make('Surat menunggu diteruskan ke dekan', SuratMasuk::whereNull('diteruskan_pada')->where('status', StatusSuratMasuk::Diterima->value)->count());
         }
 
         $stats[] = Stat::make($semua ? 'Disposisi terlambat' : 'Disposisi Anda yang terlambat', $terlambat)->color($terlambat > 0 ? 'danger' : 'success');

@@ -6,6 +6,7 @@ use App\Actions\Disposisi\BuatDisposisi;
 use App\Actions\Disposisi\LaporTindakLanjut;
 use App\Actions\Disposisi\SelesaikanDisposisi;
 use App\Actions\Disposisi\TandaiDibaca;
+use App\Actions\Masuk\TugaskanPembuatSuratMasuk;
 use App\Actions\Naskah\KembalikanNaskah;
 use App\Actions\Naskah\ParafiNaskah;
 use App\Actions\Naskah\TandaTangani;
@@ -22,6 +23,7 @@ use App\Models\Jabatan;
 use App\Models\Naskah;
 use App\Models\Permohonan;
 use App\Models\SuratMasuk;
+use App\Models\UnitPembuat;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -69,6 +71,10 @@ class KotakMasuk extends Component
     /** @var list<string> */
     public array $jabatanWd = [];
 
+    public string $modeWd = Permohonan::MODE_WD_SEMUA;
+
+    public ?string $unitPembuatId = null;
+
     public function mount(): void
     {
         abort_unless($this->pengguna()->hasAnyRole([...self::PERAN, 'super-admin']), 403);
@@ -89,6 +95,8 @@ class KotakMasuk extends Component
         if (str_starts_with($kunci, 'penerima:')) {
             $p = $this->penerimaMilikSaya(substr($kunci, 9));
             app(TandaiDibaca::class)->jalankan($p, $this->pengguna());
+        } elseif (str_starts_with($kunci, 'permohonan:')) {
+            $this->unitPembuatId = Permohonan::with('jenis')->find(substr($kunci, 11))?->jenis->unit_pembuat_bawaan_id;
         } elseif (str_starts_with($kunci, 'surat:')) {
             abort_unless($this->surat(substr($kunci, 6)) !== null, 403);
         }
@@ -103,7 +111,7 @@ class KotakMasuk extends Component
 
     public function mulai(string $mode): void
     {
-        abort_unless(in_array($mode, ['disposisi', 'teruskan', 'lapor'], true), 422);
+        abort_unless(in_array($mode, ['disposisi', 'teruskan', 'lapor', 'pembuat'], true), 422);
         $this->mode = $mode;
         $this->resetErrorBag();
     }
@@ -127,6 +135,17 @@ class KotakMasuk extends Component
         $this->tutup();
     }
 
+    /** Kasubag menugaskan unit pembuat atas surat masuk lewat disposisi lanjutan (BR-26). */
+    public function tugaskanPembuat(string $penerimaId): void
+    {
+        $p = $this->penerimaMilikSaya($penerimaId);
+        $surat = $p->disposisi->suratMasuk;
+        abort_unless($surat !== null, 404);
+
+        app(TugaskanPembuatSuratMasuk::class)->jalankan($surat, $this->pengguna(), $p, (string) $this->unitPembuatId, $this->catatan ?: null);
+        $this->tutup();
+    }
+
     public function lapor(string $penerimaId): void
     {
         app(LaporTindakLanjut::class)->jalankan($this->penerimaMilikSaya($penerimaId), $this->pengguna(), $this->laporan);
@@ -147,7 +166,7 @@ class KotakMasuk extends Component
 
     public function disposisikanPermohonan(string $id): void
     {
-        app(DisposisiPermohonan::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->jabatanWd, $this->catatanPermohonan ?: null);
+        app(DisposisiPermohonan::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->jabatanWd, $this->catatanPermohonan ?: null, $this->modeWd);
         $this->tutup();
     }
 
@@ -165,7 +184,7 @@ class KotakMasuk extends Component
 
     public function rekomendasi(string $id): void
     {
-        app(RekomendasiKasubag::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->catatanPermohonan ?: null);
+        app(RekomendasiKasubag::class)->jalankan(Permohonan::findOrFail($id), $this->pengguna(), $this->catatanPermohonan ?: null, $this->unitPembuatId ?: null);
         $this->tutup();
     }
 
@@ -195,6 +214,7 @@ class KotakMasuk extends Component
             'surat' => $this->tab === 'perlu' ? $this->suratBelumDidisposisikan() : collect(),
             'naskahDaftar' => $this->tab === 'naskah' ? $this->daftarNaskah() : collect(),
             'permohonanDaftar' => $this->tab === 'permohonan' ? $this->daftarPermohonan() : collect(),
+            'unitPilihan' => in_array($this->tab, ['permohonan', 'perlu'], true) ? UnitPembuat::where('aktif', true)->orderBy('nama')->pluck('nama', 'id') : collect(),
             'wdPilihan' => $this->tab === 'permohonan' ? Jabatan::where('kode', 'like', 'wd-%')->orderBy('urutan')->get() : collect(),
             'penerimaDaftar' => in_array($this->tab, ['terkirim', 'naskah', 'permohonan'], true) ? collect() : $this->daftarPenerima(),
             'terkirim' => $this->tab === 'terkirim' ? $this->daftarTerkirim() : collect(),
@@ -220,7 +240,7 @@ class KotakMasuk extends Component
 
     private function resetForm(): void
     {
-        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan', 'catatanNaskah', 'catatanPermohonan', 'jabatanWd');
+        $this->reset('penerima', 'instruksi', 'catatan', 'batas', 'laporan', 'catatanNaskah', 'catatanPermohonan', 'jabatanWd', 'modeWd', 'unitPembuatId');
         $this->resetErrorBag();
     }
 
@@ -250,7 +270,7 @@ class KotakMasuk extends Component
             return collect();
         }
 
-        return SuratMasuk::where('status', StatusSuratMasuk::Diterima->value)
+        return SuratMasuk::tampakBagi($this->pengguna())->where('status', StatusSuratMasuk::Diterima->value)
             ->orderByRaw("FIELD(derajat_kecepatan, 'sangat_segera', 'segera', 'biasa')")
             ->orderBy('tanggal_terima')
             ->get();
@@ -263,7 +283,7 @@ class KotakMasuk extends Component
             ? [StatusDisposisiPenerima::Selesai->value]
             : [StatusDisposisiPenerima::Diterima->value, StatusDisposisiPenerima::Dibaca->value, StatusDisposisiPenerima::Ditindaklanjuti->value];
 
-        return DisposisiPenerima::with(['disposisi.suratMasuk', 'disposisi.dari'])
+        return DisposisiPenerima::with(['disposisi.suratMasuk.unitPembuat', 'disposisi.dari'])
             ->where('user_id', $this->pengguna()->getKey())
             ->whereIn('status', $status)
             ->latest()
@@ -290,10 +310,10 @@ class KotakMasuk extends Component
     {
         $pengguna = $this->pengguna();
 
-        return Permohonan::with(['ormawa', 'jenis', 'persetujuanWd.jabatan'])
-            ->whereIn('status', [StatusPermohonan::DisposisiDekan->value, StatusPermohonan::PersetujuanWd->value, StatusPermohonan::RekomendasiKasubag->value])
+        return Permohonan::with(['ormawa', 'jenis', 'unitPembuat', 'persetujuanWd.jabatan'])
+            ->whereIn('status', [StatusPermohonan::DisposisiDekan->value, StatusPermohonan::PersetujuanWd->value, StatusPermohonan::RekomendasiKasubag->value, StatusPermohonan::Pembuatan->value])
             ->orderBy('diajukan_pada')->get()
-            ->filter(fn (Permohonan $p) => $pengguna->can('disposisiDekan', $p) || $pengguna->can('putusWd', $p) || $pengguna->can('rekomendasiKasubag', $p))
+            ->filter(fn (Permohonan $p) => $pengguna->can('disposisiDekan', $p) || $pengguna->can('putusWd', $p) || $pengguna->can('rekomendasiKasubag', $p) || $pengguna->can('terbitkanIzin', $p))
             ->values();
     }
 

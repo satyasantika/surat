@@ -2,12 +2,15 @@
 
 namespace App\Services\Notifikasi;
 
+use App\Enums\JenisPengirim;
 use App\Enums\KlasifikasiKeamanan;
 use App\Enums\StatusNaskah;
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\Lpjs\LpjResource;
 use App\Filament\Resources\Naskahs\NaskahResource;
 use App\Filament\Resources\Permohonans\PermohonanResource;
+use App\Filament\Resources\SuratMasuks\SuratMasukResource;
+use App\Jobs\KirimHasilKePengirim;
 use App\Models\Disposisi;
 use App\Models\DisposisiPenerima;
 use App\Models\Kabar;
@@ -31,10 +34,29 @@ class NotifikasiAlur
 {
     public function __construct(private readonly PengirimNotifikasi $kirim) {}
 
+    /** Surat baru: staf khusus bila menunggu diteruskan, dekan bila langsung (jalur admin). */
     public function suratMasukBaru(SuratMasuk $surat, User $pelaku): void
     {
         $this->aman(function () use ($surat, $pelaku) {
-            $this->kirim->kirim(Penerima::izin('disposisi.buat'), 'surat-masuk', 'Surat masuk menunggu disposisi', $this->ringkasSurat($surat->klasifikasi_keamanan, "{$surat->nomor_agenda}: {$surat->perihal}", "Surat masuk {$surat->klasifikasi_keamanan->value} ({$surat->nomor_agenda})").' menunggu disposisi.', route('disposisi'), $pelaku);
+            $ringkas = $this->ringkasSurat($surat->klasifikasi_keamanan, "{$surat->nomor_agenda}: {$surat->perihal}", "Surat masuk {$surat->klasifikasi_keamanan->value} ({$surat->nomor_agenda})");
+
+            if ($surat->sudahDiteruskan()) {
+                $this->kirim->kirim(Penerima::izin('disposisi.buat'), 'surat-masuk', 'Surat masuk menunggu disposisi', $ringkas.' menunggu disposisi.', route('disposisi'), $pelaku);
+
+                return;
+            }
+
+            $this->kirim->kirim(Penerima::izin('masuk.teruskan'), 'surat-masuk', 'Surat masuk menunggu diteruskan ke Dekan', $ringkas.' menunggu diteruskan ke Dekan.', SuratMasukResource::getUrl('edit', ['record' => $surat]), $pelaku);
+        });
+    }
+
+    public function suratDiteruskan(SuratMasuk $surat, User $staf, ?string $catatan = null): void
+    {
+        $this->aman(function () use ($surat, $staf, $catatan) {
+            $ringkas = $this->ringkasSurat($surat->klasifikasi_keamanan, "{$surat->nomor_agenda}: {$surat->perihal}", "Surat masuk {$surat->klasifikasi_keamanan->value} ({$surat->nomor_agenda})")
+                .' diteruskan oleh '.$staf->name.' dan menunggu disposisi.'.($catatan ? " Catatan: {$catatan}" : '');
+
+            $this->kirim->kirim(Penerima::izin('disposisi.buat'), 'surat-masuk', 'Surat masuk diteruskan kepada Dekan', $ringkas, route('disposisi'), $staf);
         });
     }
 
@@ -95,6 +117,9 @@ class NotifikasiAlur
             $ringkas = "{$p->nomor}: {$p->nama_kegiatan} ({$p->ormawa->nama}).";
 
             $this->kirim->kirim($p->status === StatusPermohonan::PersetujuanPembina ? [$p->ormawa->pembina] : Penerima::izin('permohonan.validasi'), 'permohonan', $p->status === StatusPermohonan::PersetujuanPembina ? 'Permohonan menunggu persetujuan pembina' : 'Permohonan baru menunggu validasi', $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
+
+            // Staf khusus dekanat mendapat tembusan (informasi) setiap permohonan baru masuk.
+            $this->kirim->kirim(Penerima::peran('staf-khusus'), 'permohonan', 'Tembusan: permohonan baru dari ormawa', $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
         });
     }
 
@@ -108,8 +133,54 @@ class NotifikasiAlur
             [$users, $judul, $url] = $this->penerimaTahap($p, $ke);
             $users !== [] && $ke !== StatusPermohonan::Dikembalikan ? $this->kirim->kirim($users, 'permohonan', $judul, $ringkas, $url, $oleh) : null;
 
-            // Ormawa: setiap perubahan tahap (kecuali yang dilakukannya sendiri)
-            $this->kirim->kirim(Penerima::ormawa($p->ormawa, $p), 'permohonan', 'Permohonan: '.$ke->label(), $ringkas, route('ormawa.permohonan', $p->ormawa), $oleh);
+            // Ormawa: setiap perubahan tahap (kecuali yang dilakukannya sendiri). Selesai = hasil sampai ke pengirim,
+            // disertai tautan lacak publik (BR-27, BR-28).
+            $selesai = $ke === StatusPermohonan::Selesai;
+            $this->kirim->kirim(
+                Penerima::ormawa($p->ormawa, $p),
+                'permohonan',
+                $selesai ? 'Permohonan selesai: hasil tersedia' : 'Permohonan: '.$ke->label(),
+                $selesai ? $ringkas.' Hasil dapat dibuka dari halaman progres permohonan atau tautan lacak: '.$p->tautanLacak() : $ringkas,
+                route('ormawa.permohonan', $p->ormawa),
+                $oleh,
+            );
+        });
+    }
+
+    /**
+     * Hasil surat masuk dikirim petugas unit (BR-28): pemberitahuan internal (staf khusus penerus/registrator, pimpinan
+     * prodi pengirim) dan, bila ada kontak terenkripsi, surel/WhatsApp ke pengirim lewat job yang mendekripsi sendiri.
+     */
+    public function hasilSuratMasukDikirim(SuratMasuk $surat, User $petugas): void
+    {
+        $this->aman(function () use ($surat, $petugas) {
+            $ringkas = $this->ringkasSurat($surat->klasifikasi_keamanan, "{$surat->nomor_agenda}: {$surat->perihal}", "Surat masuk {$surat->klasifikasi_keamanan->value} ({$surat->nomor_agenda})")
+                .' selesai diproses; hasil dikirim kepada pengirim. Tautan lacak: '.$surat->tautanLacak();
+
+            $internal = Penerima::izin('masuk.teruskan')->merge(array_filter([$surat->diregistrasi_oleh ? User::find($surat->diregistrasi_oleh) : null]));
+            $this->kirim->kirim($internal, 'surat-masuk', 'Hasil surat masuk dikirim kepada pengirim', $ringkas, SuratMasukResource::getUrl('edit', ['record' => $surat]), $petugas);
+
+            if ($surat->jenis_pengirim === JenisPengirim::Prodi && $surat->pengirim_unit_kerja_id !== null) {
+                $this->kirim->kirim(Penerima::pimpinanUnit($surat->pengirim_unit_kerja_id), 'surat-masuk', 'Surat Anda telah selesai diproses', 'Surat dari unit Anda kepada Dekan telah selesai diproses. Lihat hasilnya: '.$surat->tautanLacak(), $surat->tautanLacak(), $petugas);
+            }
+
+            if (filled($surat->pengirim_surel) || filled($surat->pengirim_wa)) {
+                KirimHasilKePengirim::dispatch($surat->getKey())->afterCommit();
+            }
+        });
+    }
+
+    /**
+     * Mode WD salah_satu: WD yang disposisinya diabaikan karena WD lain sudah menyetujui.
+     *
+     * @param  list<User>  $wd
+     */
+    public function disposisiWdDiabaikan(Permohonan $p, array $wd, User $pemutus): void
+    {
+        $this->aman(function () use ($p, $wd, $pemutus) {
+            $p->loadMissing('ormawa');
+
+            $this->kirim->kirim($wd, 'permohonan', 'Disposisi permohonan tidak perlu diputus', "{$p->nomor}: {$p->nama_kegiatan} sudah disetujui {$pemutus->name}; keputusan Anda tidak diperlukan lagi.", route('disposisi'), $pemutus);
         });
     }
 
@@ -163,6 +234,7 @@ class NotifikasiAlur
             StatusPermohonan::DisposisiDekan => [Penerima::jabatan('dekan')->all(), 'Permohonan menunggu disposisi Dekan', route('disposisi')],
             StatusPermohonan::PersetujuanWd => [$this->wdMenunggu($p), 'Permohonan menunggu keputusan Anda', route('disposisi')],
             StatusPermohonan::RekomendasiKasubag => [Penerima::jabatan('kasubag-umum')->all(), 'Permohonan menunggu rekomendasi Kasubag', route('disposisi')],
+            StatusPermohonan::Pembuatan => [$p->unitPembuat?->petugasAktif()->get()->all() ?? [], 'Permohonan ditugaskan kepada unit Anda untuk dibuatkan suratnya', $admin],
             StatusPermohonan::Penerbitan => [Penerima::izin('nomor.terbitkan')->all(), 'Permohonan siap diterbitkan suratnya', $admin],
             StatusPermohonan::Dikembalikan => [Penerima::ormawa($p->ormawa, $p)->all(), 'Permohonan menunggu perbaikan Anda', route('ormawa.permohonan', $p->ormawa)],
             default => [[], '', null],
