@@ -60,6 +60,10 @@
     [
      "Apakah isi surat tampil?",
      "Tidak. Verifikasi hanya menampilkan data identitas surat, bukan isi atau lampirannya."
+    ],
+    [
+     "Bagaimana melacak surat atau permohonan saya?",
+     "Buka **Lacak surat** di menu atas atau alamat `/lacak`, lalu masukkan **kode lacak** yang Anda terima dari fakultas (contoh K7M2-9QXD-4WPT). Panduan lengkap: melacak-surat.html."
     ]
    ]
   },
@@ -144,6 +148,10 @@
     [
      "Ruangan tampil terisi.",
      "Pilih sesi lain. Sesi \"seharian\" bentrok dengan semua sesi pada hari yang sama."
+    ],
+    [
+     "Bagaimana saya tahu permohonan sudah selesai dan di mana hasilnya?",
+     "Anda menerima notifikasi **Permohonan selesai: hasil tersedia**. Buka **Progres permohonan**, pilih permohonan: surat izin dapat diunduh bila terbit lewat sistem, atau tautan **Hasil cetak** dari petugas pembuat surat dapat dibuka. Di bagian yang sama tersedia **tautan lacak** yang boleh dibagikan; linimasa menampilkan jabatan pemroses, bukan nama pribadi. Panduan: melacak-surat.html."
     ]
    ]
   },
@@ -231,6 +239,10 @@
     [
      "Surat rahasia tidak terbuka.",
      "Surat rahasia hanya terbuka bagi dekan dan penerima disposisinya; pastikan disposisi ditujukan kepada akun Anda."
+    ],
+    [
+     "Saya petugas unit pembuat surat; di mana tugas saya?",
+     "Bila Anda terdaftar sebagai petugas unit, menu **Tugas pembuat** tampil di bagian atas (alamat `/pembuat`). Di sana ada permohonan dan surat masuk yang ditugaskan ke unit Anda. Setelah surat selesai dicetak dan disahkan di luar sistem, unggah ulang **tautan** hasilnya (Google Drive/Docs atau unsil.ac.id; bukan unggahan berkas), lalu pilih **Kirim hasil ke pengirim**. Pengirim diberi tahu otomatis dan proses ditutup."
     ]
    ]
   },
@@ -287,6 +299,10 @@
     [
      "Berganti ponsel, MFA tidak terbaca.",
      "Hubungi super-admin untuk mengatur ulang MFA Anda."
+    ],
+    [
+     "Berapa Wakil Dekan yang dipilih?",
+     "Pilih satu atau lebih WD saat mendisposisikan permohonan. Bila lebih dari satu, pilih aturannya: **Cukup salah satu WD** (persetujuan pertama menyelesaikan tahap) atau **Semua WD tujuan harus setuju**. Dengan satu WD, pilihan aturan tidak muncul."
     ]
    ]
   },
@@ -332,7 +348,7 @@
    "faq": [
     [
      "Bagaimana keputusan WD diproses?",
-     "Semua WD yang ditunjuk harus **Setuju** agar permohonan lanjut ke kasubag; satu **Tolak** membuat permohonan ditolak (alasan wajib)."
+     "Bergantung aturan yang dipilih Dekan. **Semua WD tujuan harus setuju**: semua WD harus **Setuju**, dan satu **Tolak** menolak permohonan (alasan wajib). **Cukup salah satu WD**: persetujuan pertama menyelesaikan tahap dan disposisi WD lain otomatis diabaikan (mereka diberi tahu); penolakan baru berlaku bila semua WD tujuan menolak."
     ],
     [
      "Saya Plt WD.",
@@ -376,6 +392,14 @@
     [
      "Rekomendasi saya menolak.",
      "Alasan wajib diisi dan ormawa diberi tahu; permohonan berstatus ditolak."
+    ],
+    [
+     "Bagaimana menugaskan pembuat surat?",
+     "Pada **Rekomendasikan & tugaskan**, pilih **Unit pembuat surat** (terisi otomatis dari jenis layanan, boleh diganti). Petugas aktif unit menerima penugasan dan notifikasi; linimasa mencatat Anda, unit, dan petugasnya. Unit tanpa petugas aktif tidak dapat dipilih. Anda tidak memproses pembuatan surat kecuali Anda terdaftar sebagai petugas unit."
+    ],
+    [
+     "Bagaimana menugaskan pembuat surat untuk surat masuk dari prodi atau pihak eksternal?",
+     "Di kotak masuk, buka disposisi yang Anda terima lalu pilih **Tugaskan pembuat surat**, pilih **unit pembuat** (hanya unit aktif yang punya petugas aktif), tulis catatan bila perlu, dan **Tugaskan**. Petugas unit dinotifikasi; hanya mereka yang dapat mengunggah hasil dan menutup surat. Anda dapat menugaskan ulang ke unit lain selama surat belum selesai."
     ]
    ]
   },
@@ -455,6 +479,14 @@
     [
      "Tidak dapat membuka surat rahasia.",
      "Hanya dekan dan penerima disposisi; admin melihat metadata registrasi saja."
+    ],
+    [
+     "Mengapa tombol Buat draf surat izin tidak muncul?",
+     "Bila kasubag menugaskan unit pembuat, hanya petugas unit tersebut yang dapat membuat draf surat izin. Minta super-admin menambahkan Anda sebagai petugas unit (Master › Unit pembuat surat); Anda juga memerlukan izin pembuatan draf naskah."
+    ],
+    [
+     "Bagaimana pengirim tanpa akun memantau suratnya?",
+     "Setiap permohonan dan surat masuk memiliki **tautan lacak publik**. Staf khusus dan admin melihatnya di rincian permohonan dan di formulir surat masuk (bisa disalin); berikan kepada pengirim bila ia tidak menerima pemberitahuan. Halaman itu hanya menampilkan tahap, jabatan pemroses, dan hasil, tanpa catatan internal."
     ]
    ]
   },
@@ -549,6 +581,14 @@
     [
      "Bagaimana mencadangkan?",
      "Lihat docs/DEPLOY.md: cadangan harian dan uji pulih."
+    ],
+    [
+     "Bagaimana mengelola unit pembuat surat?",
+     "Menu **Master › Unit pembuat surat**: tambah/ubah unit (kode, nama, deskripsi, aktif) dan pilih petugasnya. Atur unit bawaan tiap jenis layanan di **Master › Jenis permohonan**. Tidak ada unit baku: semua dapat diubah. Unit yang pernah ditugaskan tidak dapat dihapus, nonaktifkan saja. Petugas yang akan membuat draf surat izin perlu izin pembuatan draf naskah."
+    ],
+    [
+     "Bagaimana petugas unit pembuat bekerja bila perannya pegawai?",
+     "Tambahkan akun itu sebagai petugas di **Master › Unit pembuat surat**. Petugas berperan pegawai tidak masuk panel; menu **Tugas pembuat** (alamat `/pembuat`) muncul otomatis untuk mengunggah tautan hasil dan mengirimnya kepada pengirim. Membuat draf surat izin lewat naskah tetap memerlukan peran berakses panel dan izin pembuatan draf naskah."
     ]
    ],
    "internal": true

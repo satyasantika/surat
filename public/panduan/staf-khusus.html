@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staf khusus dekanat — Panduan Persuratan FKIP</title>
+<style>
+:root{--biru:#1e3a8a;--abu:#475569;--garis:#e2e8f0;--latar:#f8fafc}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1e293b;background:var(--latar)}
+header{background:var(--biru);color:#fff;padding:14px 16px}header a{color:#fff}
+main{max-width:860px;margin:0 auto;padding:16px}h1{font-size:1.5rem;color:var(--biru);margin:.4em 0}h2{font-size:1.15rem;margin:1.6em 0 .4em;color:var(--biru)}
+.kartu{background:#fff;border:1px solid var(--garis);border-radius:10px;padding:14px 16px;margin:12px 0}
+.langkah{display:grid;gap:8px}.langkah figure{margin:0}.langkah img{display:block;max-width:100%;height:auto;border:1px solid var(--garis);border-radius:8px}
+.langkah figcaption{font-size:.85rem;color:var(--abu);margin-top:4px}
+.daftar{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:0;list-style:none}
+.daftar a{display:block;text-decoration:none;color:inherit}.daftar .kartu{margin:0;height:100%}.daftar strong{color:var(--biru)}
+code{background:#eef2ff;padding:1px 5px;border-radius:4px;font-size:.9em}details{margin:6px 0}summary{cursor:pointer;font-weight:600}
+footer{max-width:860px;margin:0 auto;padding:16px;color:var(--abu);font-size:.85rem}nav a{margin-right:12px}
+@media print{header,nav{display:none}body{background:#fff}.kartu{break-inside:avoid}img{max-height:480px}}
+</style>
+</head>
+<body>
+<header><strong>Panduan Persuratan &amp; Layanan FKIP Unsil</strong></header>
+<main>
+<nav><a href="index.html">&larr; Semua panduan</a></nav>
+<h1>Staf khusus dekanat</h1>
+<h2>Tujuan</h2><p>Menerima dan meregistrasi surat masuk (termasuk dari pengirim eksternal dan program studi), lalu meneruskannya kepada dekan untuk didisposisikan.</p>
+<h2>Cara masuk</h2><p>Admin membuatkan akun dan memberi peran <strong>staf-khusus</strong>. Masuk lewat <strong>Masuk</strong>, aktifkan verifikasi dua langkah (wajib), lalu buka menu <strong>Surat masuk</strong> di panel.</p>
+<h2>Langkah-langkah</h2>
+<ol style="padding-left:1.2em">
+<li class="kartu"><strong>Registrasi surat</strong><br>Pilih <strong>Registrasi surat masuk</strong>, isi nomor, tanggal, asal, perihal, klasifikasi, dan tautan pindaian. Pada bagian <strong>Pengirim</strong> pilih jenis: <em>Ormawa</em>, <em>Program studi</em> (pilih unit kerja), atau <em>Eksternal</em> (isi nama, instansi, serta surel atau WhatsApp agar pengirim dapat diberi tahu).</li>
+<li class="kartu"><strong>Teruskan ke dekan</strong><br>Surat yang baru diregistrasi berstatus belum diteruskan dan belum tampak bagi dekan. Pada daftar surat, pilih <strong>Teruskan ke dekan</strong>, tambahkan catatan bila perlu, lalu konfirmasi. Dekan menerima notifikasi dan dapat mendisposisikannya.</li>
+<li class="kartu"><strong>Tembusan permohonan</strong><br>Setiap permohonan ormawa baru diberitahukan kepada Anda sebagai informasi; Anda dapat membukanya (hanya baca).</li>
+</ol>
+<h2>Tanya jawab</h2>
+<details><summary>Apakah surat dapat ditarik setelah diteruskan?</summary><p>Tidak. Penerusan dilakukan sekali dan tercatat di riwayat aktivitas; hubungi dekan bila ada koreksi.</p></details>
+<details><summary>Data kontak pengirim aman?</summary><p>Surel dan WhatsApp pengirim eksternal disimpan terenkripsi, tidak masuk jejak audit, dan tidak tampil di halaman publik.</p></details>
+<details><summary>Bagaimana pengirim eksternal memantau suratnya?</summary><p>Di formulir surat masuk (menu <strong>Edit</strong>) tersedia <strong>Tautan lacak publik</strong>; salin dan berikan kepada pengirim, atau ia menerimanya lewat surel/WhatsApp saat hasil dikirim. Halaman itu tidak menampilkan kontak maupun catatan internal. Panduan pengirim: <a href="melacak-surat.html">melacak surat</a>.</p></details>
+<details><summary>Saya tidak melihat daftar permohonan ormawa.</summary><p>Menu <strong>Permohonan ormawa</strong> tersedia hanya baca untuk Anda; bila tidak tampil, minta super-admin memastikan peran staf-khusus memiliki izin <code>permohonan.lihat</code> (jalankan ulang seeder peran).</p></details>
+<p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>
+</main>
+<footer>Versi aplikasi 1.0.0 · dibuat 2026-10-07 · Kendala? Hubungi admin persuratan FKIP. Data pada tangkapan layar adalah data rekaan.</footer>
+</body>
+</html>
