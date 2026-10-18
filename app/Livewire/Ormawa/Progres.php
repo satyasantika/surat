@@ -5,6 +5,7 @@ namespace App\Livewire\Ormawa;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
 use App\Models\User;
+use App\Support\Pelacakan\Linimasa;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -42,13 +43,15 @@ class Progres extends Component
         $detail = $this->terpilih ? $daftar->firstWhere('id', $this->terpilih) : null;
 
         if ($detail !== null) {
-            $detail->load(['riwayat.pelaku', 'ruangan', 'pengaju', 'naskahIzin']);
+            $detail->load(['ruangan', 'pengaju', 'naskahIzin']);
         }
 
         return view('livewire.ormawa.progres', [
             'ormawa' => Ormawa::findOrFail($this->ormawaId),
             'daftar' => $daftar,
             'detail' => $detail,
+            'linimasa' => $detail !== null ? app(Linimasa::class)->permohonan($detail) : [],
+            'hasil' => $detail?->tautanHasil(),
             'bolehPribadi' => $detail !== null && $this->pengguna()->can('lihatDataPribadi', $detail),
         ])->title('Progres permohonan');
     }

@@ -33,12 +33,17 @@
                         <p class="text-slate-600">Ketua pelaksana: {{ $detail->penanggung_jawab['ketua']['nama'] ?? '—' }} · HP {{ $detail->penanggung_jawab['ketua']['hp'] ?? '—' }}</p>
                     @endif
 
+                    @if ($hasil && $detail->status === \App\Enums\StatusPermohonan::Selesai)
+                        <p><x-tautan-berkas :tautan="$hasil" /></p>
+                    @endif
+                    <p class="text-xs text-slate-500">Tautan lacak untuk dibagikan: <span class="font-mono break-all">{{ $detail->tautanLacak() }}</span></p>
+
                     <ol class="space-y-2 border-l-2 border-blue-200 pl-4" aria-label="Linimasa">
-                        @foreach ($detail->riwayat as $r)
-                            <li wire:key="h-{{ $r->id }}">
-                                <p class="font-medium">{{ \App\Enums\StatusPermohonan::from($r->ke_status)->label() }}</p>
-                                <p class="text-xs text-slate-500">{{ $r->created_at->translatedFormat('d M Y H:i') }}@if ($r->pelaku) · {{ $r->pelaku->name }}@endif</p>
-                                @if ($r->catatan)<p class="text-slate-700">{{ $r->catatan }}</p>@endif
+                        @foreach ($linimasa as $i => $t)
+                            <li wire:key="h-{{ $i }}">
+                                <p class="font-medium">{{ $t['tahap'] }}</p>
+                                <p class="text-xs text-slate-500">{{ $t['waktu']->translatedFormat('d M Y H:i') }}@if ($t['pelaku']) · {{ $t['pelaku'] }}@endif</p>
+                                @if ($t['catatan'])<p class="text-slate-700">{{ $t['catatan'] }}</p>@endif
                             </li>
                         @endforeach
                     </ol>

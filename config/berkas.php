@@ -20,7 +20,7 @@ return [
     'pemendek' => ['bit.ly', 's.id', 'tinyurl.com', 't.co', 'goo.gl', 'cutt.ly', 'is.gd', 'rb.gy', 'ow.ly', 'shorturl.at'],
 
     // Nilai jenis tautan sistem ini (03-SKEMA §10).
-    'jenis' => ['pindaian', 'lampiran', 'surat_permohonan', 'proposal', 'lpj', 'sk', 'logo', 'foto', 'naskah_basah', 'ttd_visual'],
+    'jenis' => ['pindaian', 'lampiran', 'surat_permohonan', 'proposal', 'lpj', 'sk', 'logo', 'foto', 'naskah_basah', 'ttd_visual', 'hasil_cetak'],
 
     // Jenis yang tidak pernah dirender sebagai URL ke klien.
     'jenis_tertutup' => ['ttd_visual'],

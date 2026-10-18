@@ -19,6 +19,9 @@ class TautanBerkas extends Model
 {
     use HasUuids, MenyegarkanCachePublik, SoftDeletes, TercatatAktivitas;
 
+    /** Hasil cetak yang dikirim kepada pengirim (BR-28). */
+    public const JENIS_HASIL = 'hasil_cetak';
+
     protected $table = 'tautan_berkas';
 
     protected $attributes = ['status_cek' => 'belum'];

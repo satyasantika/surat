@@ -1,4 +1,4 @@
-@props(['judul' => null, 'deskripsi' => null])
+@props(['judul' => null, 'deskripsi' => null, 'noindex' => false])
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $judul ? $judul.' — ' : '' }}{{ config('app.name') }}</title>
     <meta name="description" content="{{ $deskripsi ?? 'Layanan persuratan digital dan profil organisasi mahasiswa Fakultas Keguruan dan Ilmu Pendidikan, Universitas Siliwangi.' }}">
+    @if ($noindex)<meta name="robots" content="noindex, nofollow">@endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
@@ -20,6 +21,7 @@
             <a href="{{ route('galeri') }}" class="underline-offset-2 hover:underline">Galeri</a>
             <a href="{{ route('organisasi') }}" class="underline-offset-2 hover:underline">Organisasi</a>
             <a href="{{ route('verifikasi.form') }}" class="underline-offset-2 hover:underline">Verifikasi surat</a>
+            <a href="{{ route('lacak.form') }}" class="underline-offset-2 hover:underline">Lacak surat</a>
             <a href="{{ asset('panduan/index.html') }}" class="underline-offset-2 hover:underline">Panduan</a>
             <a href="{{ route('login') }}" class="rounded bg-white px-3 py-1 font-medium text-blue-900 hover:bg-blue-50">Masuk</a>
         </div>
@@ -34,6 +36,7 @@
         <p class="mt-1">Fakultas Keguruan dan Ilmu Pendidikan, Universitas Siliwangi</p>
         <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs">
             <a href="{{ route('verifikasi.form') }}" class="hover:underline">Verifikasi surat</a>
+            <a href="{{ route('lacak.form') }}" class="hover:underline">Lacak surat</a>
             <a href="{{ asset('panduan/index.html') }}" class="hover:underline">Panduan pengguna</a>
             <a href="{{ route('login') }}" class="hover:underline">Masuk ke sistem</a>
         </div>

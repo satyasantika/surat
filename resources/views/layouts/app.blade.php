@@ -12,6 +12,7 @@
     <nav class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 text-sm">
         <a href="{{ \App\Support\Beranda::url(auth()->user()) }}" class="font-semibold">{{ config('app.name') }}</a>
         <div class="flex items-center gap-4">
+            @if (auth()->user()->unitPembuat()->exists())<a href="{{ route('pembuat') }}" class="underline">Tugas pembuat</a>@endif
             <a href="{{ route('notifikasi') }}" class="underline">Notifikasi @if (($n = auth()->user()->unreadNotifications()->count()) > 0)<span class="rounded-full bg-amber-400 px-1.5 text-xs text-blue-950">{{ $n }}</span>@endif</a>
             <a href="{{ asset('panduan/index.html') }}" class="underline">Panduan</a>
             <a href="{{ route('profil') }}" class="underline">Profil</a>

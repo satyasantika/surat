@@ -177,7 +177,7 @@ describe('progres', function () {
 
         Livewire::actingAs($u)->test(Progres::class, ['ormawa' => $o->id])
             ->assertSee('PMH-2026-0001')->assertSee('Seminar')->assertSee('Validasi admin')
-            ->call('pilih', $p->id)->assertSee('Seminar nasional')->assertSee('Diajukan')->assertSee('Linimasa');
+            ->call('pilih', $p->id)->assertSee('Seminar nasional')->assertSee('Permohonan diajukan')->assertSee('Linimasa');
     });
 
     it('menyembunyikan data pribadi penanggung jawab dari anggota biasa, menampilkannya untuk ketua dan pengaju', function () {

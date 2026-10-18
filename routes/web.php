@@ -13,6 +13,7 @@ use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PratinjauNaskahController;
 use App\Http\Controllers\Publik\FormVerifikasiController;
 use App\Http\Controllers\Publik\HalamanController;
+use App\Http\Controllers\Publik\LacakController;
 use App\Http\Controllers\Publik\VerifikasiController;
 use App\Http\Middleware\HeaderHalamanPublik;
 use App\Http\Middleware\PastikanAktif;
@@ -22,6 +23,7 @@ use App\Livewire\Ormawa\IsiLpj;
 use App\Livewire\Ormawa\Kabar as KabarOrmawa;
 use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
+use App\Livewire\Pembuat\Tugas as TugasPembuat;
 use App\Livewire\Pimpinan\KotakMasuk;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +37,9 @@ Route::middleware(HeaderHalamanPublik::class)->group(function () {
     Route::get('/organisasi', [HalamanController::class, 'organisasiIndex'])->name('organisasi');
     Route::get('/organisasi/{slug}', [HalamanController::class, 'organisasiShow'])->name('organisasi.tampil');
     Route::get('/verifikasi', FormVerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi.form');
+    // Pelacakan tanpa login (BR-27): hanya tahap, jabatan pemroses, dan tautan hasil; dibatasi laju dan tak diindeks.
+    Route::get('/lacak', [LacakController::class, 'form'])->middleware('throttle:lacak')->name('lacak.form');
+    Route::get('/lacak/{kode}', [LacakController::class, 'tampil'])->middleware('throttle:lacak')->name('lacak.tampil');
 });
 
 Route::get('/verifikasi/{id}', VerifikasiController::class)->middleware('throttle:verifikasi')->name('verifikasi');
@@ -68,6 +73,7 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/ormawa/{ormawa}/kabar', KabarOrmawa::class)->whereUuid('ormawa')->name('ormawa.kabar');
     Route::get('/ormawa/{ormawa}/lpj/{lpj}', IsiLpj::class)->whereUuid(['ormawa', 'lpj'])->name('ormawa.lpj');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
+    Route::get('/pembuat', TugasPembuat::class)->name('pembuat');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');
     Route::get('/berkas/{tautan}/buka', BukaTautanController::class)->whereUuid('tautan')->name('berkas.buka');
     Route::post('/impersonasi/selesai', [ImpersonasiController::class, 'selesai'])->name('impersonasi.selesai');
