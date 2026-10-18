@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StatusPermohonan;
+use App\Models\Concerns\MemilikiKodeLacak;
 use App\Models\Concerns\TercatatAktivitas;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -14,6 +15,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property StatusPermohonan $status
+ * @property string|null $mode_wd
+ * @property string $kode_lacak
+ * @property ?CarbonImmutable $hasil_dikirim_pada
+ * @property ?string $hasil_dikirim_oleh
  * @property CarbonImmutable $tanggal_mulai
  * @property CarbonImmutable $tanggal_selesai
  * @property CarbonImmutable $diajukan_pada
@@ -23,14 +28,24 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 #[Fillable(['ormawa_id', 'jenis_permohonan_id', 'diajukan_oleh', 'nama_kegiatan', 'perihal', 'nomor_surat_ormawa', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'tempat_lain', 'deskripsi', 'penanggung_jawab', 'fasilitas_rektorat', 'alasan_mendesak'])]
 class Permohonan extends Model
 {
-    use HasUuids, TercatatAktivitas;
+    use HasUuids, MemilikiKodeLacak, TercatatAktivitas;
+
+    public const MODE_WD_SEMUA = 'semua';
+
+    public const MODE_WD_SALAH_SATU = 'salah_satu';
+
+    /** @var array<string, string> */
+    public const MODE_WD = [
+        self::MODE_WD_SALAH_SATU => 'Cukup salah satu WD',
+        self::MODE_WD_SEMUA => 'Semua WD tujuan harus setuju',
+    ];
 
     protected $table = 'permohonan';
 
     protected $attributes = ['sumber' => 'aplikasi'];
 
     /** Data pribadi penanggung jawab (BR-18) tidak ikut serialisasi maupun jejak audit. */
-    protected $hidden = ['penanggung_jawab'];
+    protected $hidden = ['penanggung_jawab', 'kode_lacak'];
 
     protected function casts(): array
     {
@@ -40,6 +55,7 @@ class Permohonan extends Model
             'tanggal_selesai' => 'date',
             'diajukan_pada' => 'datetime',
             'selesai_pada' => 'datetime',
+            'hasil_dikirim_pada' => 'datetime',
             'penanggung_jawab' => 'encrypted:array',
             'fasilitas_rektorat' => 'array',
         ];
@@ -66,6 +82,24 @@ class Permohonan extends Model
     public function pengaju(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diajukan_oleh');
+    }
+
+    /** @return BelongsTo<UnitPembuat, $this> */
+    public function unitPembuat(): BelongsTo
+    {
+        return $this->belongsTo(UnitPembuat::class);
+    }
+
+    /** Tautan hasil cetak yang dikirim petugas unit kepada pengirim (BR-28), bila ada. */
+    public function tautanHasil(): ?TautanBerkas
+    {
+        return $this->tautan()->where('jenis', TautanBerkas::JENIS_HASIL)->latest()->first();
+    }
+
+    /** Mode persetujuan WD: `semua` (bawaan, BR-14) atau `salah_satu` (BR-25). */
+    public function modeWd(): string
+    {
+        return $this->mode_wd ?? self::MODE_WD_SEMUA;
     }
 
     /** @return BelongsTo<Naskah, $this> */

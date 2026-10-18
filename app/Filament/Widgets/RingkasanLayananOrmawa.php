@@ -36,6 +36,7 @@ class RingkasanLayananOrmawa extends StatsOverviewWidget
             Stat::make('Menunggu disposisi Dekan', $hitung(StatusPermohonan::DisposisiDekan)),
             Stat::make('Menunggu keputusan WD', $hitung(StatusPermohonan::PersetujuanWd)),
             Stat::make('Menunggu rekomendasi Kasubag', $hitung(StatusPermohonan::RekomendasiKasubag)),
+            Stat::make('Menunggu pembuatan surat', $hitung(StatusPermohonan::Pembuatan)),
             Stat::make('Menunggu penerbitan surat', $hitung(StatusPermohonan::Penerbitan)),
             Stat::make('Dikembalikan ke ormawa', $hitung(StatusPermohonan::Dikembalikan)),
             Stat::make('LPJ terlambat', $lpjTerlambat)->color($lpjTerlambat > 0 ? 'danger' : 'success'),

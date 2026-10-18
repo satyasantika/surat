@@ -99,7 +99,8 @@ describe('peta transisi', function () {
             'dikembalikan' => ['validasi_admin', 'dibatalkan'],
             'disposisi_dekan' => ['persetujuan_wd', 'ditolak', 'dibatalkan'],
             'persetujuan_wd' => ['rekomendasi_kasubag', 'ditolak', 'dibatalkan'],
-            'rekomendasi_kasubag' => ['penerbitan', 'ditolak', 'dibatalkan'],
+            'rekomendasi_kasubag' => ['pembuatan', 'penerbitan', 'ditolak', 'dibatalkan'],
+            'pembuatan' => ['penerbitan', 'selesai', 'dibatalkan'],
             'penerbitan' => ['selesai', 'dibatalkan'],
             'selesai' => [], 'ditolak' => [], 'dibatalkan' => [],
         ];

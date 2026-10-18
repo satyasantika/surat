@@ -19,6 +19,9 @@ class PersetujuanWd extends Model
 
     public const TOLAK = 'tolak';
 
+    /** Mode salah_satu: WD ini tidak perlu memutus karena WD lain sudah menyetujui. */
+    public const DIABAIKAN = 'diabaikan';
+
     protected $table = 'persetujuan_wd';
 
     protected $attributes = ['putusan' => 'menunggu'];

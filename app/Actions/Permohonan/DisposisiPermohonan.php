@@ -14,22 +14,33 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Dekan mendisposisikan permohonan ke satu atau lebih jabatan WD (BR-14): membuat disposisi bagi pemangku
- * saat ini dan baris persetujuan_wd menunggu. Dekan juga dapat menolak pada tahap ini.
+ * saat ini dan baris persetujuan_wd menunggu; dekan memilih mode `semua` atau `salah_satu` (BR-25). Dekan juga dapat menolak pada tahap ini.
  */
 class DisposisiPermohonan
 {
     public function __construct(private readonly TransisiPermohonan $transisi) {}
 
-    /** @param  list<string>  $jabatanWdIds */
-    public function jalankan(Permohonan $permohonan, User $dekan, array $jabatanWdIds, ?string $catatan = null): Disposisi
+    /**
+     * @param  list<string>  $jabatanWdIds
+     * @param  string  $modeWd  `semua` (bawaan, BR-14) atau `salah_satu` (BR-25); bila hanya satu WD dipilih, mode tak berlaku dan disimpan `semua`
+     */
+    public function jalankan(Permohonan $permohonan, User $dekan, array $jabatanWdIds, ?string $catatan = null, string $modeWd = Permohonan::MODE_WD_SEMUA): Disposisi
     {
         $jabatanWdIds = array_values(array_unique($jabatanWdIds));
+
+        if (! in_array($modeWd, [Permohonan::MODE_WD_SEMUA, Permohonan::MODE_WD_SALAH_SATU], true)) {
+            throw ValidationException::withMessages(['mode_wd' => 'Mode persetujuan WD harus "semua" atau "salah_satu".']);
+        }
+
+        if (count($jabatanWdIds) === 1) {
+            $modeWd = Permohonan::MODE_WD_SEMUA;
+        }
 
         if ($jabatanWdIds === []) {
             throw ValidationException::withMessages(['jabatan' => 'Pilih minimal satu Wakil Dekan.']);
         }
 
-        return $this->transisi->dalamKunci($permohonan, function (Permohonan $segar) use ($dekan, $jabatanWdIds, $catatan) {
+        return $this->transisi->dalamKunci($permohonan, function (Permohonan $segar) use ($dekan, $jabatanWdIds, $catatan, $modeWd) {
             $this->transisi->pastikanStatus($segar, [StatusPermohonan::DisposisiDekan]);
             Gate::forUser($dekan)->authorize('disposisiDekan', $segar);
 
@@ -66,7 +77,13 @@ class DisposisiPermohonan
                 PersetujuanWd::create(['permohonan_id' => $segar->getKey(), 'jabatan_id' => $jabatanId]);
             }
 
-            $this->transisi->ke($segar, StatusPermohonan::PersetujuanWd, $dekan, $catatan ?: 'Didisposisikan ke '.$jabatan->pluck('nama')->implode(', '));
+            $segar->forceFill(['mode_wd' => $modeWd])->save();
+
+            // Perilaku lama dipertahankan: mode `semua` + catatan dekan -> catatan apa adanya; mode salah_satu dicatat eksplisit.
+            $ringkas = 'Didisposisikan ke '.$jabatan->pluck('nama')->implode(', ').($modeWd === Permohonan::MODE_WD_SALAH_SATU ? ' (cukup salah satu WD menyetujui)' : '');
+            $catatanRiwayat = $modeWd === Permohonan::MODE_WD_SALAH_SATU && $catatan ? "{$ringkas}. Catatan: {$catatan}" : ($catatan ?: $ringkas);
+
+            $this->transisi->ke($segar, StatusPermohonan::PersetujuanWd, $dekan, $catatanRiwayat);
 
             return $disposisi;
         });

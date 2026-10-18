@@ -5,6 +5,7 @@ namespace App\Filament\Resources\JenisPermohonans;
 use App\Filament\Resources\JenisPermohonans\Pages\ManageJenisPermohonans;
 use App\Models\JenisNaskah;
 use App\Models\JenisPermohonan;
+use App\Models\UnitPembuat;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
@@ -43,8 +44,11 @@ class JenisPermohonanResource extends Resource
             Toggle::make('butuh_fasilitas_rektorat')->label('Butuh fasilitas rektorat'),
             Select::make('jenis_naskah_id')->label('Templat surat izin/pengantar')
                 ->options(fn () => JenisNaskah::where('aktif', true)->orderBy('nama')->pluck('nama', 'id'))->searchable(),
+            Select::make('unit_pembuat_bawaan_id')->label('Unit pembuat bawaan')
+                ->options(fn () => UnitPembuat::where('aktif', true)->orderBy('nama')->pluck('nama', 'id'))->searchable()
+                ->helperText('Usulan awal saat kasubag menugaskan pembuat surat; kasubag tetap dapat memilih unit lain.'),
             CheckboxList::make('berkas_wajib')->label('Berkas wajib (tautan)')
-                ->options(array_combine(config('berkas.jenis'), config('berkas.jenis')))->columns(3),
+                ->options(fn () => ($jenis = array_diff(config('berkas.jenis'), ['hasil_cetak'])) === [] ? [] : array_combine($jenis, $jenis))->columns(3),
             Toggle::make('aktif')->default(true),
         ]);
     }
@@ -58,6 +62,7 @@ class JenisPermohonanResource extends Resource
                 TextColumn::make('nama')->searchable(),
                 IconColumn::make('butuh_ruangan')->label('Ruangan')->boolean(),
                 IconColumn::make('butuh_fasilitas_rektorat')->label('Rektorat')->boolean(),
+                TextColumn::make('unitPembuatBawaan.nama')->label('Unit pembuat')->placeholder('—'),
                 TextColumn::make('berkas_wajib')->label('Berkas wajib')->badge(),
                 IconColumn::make('aktif')->boolean(),
             ])

@@ -18,7 +18,10 @@ class AlurPermohonan
             S::Dikembalikan->value => [S::ValidasiAdmin, S::Dibatalkan],
             S::DisposisiDekan->value => [S::PersetujuanWd, S::Ditolak, S::Dibatalkan],
             S::PersetujuanWd->value => [S::RekomendasiKasubag, S::Ditolak, S::Dibatalkan],
-            S::RekomendasiKasubag->value => [S::Penerbitan, S::Ditolak, S::Dibatalkan],
+            // Pembuatan: kasubag menugaskan unit pembuat (BR-26). Penerbitan langsung = jalur lama tanpa unit.
+            S::RekomendasiKasubag->value => [S::Pembuatan, S::Penerbitan, S::Ditolak, S::Dibatalkan],
+            // Pembuatan -> Selesai: petugas unit mengunggah tautan hasil cetak dan mengirimnya ke pengirim (BR-28).
+            S::Pembuatan->value => [S::Penerbitan, S::Selesai, S::Dibatalkan],
             S::Penerbitan->value => [S::Selesai, S::Dibatalkan],
             S::Selesai->value => [],
             S::Ditolak->value => [],

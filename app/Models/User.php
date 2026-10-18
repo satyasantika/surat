@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -58,6 +59,16 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function pemangkuJabatan(): HasMany
     {
         return $this->hasMany(PemangkuJabatan::class);
+    }
+
+    /**
+     * Unit pembuat surat tempat pengguna menjadi petugas.
+     *
+     * @return BelongsToMany<UnitPembuat, $this>
+     */
+    public function unitPembuat(): BelongsToMany
+    {
+        return $this->belongsToMany(UnitPembuat::class, 'unit_pembuat_petugas', 'user_id', 'unit_pembuat_id')->withTimestamps();
     }
 
     /**

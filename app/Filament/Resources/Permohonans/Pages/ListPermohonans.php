@@ -20,7 +20,7 @@ class ListPermohonans extends ListRecords
         foreach ([
             StatusPermohonan::PersetujuanPembina, StatusPermohonan::ValidasiAdmin, StatusPermohonan::Dikembalikan,
             StatusPermohonan::DisposisiDekan, StatusPermohonan::PersetujuanWd, StatusPermohonan::RekomendasiKasubag,
-            StatusPermohonan::Penerbitan, StatusPermohonan::Selesai, StatusPermohonan::Ditolak,
+            StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan, StatusPermohonan::Selesai, StatusPermohonan::Ditolak,
         ] as $status) {
             $tab[$status->value] = Tab::make($status->label())
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', $status->value));

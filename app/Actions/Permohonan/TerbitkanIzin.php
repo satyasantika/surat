@@ -3,7 +3,9 @@
 namespace App\Actions\Permohonan;
 
 use App\Actions\Naskah\SimpanDraf;
+use App\Enums\StatusDisposisiPenerima;
 use App\Enums\StatusPermohonan;
+use App\Models\DisposisiPenerima;
 use App\Models\JenisNaskah;
 use App\Models\KlasifikasiArsip;
 use App\Models\Naskah;
@@ -17,7 +19,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Penerbitan surat izin (BR-14): setelah rekomendasi, admin membuat draf naskah dari templat jenis permohonan
+ * Penerbitan surat izin (BR-14, BR-26): setelah rekomendasi, petugas unit pembuat yang ditugaskan kasubag (atau admin
+ * pada jalur lama tanpa unit) membuat draf naskah dari templat jenis permohonan
  * dengan variabel terisi otomatis. Bentrok ruangan dicek ulang di dalam kunci sebelum draf dibuat. Selanjutnya
  * naskah mengikuti alur F5 (paraf, tanda tangan, nomor, terbit).
  */
@@ -35,7 +38,7 @@ class TerbitkanIzin
             ->map(fn (PermohonanRuangan $r) => ['kode' => $r->kode_ruangan, 'tanggal' => $r->tanggal->toDateString()])->all();
 
         return KunciRuangan::dengan($butir, fn () => $this->transisi->dalamKunci($permohonan, function (Permohonan $segar) use ($admin) {
-            $this->transisi->pastikanStatus($segar, [StatusPermohonan::Penerbitan]);
+            $this->transisi->pastikanStatus($segar, [StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan]);
             Gate::forUser($admin)->authorize('terbitkanIzin', $segar);
 
             if ($segar->naskah_izin_id !== null && Naskah::whereKey($segar->naskah_izin_id)->where('status', '!=', 'dibatalkan')->exists()) {
@@ -62,6 +65,15 @@ class TerbitkanIzin
 
             $naskah->forceFill(['permohonan_id' => $segar->getKey()])->save();
             $segar->forceFill(['naskah_izin_id' => $naskah->getKey()])->save();
+
+            // Petugas unit mulai membuat: tahap pembuatan berlanjut ke penerbitan (naskah menempuh paraf/tanda tangan).
+            if ($segar->status === StatusPermohonan::Pembuatan) {
+                $this->transisi->ke($segar, StatusPermohonan::Penerbitan, $admin, "Draf surat izin dibuat oleh {$admin->name}".($segar->unitPembuat ? " (unit {$segar->unitPembuat->nama})" : ''));
+                DisposisiPenerima::where('user_id', $admin->getKey())
+                    ->whereHas('disposisi', fn ($q) => $q->where('permohonan_id', $segar->getKey()))
+                    ->whereIn('status', [StatusDisposisiPenerima::Diterima->value, StatusDisposisiPenerima::Dibaca->value])
+                    ->update(['status' => StatusDisposisiPenerima::Ditindaklanjuti->value, 'ditindaklanjuti_pada' => now()]);
+            }
 
             activity('permohonan')->event('draf-izin')->performedOn($segar)->withProperties(['naskah' => $naskah->getKey()])->log('Draf surat izin dibuat');
 

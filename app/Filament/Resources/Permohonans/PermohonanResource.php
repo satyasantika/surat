@@ -45,7 +45,7 @@ class PermohonanResource extends Resource
     }
 
     /**
-     * Admin dan pimpinan melihat semua; pembina hanya permohonan ormawa binaannya.
+     * Admin, pimpinan, dan pemegang izin baca (permohonan.lihat, mis. staf khusus) melihat semua; pembina hanya permohonan ormawa binaannya; petugas unit pembuat hanya yang ditugaskan ke unitnya.
      *
      * @return Builder<Model>
      */
@@ -55,8 +55,12 @@ class PermohonanResource extends Resource
         $query = Permohonan::query();
         $pengguna = auth()->user();
 
-        if ($pengguna && ! $pengguna->canAny(['permohonan.validasi', 'permohonan.putuskan'])) {
-            $query->whereHas('ormawa', fn (Builder $q) => $q->where('pembina_user_id', $pengguna->getKey()));
+        if ($pengguna && ! $pengguna->canAny(['permohonan.lihat', 'permohonan.validasi', 'permohonan.putuskan'])) {
+            $unitIds = $pengguna->unitPembuat()->pluck('unit_pembuat.id');
+
+            $query->where(fn (Builder $w) => $w
+                ->whereHas('ormawa', fn (Builder $q) => $q->where('pembina_user_id', $pengguna->getKey()))
+                ->orWhereIn('unit_pembuat_id', $unitIds));
         }
 
         return $query;
@@ -76,8 +80,14 @@ class PermohonanResource extends Resource
                 TextEntry::make('tanggal_selesai')->date('d M Y'),
                 TextEntry::make('deskripsi')->columnSpanFull(),
                 TextEntry::make('alasan_mendesak')->placeholder('—')->columnSpanFull(),
+                TextEntry::make('mode_wd')->label('Aturan persetujuan WD')->formatStateUsing(fn (?string $state) => Permohonan::MODE_WD[$state ?? 'semua'] ?? $state),
+                TextEntry::make('unitPembuat.nama')->label('Unit pembuat surat')->placeholder('—'),
                 TextEntry::make('pengaju.name')->label('Diajukan oleh'),
                 TextEntry::make('diajukan_pada')->dateTime('d M Y H:i'),
+                // Untuk diberikan kepada pengirim yang tidak punya akun (BR-27); kode ini kunci akses, jadi hanya staf berwenang.
+                TextEntry::make('tautan_lacak')->label('Tautan lacak publik')->columnSpanFull()->copyable()
+                    ->state(fn (Permohonan $record) => $record->tautanLacak())
+                    ->visible(fn () => auth()->user()?->canAny(['permohonan.lihat', 'permohonan.validasi', 'masuk.teruskan']) ?? false),
             ]),
         ]);
     }

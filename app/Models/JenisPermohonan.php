@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 
 /** @property array<int, string> $berkas_wajib */
-#[Fillable(['kode', 'nama', 'butuh_ruangan', 'butuh_fasilitas_rektorat', 'butuh_lpj', 'jenis_naskah_id', 'berkas_wajib', 'aktif'])]
+#[Fillable(['kode', 'nama', 'butuh_ruangan', 'butuh_fasilitas_rektorat', 'butuh_lpj', 'jenis_naskah_id', 'berkas_wajib', 'unit_pembuat_bawaan_id', 'aktif'])]
 class JenisPermohonan extends Model
 {
     use HasUuids, TercatatAktivitas;
@@ -33,6 +33,12 @@ class JenisPermohonan extends Model
                 throw ValidationException::withMessages(['berkas_wajib' => 'Jenis berkas tidak dikenal: '.implode(', ', $tak)]);
             }
         });
+    }
+
+    /** @return BelongsTo<UnitPembuat, $this> */
+    public function unitPembuatBawaan(): BelongsTo
+    {
+        return $this->belongsTo(UnitPembuat::class, 'unit_pembuat_bawaan_id');
     }
 
     /** @return BelongsTo<JenisNaskah, $this> */

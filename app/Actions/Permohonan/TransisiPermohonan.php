@@ -50,6 +50,11 @@ class TransisiPermohonan
 
         if ($ke === StatusPermohonan::Selesai) {
             $permohonan->selesai_pada = now();
+
+            // Selesai berarti hasil sampai ke pengirim (surat izin terbit atau tautan hasil dikirim petugas unit).
+            if ($permohonan->hasil_dikirim_pada === null) {
+                $permohonan->forceFill(['hasil_dikirim_pada' => now(), 'hasil_dikirim_oleh' => $oleh->getKey()]);
+            }
         }
 
         $permohonan->save();
