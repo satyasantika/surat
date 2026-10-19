@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bagan alur pengirim surat — Panduan Persuratan FKIP</title>
+<style>
+:root{--biru:#1e3a8a;--abu:#475569;--garis:#e2e8f0;--latar:#f8fafc;--hijau:#166534;--hijau-m:#dcfce7;--merah:#991b1b;--merah-m:#fee2e2;--kuning-m:#fef9c3;--kuning:#854d0e;--biru-m:#eff6ff}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1e293b;background:var(--latar)}
+header{background:var(--biru);color:#fff;padding:14px 16px}header a{color:#fff}
+main{max-width:860px;margin:0 auto;padding:16px}h1{font-size:1.5rem;color:var(--biru);margin:.4em 0}h2{font-size:1.15rem;margin:1.8em 0 .4em;color:var(--biru)}
+nav a{margin-right:12px}footer{max-width:860px;margin:0 auto;padding:16px;color:var(--abu);font-size:.85rem}
+code{background:#eef2ff;padding:1px 5px;border-radius:4px;font-size:.9em}
+
+/* Bagan: rantai langkah vertikal, panah antar-langkah */
+.alur{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;align-items:center}
+.alur>li{position:relative;width:100%;max-width:520px;text-align:center;margin:0 0 30px}
+.alur>li:not(:last-child)::after{content:"";position:absolute;left:50%;bottom:-26px;width:2px;height:22px;background:var(--biru);transform:translateX(-50%)}
+.alur>li:not(:last-child)::before{content:"";position:absolute;left:50%;bottom:-28px;border:6px solid transparent;border-top:8px solid var(--biru);border-bottom:0;transform:translateX(-50%)}
+.kotak{display:block;background:#fff;border:2px solid var(--biru);border-radius:10px;padding:10px 14px;text-align:left}
+.kotak b{display:block;color:var(--biru)}.kotak small{color:var(--abu);display:block;margin-top:2px;line-height:1.45}
+.no{display:inline-block;min-width:1.7em;height:1.7em;line-height:1.7em;text-align:center;border-radius:50%;background:var(--biru);color:#fff;font-size:.8rem;font-weight:700;margin-right:6px}
+.mulai .kotak,.selesai .kotak{border-radius:999px;text-align:center}
+.mulai .kotak{background:var(--biru);border-color:var(--biru)}.mulai .kotak b,.mulai .kotak small{color:#fff}
+.selesai .kotak{background:var(--hijau-m);border-color:var(--hijau)}.selesai .kotak b{color:var(--hijau)}
+.tanya .kotak{background:var(--kuning-m);border-color:#ca8a04;border-style:dashed}.tanya .kotak b{color:var(--kuning);text-align:center}
+.petugas .kotak{background:var(--biru-m);border-style:dashed}
+.cabang{margin-top:8px;display:grid;gap:6px;text-align:left;font-size:.88rem}
+.cabang span{display:block;border-left:4px solid var(--garis);padding:3px 8px;background:#fff;border-radius:0 6px 6px 0}
+.cabang .ya{border-color:var(--hijau)}.cabang .tidak{border-color:var(--merah);background:var(--merah-m)}.cabang .ulang{border-color:#ca8a04;background:var(--kuning-m)}
+
+/* Dua jalur berdampingan di layar lebar */
+.jalur{display:grid;gap:28px;margin-top:10px}
+@media(min-width:820px){.jalur{grid-template-columns:1fr 1fr;align-items:start}main{max-width:1000px}}
+.lajur{background:#fff;border:1px solid var(--garis);border-radius:12px;padding:16px 14px 2px}
+.lajur>h3{margin:0 0 4px;color:var(--biru);font-size:1.05rem}.lajur>p{margin:0 0 16px;font-size:.9rem;color:var(--abu)}
+.legenda{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.82rem;color:var(--abu);margin:8px 0 0}
+.legenda i{display:inline-block;width:14px;height:14px;border:2px solid var(--biru);border-radius:4px;vertical-align:-2px;margin-right:4px;background:#fff}
+.legenda .p{background:var(--biru-m);border-style:dashed}.legenda .k{background:var(--kuning-m);border:2px dashed #ca8a04}.legenda .s{background:var(--hijau-m);border-color:var(--hijau);border-radius:999px}
+.kartu{background:#fff;border:1px solid var(--garis);border-radius:10px;padding:14px 16px;margin:12px 0}
+details{margin:6px 0}summary{cursor:pointer;font-weight:600}
+.pusat{max-width:520px;margin:0 auto}
+.tombol{display:inline-block;background:var(--biru);color:#fff;text-decoration:none;border-radius:6px;padding:8px 16px;font-weight:600}
+@media print{header,nav{display:none}body{background:#fff}.lajur,.kartu{break-inside:avoid}.jalur{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><strong>Panduan Persuratan &amp; Layanan FKIP Unsil</strong></header>
+<main>
+<nav><a href="index.html">&larr; Semua panduan</a></nav>
+<h1>Bagan alur untuk pengirim surat</h1>
+<p>Ikuti panah dari atas ke bawah. Pilih jalur sesuai siapa Anda: <strong>pengurus ormawa</strong> (mengajukan lewat akun sendiri) atau <strong>program studi / pihak eksternal</strong> (menyerahkan surat kepada staf khusus dekanat). Keduanya bertemu di langkah akhir yang sama: melacak dan mengambil hasil.</p>
+<p class="legenda" aria-label="Keterangan simbol">
+<span><i></i>Langkah Anda</span><span><i class="p"></i>Diproses petugas fakultas</span><span><i class="k"></i>Pertanyaan / percabangan</span><span><i class="s"></i>Awal &amp; akhir</span>
+</p>
+
+<h2>Langkah awal</h2>
+<ol class="alur pusat">
+<li class="mulai"><span class="kotak"><b>Anda punya surat atau permohonan untuk Dekan FKIP</b><small>Izin kegiatan, penggunaan ruangan, atau surat dari instansi</small></span></li>
+<li class="tanya"><span class="kotak"><b>Anda mengirim sebagai siapa?</b>
+<span class="cabang">
+<span class="ya"><strong>Pengurus ormawa</strong> (mahasiswa) &rarr; ikuti <a href="#jalur-ormawa">Jalur A</a></span>
+<span class="ya"><strong>Program studi / pihak eksternal</strong> (UKM, instansi, umum) &rarr; ikuti <a href="#jalur-eksternal">Jalur B</a></span>
+</span></span></li>
+</ol>
+
+<div class="jalur">
+<section class="lajur" id="jalur-ormawa" aria-labelledby="ja">
+<h3 id="ja">Jalur A — Pengurus ormawa</h3>
+<p>Lewat akun pribadi; kegiatan dan ruangan diajukan langsung di aplikasi.</p>
+<ol class="alur">
+<li><span class="kotak"><b><span class="no">1</span>Daftar akun</b><small>Halaman <code>/daftar</code> dengan surel <code>…@student.unsil.ac.id</code>, lalu klik tautan verifikasi di surel. Sudah punya akun? Lewati.</small></span></li>
+<li><span class="kotak"><b><span class="no">2</span>Akun ditautkan ke ormawa</b><small>Minta ketua/sekretaris atau admin menautkan akun Anda (berdasarkan NIM). Setelah itu <strong>Masuk</strong>.</small></span></li>
+<li class="tanya"><span class="kotak"><b>Bisakah mengajukan?</b>
+<span class="cabang">
+<span class="ya">SK kepengurusan berlaku &amp; tidak ada LPJ terlambat &rarr; lanjut</span>
+<span class="tidak">SK habis / LPJ terlambat &rarr; perbarui SK atau ajukan LPJ dulu</span>
+</span></span></li>
+<li><span class="kotak"><b><span class="no">3</span>Ajukan permohonan baru</b><small>Menu <strong>Ajukan permohonan</strong>: pilih jenis, isi data kegiatan, pilih ruangan &amp; sesi, lampirkan <strong>tautan</strong> surat dan proposal (Google Drive / unsil.ac.id, bukan unggahan file).</small></span></li>
+<li class="petugas"><span class="kotak"><b>Pembina menyetujui</b><small>Hanya bila tahap ini diaktifkan fakultas</small></span></li>
+<li class="petugas"><span class="kotak"><b>Admin persuratan memvalidasi</b>
+<span class="cabang">
+<span class="ulang">Kurang lengkap &rarr; <em>Dikembalikan</em>: perbaiki lalu ajukan ulang</span>
+<span class="ya">Lengkap &rarr; lanjut ke Dekan</span>
+</span></span></li>
+<li class="petugas"><span class="kotak"><b>Dekan &rarr; Wakil Dekan &rarr; Kasubag</b><small>Disposisi, persetujuan, dan rekomendasi secara berurutan. Pimpinan dapat menolak.</small></span></li>
+<li class="petugas"><span class="kotak"><b>Unit pembuat menyiapkan surat</b><small>Surat izin dibuat lalu diparaf dan ditandatangani</small></span></li>
+<li><span class="kotak"><b><span class="no">4</span>Terima pemberitahuan</b><small>Notifikasi di aplikasi dan surel: <em>Permohonan selesai, hasil tersedia</em> (atau ditolak, dengan alasan).</small></span></li>
+<li><span class="kotak"><b><span class="no">5</span>Ambil hasil</b><small><strong>Progres permohonan</strong> &rarr; <strong>Unduh surat izin</strong> atau buka tautan <strong>Hasil cetak</strong>.</small></span></li>
+<li><span class="kotak"><b><span class="no">6</span>Isi LPJ setelah kegiatan</b><small>Menu LPJ &rarr; <strong>Ajukan LPJ</strong>. Terlambat dapat memblokir pengajuan berikutnya.</small></span></li>
+</ol>
+</section>
+
+<section class="lajur" id="jalur-eksternal" aria-labelledby="jb">
+<h3 id="jb">Jalur B — Prodi &amp; pihak eksternal</h3>
+<p>Tanpa akun; surat diserahkan, petugas yang mendaftarkan.</p>
+<ol class="alur">
+<li><span class="kotak"><b><span class="no">1</span>Siapkan surat &amp; pindaiannya</b><small>Surat resmi bernomor dan bertanggal, beserta pindaian (tautan berkas) yang dapat dibuka.</small></span></li>
+<li><span class="kotak"><b><span class="no">2</span>Serahkan ke staf khusus dekanat</b><small>Antar langsung atau kirim melalui kanal resmi fakultas. <strong>Sertakan kontak</strong>: nama, instansi, serta surel <em>atau</em> nomor WhatsApp yang aktif.</small></span></li>
+<li class="petugas"><span class="kotak"><b>Staf khusus meregistrasi surat</b><small>Dicatat nomor agenda, asal, perihal, dan jenis pengirim (prodi / eksternal)</small></span></li>
+<li class="petugas"><span class="kotak"><b>Diteruskan kepada Dekan</b><small>Dekan menerima pemberitahuan dan mendisposisikan</small></span></li>
+<li class="petugas"><span class="kotak"><b>Ditugaskan ke unit pembuat</b><small>Bila perlu dibuatkan surat balasan atau tindak lanjut</small></span></li>
+<li><span class="kotak"><b><span class="no">3</span>Terima kode lacak</b><small>Dikirim lewat surel / WhatsApp, atau diberikan staf khusus. Simpan kode seperti <code>K7M2-9QXD-4WPT</code>.</small></span></li>
+<li class="petugas"><span class="kotak"><b>Hasil dikirim kepada Anda</b><small>Petugas mengirim tautan hasil lewat surel / WhatsApp</small></span></li>
+</ol>
+</section>
+</div>
+
+<h2>Langkah akhir (semua pengirim)</h2>
+<ol class="alur pusat">
+<li><span class="kotak"><b><span class="no">★</span>Lacak kapan saja, tanpa akun</b><small>Buka <code>/lacak</code>, ketik kode lacak, lalu <strong>Lacak</strong>. Tampil status terkini dan linimasa tahap berikut jabatan pemrosesnya.</small></span></li>
+<li class="tanya"><span class="kotak"><b>Hasilnya bagaimana?</b>
+<span class="cabang">
+<span class="ya">Selesai &rarr; klik <strong>Buka hasil</strong>; surat izin juga punya tautan <strong>Periksa keaslian surat</strong></span>
+<span class="ulang">Dikembalikan &rarr; baca alasan, perbaiki, ajukan ulang</span>
+<span class="tidak">Ditolak / dibatalkan &rarr; alasan tertera; ajukan baru bila perlu</span>
+<span class="ulang">Masih diproses &rarr; cek lagi nanti; hubungi admin persuratan bila lama</span>
+</span></span></li>
+<li class="selesai"><span class="kotak"><b>Selesai</b><small>Hasil diterima</small></span></li>
+</ol>
+
+<p class="pusat" style="text-align:center"><a class="tombol" href="../lacak">Buka halaman lacak</a></p>
+
+<h2>Tanya jawab</h2>
+<details><summary>Saya tidak punya kode lacak.</summary><p>Pengurus ormawa: lihat halaman <strong>Progres permohonan</strong> setelah masuk. Pengirim prodi/eksternal: minta kode kepada staf khusus dekanat, atau periksa surel/WhatsApp yang Anda berikan saat menyerahkan surat.</p></details>
+<details><summary>Tautan berkas saya ditolak.</summary><p>Gunakan satu berkas Google Drive atau unsil.ac.id (bukan folder, bukan pemendek URL seperti bit.ly) dan atur agar dapat dibuka.</p></details>
+<details><summary>Siapa yang melihat kontak saya?</summary><p>Surel dan WhatsApp disimpan terenkripsi dan tidak tampil di halaman lacak. Halaman lacak hanya memuat tahap, jabatan pemroses, dan tautan hasil.</p></details>
+<details><summary>Panduan lengkap dengan tangkapan layar?</summary><p><a href="pengurus-ormawa.html">Pengurus ormawa</a> · <a href="melacak-surat.html">Melacak surat</a> · <a href="index.html">Semua panduan</a></p></details>
+<p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>
+</main>
+<footer>Bagan ini menyederhanakan alur resmi; urutan tahap dapat berbeda sesuai pengaturan fakultas. Kendala? Hubungi admin persuratan FKIP.</footer>
+</body>
+</html>

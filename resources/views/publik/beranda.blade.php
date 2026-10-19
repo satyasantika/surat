@@ -5,6 +5,7 @@
         <p class="mt-4 max-w-xl text-blue-100">Pengajuan surat, disposisi, arsip naskah, hingga profil kegiatan ormawa — satu sistem terpadu untuk sivitas akademika FKIP.</p>
         <div class="mt-8 flex flex-wrap gap-3">
             <a href="{{ route('verifikasi.form') }}" class="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-blue-900 hover:bg-blue-50">Verifikasi keaslian surat</a>
+            <a href="{{ asset('panduan/alur-pengirim.html') }}" class="rounded-md border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Alur pengiriman surat</a>
             <a href="{{ asset('panduan/index.html') }}" class="rounded-md border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Lihat panduan pengguna</a>
             <a href="{{ route('login') }}" class="rounded-md border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">Masuk ke sistem</a>
         </div>
@@ -40,6 +41,7 @@
     </section>
 
     <section class="rounded-xl border border-blue-100 bg-blue-50 p-6 text-sm text-blue-900">
+        <p class="mb-2">Mengirim surat ke fakultas? Ikuti <a href="{{ asset('panduan/alur-pengirim.html') }}" class="font-medium underline">Bagan alur pengiriman surat</a> langkah demi langkah.</p>
         <p class="mb-2">Butuh bantuan memakai aplikasi? Buka <a href="{{ asset('panduan/index.html') }}" class="font-medium underline">Panduan Pengguna</a> per peran lengkap dengan tangkapan layar.</p>
         <p>Memeriksa keaslian surat? Gunakan <a href="{{ route('verifikasi.form') }}" class="font-medium underline">Verifikasi surat</a>.</p>
     </section>

@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const akar = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const dasar = (process.env.PANDUAN_BASE_URL ?? 'http://localhost:8028').replace(/\/$/, '');
+const dasar = (process.env.PANDUAN_BASE_URL ?? 'http://localhost:8015').replace(/\/$/, '');
 const sandi = process.env.PANDUAN_PASSWORD;
 if (!sandi) { console.error('PANDUAN_PASSWORD wajib diisi (kata sandi akun demo dari PanduanSeeder).'); process.exit(2); }
 

@@ -21,7 +21,7 @@ srp composer install
 srp php artisan migrate
 ```
 
-Aplikasi: http://localhost:8028 (port dari compose pusat). Perintah PHP/Composer selalu lewat `srp`; npm dijalankan dari host (container belum berisi Node).
+Aplikasi: http://localhost:8015 (port dari compose pusat). Perintah PHP/Composer selalu lewat `srp`; npm dijalankan dari host (container belum berisi Node).
 
 ## Subpath produksi `/surat`
 
@@ -58,7 +58,7 @@ menyalakan worker (`routes/console.php`); tidak perlu Redis, Horizon, maupun Got
 ```
 
 Tanpa service itu, proses antrean secara manual: `srp php artisan queue:work database --queue=default --stop-when-empty`
-(job berat: `queue:work database-berat --queue=berat --stop-when-empty`). Pantau dengan `curl http://localhost:8028/api/health`
+(job berat: `queue:work database-berat --queue=berat --stop-when-empty`). Pantau dengan `curl http://localhost:8015/api/health`
 dan `srp php artisan queue:failed`.
 
 ## Uji penerimaan (staging)
