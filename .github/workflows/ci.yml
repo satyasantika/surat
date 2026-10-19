@@ -71,7 +71,7 @@ jobs:
 
       - run: ./vendor/bin/pint --test
       - run: ./vendor/bin/phpstan analyse --memory-limit=1G --no-progress
-      - run: php artisan test --parallel
+      - run: php artisan test
 
   deploy:
     needs: uji
