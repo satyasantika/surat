@@ -76,7 +76,11 @@ class PenggunaImporter extends Importer
         ];
 
         try {
-            $this->record = app(SimpanPengguna::class)->jalankan($this->record->exists ? $this->record : null, $data, $pelaku);
+            // $model = User::class di atas menjamin $this->record selalu User (basis Importer mendeklarasikannya generik Model).
+            /** @var User|null $penggunaAda */
+            $penggunaAda = $this->record->exists ? $this->record : null;
+
+            $this->record = app(SimpanPengguna::class)->jalankan($penggunaAda, $data, $pelaku);
         } catch (ValidationException $e) {
             throw new RowImportFailedException(collect($e->errors())->flatten()->implode(' '));
         }
