@@ -20,9 +20,11 @@ use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -92,6 +94,15 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn ($user) => $user->hasRole('super-admin') ? true : null);
 
         $this->aturUrlSubpath();
+
+        // Pest/ParaTest --parallel: tiap worker butuh database fisik sendiri, bukan berbagi satu
+        // database yang sama — kalau berbagi, insert bersamaan (mis. seeder permissions) saling
+        // mengunci baris dan melempar deadlock (SQLSTATE[40001]) secara acak antarworker.
+        if ($this->app->runningUnitTests()) {
+            ParallelTesting::setUpTestDatabase(function (string $database) {
+                DB::statement("CREATE DATABASE IF NOT EXISTS `{$database}`");
+            });
+        }
     }
 
     /**
