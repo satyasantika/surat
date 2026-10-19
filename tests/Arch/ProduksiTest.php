@@ -12,7 +12,7 @@ function komposProduksi(): array
 }
 
 it('hanya memuat layanan app, nginx, scheduler, dan backup', function () {
-    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['app', 'nginx', 'scheduler', 'backup']);
+    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['php', 'nginx', 'scheduler', 'backup']);
 });
 
 it('tidak memuat container database, redis, queue, atau gotenberg', function () {
@@ -43,7 +43,7 @@ it('memakai image mariadb hanya sebagai klien cadangan berprofil backup', functi
 });
 
 it('menghubungkan container ke basis data host lewat host-gateway', function () {
-    foreach (['app', 'scheduler', 'backup'] as $nama) {
+    foreach (['php', 'scheduler', 'backup'] as $nama) {
         expect(komposProduksi()['services'][$nama]['extra_hosts'])->toContain('host.docker.internal:host-gateway');
     }
 

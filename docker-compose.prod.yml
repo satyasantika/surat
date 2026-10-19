@@ -26,7 +26,7 @@ x-app: &app
     PHP_MEMORY_LIMIT: 512M
 
 services:
-  app:
+  php:
     <<: *app
     mem_limit: 512m
     build:
@@ -50,7 +50,7 @@ services:
     restart: unless-stopped
     mem_limit: 64m
     logging: *log
-    depends_on: [app]
+    depends_on: [php]
     # Hanya loopback: reverse proxy fakultas yang membuka ke publik (TLS di sana).
     ports: ["127.0.0.1:${HTTP_PORT:-8028}:80"]
     networks: [internal]
