@@ -23,7 +23,7 @@ Schedule::command('queue:work database-berat --queue=berat --stop-when-empty --m
     ->everyMinute()->withoutOverlapping(30)->runInBackground();
 
 // Detak penjadwal: dibaca /api/health; peringatan bila lebih tua dari 5 menit.
-Schedule::call(fn () => cache()->put(config('app.kode').':detak-penjadwal', now(), 600))
+Schedule::call(fn () => cache()->put(config('app.kode').':detak-penjadwal', now()->getTimestamp(), 600))
     ->everyMinute()->name('detak-penjadwal');
 
 Schedule::command('queue:prune-failed --hours=720')->dailyAt('03:00');
