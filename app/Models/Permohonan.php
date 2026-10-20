@@ -94,6 +94,16 @@ class Permohonan extends Model
         return $this->jenis_pengaju->berunit() ? (string) $this->unitKerja?->nama : (string) $this->ormawa?->nama;
     }
 
+    /** Penerima surat izin: ketua ormawa, ketua program studi, atau kepala laboratorium. */
+    public function sebutanPimpinanPengaju(): string
+    {
+        return match ($this->jenis_pengaju) {
+            JenisPengaju::Ormawa => 'Ketua '.$this->namaPengaju(),
+            JenisPengaju::Prodi => 'Ketua Program Studi '.$this->namaPengaju(),
+            JenisPengaju::Laboratorium => 'Kepala '.$this->namaPengaju(),
+        };
+    }
+
     /** @return BelongsTo<JenisPermohonan, $this> */
     public function jenis(): BelongsTo
     {

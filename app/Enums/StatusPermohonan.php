@@ -6,6 +6,7 @@ enum StatusPermohonan: string
 {
     case Diajukan = 'diajukan';
     case PersetujuanPembina = 'persetujuan_pembina';
+    case PersetujuanUnit = 'persetujuan_unit';
     case ValidasiAdmin = 'validasi_admin';
     case Dikembalikan = 'dikembalikan';
     case DisposisiDekan = 'disposisi_dekan';
@@ -21,6 +22,7 @@ enum StatusPermohonan: string
     {
         return match ($this) {
             self::PersetujuanPembina => 'Persetujuan pembina',
+            self::PersetujuanUnit => 'Persetujuan kepala unit',
             self::ValidasiAdmin => 'Validasi admin',
             self::DisposisiDekan => 'Disposisi dekan',
             self::PersetujuanWd => 'Persetujuan WD',
@@ -36,6 +38,7 @@ enum StatusPermohonan: string
         return match ($this) {
             self::Diajukan => 'Permohonan diajukan',
             self::PersetujuanPembina => 'Menunggu persetujuan pembina',
+            self::PersetujuanUnit => 'Menunggu persetujuan kepala program studi / laboratorium',
             self::ValidasiAdmin => 'Validasi administrasi',
             self::Dikembalikan => 'Dikembalikan untuk diperbaiki',
             self::DisposisiDekan => 'Menunggu disposisi dekan',

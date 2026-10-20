@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Permohonans;
 
+use App\Enums\JenisPengaju;
 use App\Enums\StatusPermohonan;
 use App\Filament\Resources\Permohonans\Pages\ListPermohonans;
 use App\Filament\Resources\Permohonans\Pages\ViewPermohonan;
@@ -60,6 +61,7 @@ class PermohonanResource extends Resource
 
             $query->where(fn (Builder $w) => $w
                 ->whereHas('ormawa', fn (Builder $q) => $q->where('pembina_user_id', $pengguna->getKey()))
+                ->orWhereIn('unit_kerja_id', $pengguna->unitDisetujui()->pluck('unit_kerja.id'))
                 ->orWhereIn('unit_pembuat_id', $unitIds));
         }
 
@@ -72,7 +74,8 @@ class PermohonanResource extends Resource
             Section::make('Permohonan')->columns(2)->schema([
                 TextEntry::make('nomor'),
                 TextEntry::make('status')->badge()->formatStateUsing(fn (StatusPermohonan $state) => $state->label()),
-                TextEntry::make('ormawa.nama')->label('Ormawa'),
+                TextEntry::make('jenis_pengaju')->label('Jenis pengaju')->formatStateUsing(fn (JenisPengaju $state) => $state->label()),
+                TextEntry::make('pengaju_nama')->label('Pengaju')->state(fn (Permohonan $record) => $record->namaPengaju()),
                 TextEntry::make('jenis.nama')->label('Jenis'),
                 TextEntry::make('nama_kegiatan')->columnSpanFull(),
                 TextEntry::make('perihal')->columnSpanFull(),
@@ -95,11 +98,12 @@ class PermohonanResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['ormawa', 'jenis']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['ormawa', 'unitKerja', 'jenis']))
             ->defaultSort('diajukan_pada', 'desc')
             ->columns([
                 TextColumn::make('nomor')->searchable()->sortable(),
-                TextColumn::make('ormawa.nama')->label('Ormawa')->searchable(),
+                TextColumn::make('pengaju_nama')->label('Pengaju')->state(fn (Permohonan $record) => $record->namaPengaju())
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where(fn (Builder $w) => $w->whereHas('ormawa', fn (Builder $q) => $q->where('nama', 'like', "%{$search}%"))->orWhereHas('unitKerja', fn (Builder $q) => $q->where('nama', 'like', "%{$search}%")))),
                 TextColumn::make('nama_kegiatan')->searchable()->wrap(),
                 TextColumn::make('jenis.nama')->label('Jenis')->toggleable(),
                 TextColumn::make('tanggal_mulai')->label('Kegiatan')->date('d M Y')->sortable(),

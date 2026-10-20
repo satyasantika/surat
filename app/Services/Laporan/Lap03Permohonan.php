@@ -27,9 +27,9 @@ class Lap03Permohonan extends Laporan
 
     public function susun(CarbonImmutable $dari, CarbonImmutable $sampai): array
     {
-        $permohonan = Permohonan::whereBetween('diajukan_pada', [$dari, $sampai])->with('ormawa:id,nama')->get();
+        $permohonan = Permohonan::whereBetween('diajukan_pada', [$dari, $sampai])->with(['ormawa:id,nama', 'unitKerja:id,nama'])->get();
 
-        $rekap = $permohonan->groupBy(fn (Permohonan $p) => $p->diajukan_pada->format('Y-m').'|'.$p->ormawa->nama.'|'.$p->status->value)
+        $rekap = $permohonan->groupBy(fn (Permohonan $p) => $p->diajukan_pada->format('Y-m').'|'.$p->namaPengaju().'|'.$p->status->value)
             ->map(fn ($k, $kunci) => [...explode('|', $kunci, 3), $k->count()])->sortKeys()
             ->map(fn ($b) => [$b[0], $b[1], StatusPermohonan::from($b[2])->label(), $b[3]])->values()->all();
 

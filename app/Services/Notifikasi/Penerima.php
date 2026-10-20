@@ -43,6 +43,25 @@ class Penerima
         return PemangkuJabatan::whereHas('jabatan', fn ($q) => $q->where('unit_kerja_id', $unitKerjaId))->berlakuPada(now())->with('user')->get()->pluck('user')->filter()->values();
     }
 
+    /** @return Collection<int, User> kepala unit (kaprodi/kalab) aktif yang menyetujui permohonan unit */
+    public static function penyetujuUnit(string $unitKerjaId): Collection
+    {
+        return User::whereHas('unitDisetujui', fn ($q) => $q->whereKey($unitKerjaId))->where('aktif', true)->get();
+    }
+
+    /** @return Collection<int, User> pihak pengirim permohonan: pengurus ormawa, atau pengaju unit, ditambah pengaju sendiri */
+    public static function pengaju(Permohonan $permohonan): Collection
+    {
+        if ($permohonan->jenis_pengaju->berunit() && $permohonan->unit_kerja_id !== null) {
+            $permohonan->loadMissing('pengaju');
+
+            return User::whereHas('unitDiajukan', fn ($q) => $q->whereKey($permohonan->unit_kerja_id))->where('aktif', true)->get()
+                ->push($permohonan->pengaju)->filter()->unique('id')->values();
+        }
+
+        return self::ormawa($permohonan->ormawa, $permohonan);
+    }
+
     /** @return Collection<int, User> akun pengurus aktif ormawa + pengaju (bila diberikan) */
     public static function ormawa(Ormawa $ormawa, ?Permohonan $permohonan = null): Collection
     {

@@ -111,21 +111,27 @@ class NotifikasiAlur
     public function permohonanDiajukan(Permohonan $p, User $pelaku): void
     {
         $this->aman(function () use ($p, $pelaku) {
-            $p->loadMissing('ormawa');
-            $ringkas = "{$p->nomor}: {$p->nama_kegiatan} ({$p->ormawa->nama}).";
+            $p->loadMissing(['ormawa', 'unitKerja']);
+            $ringkas = "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}).";
 
-            $this->kirim->kirim($p->status === StatusPermohonan::PersetujuanPembina ? [$p->ormawa->pembina] : Penerima::izin('permohonan.validasi'), 'permohonan', $p->status === StatusPermohonan::PersetujuanPembina ? 'Permohonan menunggu persetujuan pembina' : 'Permohonan baru menunggu validasi', $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
+            [$penerima, $judul] = match ($p->status) {
+                StatusPermohonan::PersetujuanPembina => [[$p->ormawa?->pembina], 'Permohonan menunggu persetujuan pembina'],
+                StatusPermohonan::PersetujuanUnit => [Penerima::penyetujuUnit((string) $p->unit_kerja_id), 'Permohonan menunggu persetujuan kepala unit'],
+                default => [Penerima::izin('permohonan.validasi'), 'Permohonan baru menunggu validasi'],
+            };
+
+            $this->kirim->kirim($penerima, 'permohonan', $judul, $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
 
             // Staf khusus dekanat mendapat tembusan (informasi) setiap permohonan baru masuk.
-            $this->kirim->kirim(Penerima::peran('staf-khusus'), 'permohonan', 'Tembusan: permohonan baru dari ormawa', $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
+            $this->kirim->kirim(Penerima::peran('staf-khusus'), 'permohonan', 'Tembusan: permohonan baru dari '.$p->jenis_pengaju->label(), $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
         });
     }
 
     public function permohonanBerubah(Permohonan $p, StatusPermohonan $ke, User $oleh): void
     {
         $this->aman(function () use ($p, $ke, $oleh) {
-            $p->loadMissing('ormawa');
-            $ringkas = "{$p->nomor}: {$p->nama_kegiatan} ({$p->ormawa->nama}).";
+            $p->loadMissing(['ormawa', 'unitKerja']);
+            $ringkas = "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}).";
 
             // Pihak berikutnya
             [$users, $judul, $url] = $this->penerimaTahap($p, $ke);
@@ -135,11 +141,11 @@ class NotifikasiAlur
             // disertai tautan lacak publik (BR-27, BR-28).
             $selesai = $ke === StatusPermohonan::Selesai;
             $this->kirim->kirim(
-                Penerima::ormawa($p->ormawa, $p),
+                Penerima::pengaju($p),
                 'permohonan',
                 $selesai ? 'Permohonan selesai: hasil tersedia' : 'Permohonan: '.$ke->label(),
                 $selesai ? $ringkas.' Hasil dapat dibuka dari halaman progres permohonan atau tautan lacak: '.$p->tautanLacak() : $ringkas,
-                route('ormawa.permohonan', $p->ormawa),
+                $p->ormawa_id !== null ? route('ormawa.permohonan', $p->ormawa) : null,
                 $oleh,
             );
         });
@@ -209,18 +215,19 @@ class NotifikasiAlur
      */
     public function penerimaTahap(Permohonan $p, StatusPermohonan $tahap): array
     {
-        $p->loadMissing('ormawa.pembina');
+        $p->loadMissing(['ormawa.pembina', 'unitKerja']);
         $admin = PermohonanResource::getUrl('view', ['record' => $p]);
 
         return match ($tahap) {
-            StatusPermohonan::PersetujuanPembina => [array_filter([$p->ormawa->pembina]), 'Permohonan menunggu persetujuan pembina', $admin],
+            StatusPermohonan::PersetujuanPembina => [array_filter([$p->ormawa?->pembina]), 'Permohonan menunggu persetujuan pembina', $admin],
+            StatusPermohonan::PersetujuanUnit => [Penerima::penyetujuUnit((string) $p->unit_kerja_id)->all(), 'Permohonan menunggu persetujuan kepala unit', $admin],
             StatusPermohonan::Diajukan, StatusPermohonan::ValidasiAdmin => [Penerima::izin('permohonan.validasi')->all(), 'Permohonan menunggu validasi', $admin],
             StatusPermohonan::DisposisiDekan => [Penerima::jabatan('dekan')->all(), 'Permohonan menunggu disposisi Dekan', route('disposisi')],
             StatusPermohonan::PersetujuanWd => [$this->wdMenunggu($p), 'Permohonan menunggu keputusan Anda', route('disposisi')],
             StatusPermohonan::RekomendasiKasubag => [Penerima::jabatan('kasubag-umum')->all(), 'Permohonan menunggu rekomendasi Kasubag', route('disposisi')],
             StatusPermohonan::Pembuatan => [$p->unitPembuat?->petugasAktif()->get()->all() ?? [], 'Permohonan ditugaskan kepada unit Anda untuk dibuatkan suratnya', $admin],
             StatusPermohonan::Penerbitan => [Penerima::izin('nomor.terbitkan')->all(), 'Permohonan siap diterbitkan suratnya', $admin],
-            StatusPermohonan::Dikembalikan => [Penerima::ormawa($p->ormawa, $p)->all(), 'Permohonan menunggu perbaikan Anda', route('ormawa.permohonan', $p->ormawa)],
+            StatusPermohonan::Dikembalikan => [Penerima::pengaju($p)->all(), 'Permohonan menunggu perbaikan Anda', $p->ormawa_id !== null ? route('ormawa.permohonan', $p->ormawa) : null],
             default => [[], '', null],
         };
     }
@@ -229,9 +236,9 @@ class NotifikasiAlur
     {
         $this->aman(function () use ($p, $hari) {
             [$users, $judul, $url] = $this->penerimaTahap($p, $p->status);
-            $p->loadMissing('ormawa');
+            $p->loadMissing(['ormawa', 'unitKerja']);
 
-            $users !== [] ? $this->kirim->kirim($users, 'pengingat', "Pengingat: {$judul}", "{$p->nomor}: {$p->nama_kegiatan} ({$p->ormawa->nama}) tertahan {$hari} hari pada tahap ini.", $url) : null;
+            $users !== [] ? $this->kirim->kirim($users, 'pengingat', "Pengingat: {$judul}", "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}) tertahan {$hari} hari pada tahap ini.", $url) : null;
         });
     }
 

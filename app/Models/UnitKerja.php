@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property TipeUnitKerja $tipe
+ */
 #[Fillable(['kode', 'nama', 'tipe', 'induk_id', 'aktif'])]
 class UnitKerja extends Model
 {

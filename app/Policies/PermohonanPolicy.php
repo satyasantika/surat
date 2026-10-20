@@ -44,15 +44,21 @@ class PermohonanPolicy
             && $permohonan->status === StatusPermohonan::PersetujuanPembina;
     }
 
+    /** Kepala unit (kaprodi/kalab) menyetujui permohonan unitnya pada tahap persetujuan unit. */
+    public function setujuiUnit(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->status === StatusPermohonan::PersetujuanUnit && $this->penyetujuUnit($pelaku, $permohonan);
+    }
+
     public function validasi(User $pelaku, Permohonan $permohonan): bool
     {
         return $pelaku->can('permohonan.validasi') && $permohonan->status === StatusPermohonan::ValidasiAdmin;
     }
 
-    /** Mengembalikan/menolak pada tahap pembina (oleh pembina binaan) atau tahap validasi (oleh admin). */
+    /** Mengembalikan/menolak pada tahap pembina (pembina binaan), tahap unit (kepala unit), atau tahap validasi (admin). */
     public function putusTahapAwal(User $pelaku, Permohonan $permohonan): bool
     {
-        return $this->setujuiPembina($pelaku, $permohonan) || $this->validasi($pelaku, $permohonan);
+        return $this->setujuiPembina($pelaku, $permohonan) || $this->setujuiUnit($pelaku, $permohonan) || $this->validasi($pelaku, $permohonan);
     }
 
     /** Pengurus aktif ormawa merevisi lalu mengajukan ulang permohonan yang dikembalikan. */

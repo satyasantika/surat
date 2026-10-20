@@ -93,8 +93,9 @@ function paksaStatus(Permohonan $p, StatusPermohonan $s): Permohonan
 describe('peta transisi', function () {
     it('mendefinisikan transisi sah dan menolak seluruh sisanya', function () {
         $sah = [
-            'diajukan' => ['persetujuan_pembina', 'validasi_admin'],
+            'diajukan' => ['persetujuan_pembina', 'persetujuan_unit', 'validasi_admin'],
             'persetujuan_pembina' => ['validasi_admin', 'dikembalikan', 'ditolak', 'dibatalkan'],
+            'persetujuan_unit' => ['validasi_admin', 'dikembalikan', 'ditolak', 'dibatalkan'],
             'validasi_admin' => ['disposisi_dekan', 'dikembalikan', 'ditolak', 'dibatalkan'],
             'dikembalikan' => ['validasi_admin', 'dibatalkan'],
             'disposisi_dekan' => ['persetujuan_wd', 'ditolak', 'dibatalkan'],

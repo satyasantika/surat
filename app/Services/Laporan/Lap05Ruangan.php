@@ -26,8 +26,8 @@ class Lap05Ruangan extends Laporan
     public function susun(CarbonImmutable $dari, CarbonImmutable $sampai): array
     {
         $baris = PermohonanRuangan::where('status', PermohonanRuangan::DIKONFIRMASI)->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])
-            ->with('permohonan.ormawa:id,nama')->get()
-            ->groupBy(fn (PermohonanRuangan $r) => $r->tanggal->format('Y-m').'|'.$r->kode_ruangan.' — '.$r->nama_ruangan.'|'.$r->permohonan->ormawa->nama)
+            ->with(['permohonan.ormawa:id,nama', 'permohonan.unitKerja:id,nama'])->get()
+            ->groupBy(fn (PermohonanRuangan $r) => $r->tanggal->format('Y-m').'|'.$r->kode_ruangan.' — '.$r->nama_ruangan.'|'.$r->permohonan->namaPengaju())
             ->map(fn ($k, $kunci) => [...explode('|', $kunci, 3), $k->count(), $k->pluck('tanggal')->map->toDateString()->unique()->count()])
             ->sortKeys()->values()->all();
 

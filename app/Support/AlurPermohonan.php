@@ -12,8 +12,10 @@ class AlurPermohonan
     public static function peta(): array
     {
         return [
-            S::Diajukan->value => [S::PersetujuanPembina, S::ValidasiAdmin],
+            S::Diajukan->value => [S::PersetujuanPembina, S::PersetujuanUnit, S::ValidasiAdmin],
             S::PersetujuanPembina->value => [S::ValidasiAdmin, S::Dikembalikan, S::Ditolak, S::Dibatalkan],
+            // Pengaju prodi/laboratorium: kepala unit menyetujui sebelum permohonan masuk ke validasi fakultas.
+            S::PersetujuanUnit->value => [S::ValidasiAdmin, S::Dikembalikan, S::Ditolak, S::Dibatalkan],
             S::ValidasiAdmin->value => [S::DisposisiDekan, S::Dikembalikan, S::Ditolak, S::Dibatalkan],
             S::Dikembalikan->value => [S::ValidasiAdmin, S::Dibatalkan],
             S::DisposisiDekan->value => [S::PersetujuanWd, S::Ditolak, S::Dibatalkan],
