@@ -23,7 +23,7 @@ beforeEach(function () {
     $this->seed([PeranDanIzinSeeder::class, StrukturFkipSeeder::class, PengaturanSeeder::class, RegisterNomorSeeder::class, JenisNaskahSeeder::class]);
 });
 
-const MATRIKS_PERAN = ['super-admin', 'admin-persuratan', 'operator-layanan', 'staf-khusus', 'dekan', 'wakil-dekan', 'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab'];
+const MATRIKS_PERAN = ['super-admin', 'admin-persuratan', 'operator-layanan', 'staf-khusus', 'dekan', 'wakil-dekan', 'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab', 'mahasiswa'];
 
 /**
  * Matriks hak akses PRD §3.1 dalam bentuk izin → peran yang berhak (super-admin selalu lewat Gate::before;
@@ -60,6 +60,7 @@ function matriksIzin(): array
         'permohonan.setujui-pembina' => ['pembina-ormawa'],
         'permohonan.ajukan-unit' => ['pengaju-unit'],
         'permohonan.setujui-unit' => ['kaprodi', 'kalab'],
+        'usulan.ajukan' => ['mahasiswa'],
         'permohonan.validasi' => [$admin],
         'permohonan.putuskan' => $pimpinan,
         'ruangan.kelola' => [],

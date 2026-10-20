@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 /**
- * Pendaftaran mandiri pengurus ormawa: hanya surel domain mahasiswa dan wajib verifikasi surel.
+ * Pendaftaran mandiri pengurus ormawa atau mahasiswa pengusul: hanya surel domain mahasiswa dan wajib verifikasi surel.
  * Akun belum terhubung ke ormawa sampai ditautkan admin (F6).
  */
 class DaftarController extends Controller
@@ -30,10 +30,15 @@ class DaftarController extends Controller
             'nip_nim' => ['required', 'string', 'max:30', 'unique:users,nip_nim'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', new SurelDomainUnsil(config('unsil.domain_mahasiswa'))],
             'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()],
+            'jalur' => ['nullable', 'in:pengurus,mahasiswa'],
         ]);
 
+        $jalur = $data['jalur'] ?? 'pengurus';
+        unset($data['jalur']);
+
         $user = User::create($data);
-        $user->assignRole('pengurus-ormawa');
+        // Pengurus ormawa baru berfungsi setelah ditautkan admin (F6); mahasiswa langsung dapat mengusulkan kepada perantara.
+        $user->assignRole($jalur === 'mahasiswa' ? 'mahasiswa' : 'pengurus-ormawa');
 
         event(new Registered($user));
 

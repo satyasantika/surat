@@ -5,6 +5,7 @@ namespace App\Services\Notifikasi;
 use App\Enums\KlasifikasiKeamanan;
 use App\Enums\StatusNaskah;
 use App\Enums\StatusPermohonan;
+use App\Enums\StatusUsulan;
 use App\Filament\Resources\Lpjs\LpjResource;
 use App\Filament\Resources\Naskahs\NaskahResource;
 use App\Filament\Resources\Permohonans\PermohonanResource;
@@ -19,6 +20,7 @@ use App\Models\Permohonan;
 use App\Models\SuratMasuk;
 use App\Models\TautanBerkas;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use App\Support\UrlBerkas;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -108,6 +110,39 @@ class NotifikasiAlur
         });
     }
 
+    /** Perantara (pengurus ormawa atau pengaju unit) diberi tahu ada usulan mahasiswa baru. */
+    public function usulanDiajukan(UsulanMahasiswa $usulan, User $mahasiswa): void
+    {
+        $this->aman(function () use ($usulan, $mahasiswa) {
+            $usulan->loadMissing(['ormawa', 'unitKerja']);
+            $penerima = $usulan->ormawa_id !== null ? Penerima::ormawa($usulan->ormawa) : Penerima::pengajuUnit((string) $usulan->unit_kerja_id);
+            $url = $usulan->ormawa_id !== null ? route('ormawa.usulan', $usulan->ormawa_id) : route('unit.usulan', $usulan->unit_kerja_id);
+
+            $this->kirim->kirim($penerima, 'permohonan', 'Usulan mahasiswa baru', Str::limit($usulan->perihal, 120).' ('.$usulan->namaTujuan().').', $url, $mahasiswa);
+        });
+    }
+
+    /** Mahasiswa diberi tahu usulannya dikembalikan atau ditolak perantara (beserta catatan). */
+    public function usulanDiputus(UsulanMahasiswa $usulan, User $oleh): void
+    {
+        $this->aman(function () use ($usulan, $oleh) {
+            $usulan->loadMissing(['mahasiswa', 'ormawa', 'unitKerja']);
+            $ditolak = $usulan->status === StatusUsulan::Ditolak;
+
+            $this->kirim->kirim([$usulan->mahasiswa], 'permohonan', $ditolak ? 'Usulan Anda ditolak' : 'Usulan Anda dikembalikan', Str::limit($usulan->perihal, 100).' ('.$usulan->namaTujuan().') — catatan: '.Str::limit((string) $usulan->catatan, 200), route('mahasiswa'), $oleh);
+        });
+    }
+
+    /** Mahasiswa pengusul dasar permohonan mengikuti tiap perubahan tahap permohonan itu. */
+    private function kabarkanPengusulDasar(Permohonan $p, StatusPermohonan $ke, User $oleh): void
+    {
+        $mahasiswa = UsulanMahasiswa::with('mahasiswa')->where('permohonan_id', $p->getKey())->get()->pluck('mahasiswa')->filter()->unique('id')->values()->all();
+
+        if ($mahasiswa !== []) {
+            $this->kirim->kirim($mahasiswa, 'permohonan', 'Permohonan dasar usulan Anda: '.$ke->labelPublik(), "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}).", route('mahasiswa'), $oleh);
+        }
+    }
+
     public function permohonanDiajukan(Permohonan $p, User $pelaku): void
     {
         $this->aman(function () use ($p, $pelaku) {
@@ -148,6 +183,8 @@ class NotifikasiAlur
             // Pihak berikutnya
             [$users, $judul, $url] = $this->penerimaTahap($p, $ke);
             $users !== [] && $ke !== StatusPermohonan::Dikembalikan ? $this->kirim->kirim($users, 'permohonan', $judul, $ringkas, $url, $oleh) : null;
+
+            $this->kabarkanPengusulDasar($p, $ke, $oleh);
 
             // Ormawa: setiap perubahan tahap (kecuali yang dilakukannya sendiri). Selesai = hasil sampai ke pengirim,
             // disertai tautan lacak publik (BR-27, BR-28).

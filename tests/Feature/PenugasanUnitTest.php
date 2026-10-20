@@ -120,7 +120,7 @@ it('peran unit memakai halaman Livewire, bukan panel admin', function (string $p
     $akun->forceFill(['aktif' => true])->save();
 
     expect($akun->canAccessPanel(Filament\Facades\Filament::getPanel('admin')))->toBeFalse();
-})->with(['pengaju-unit', 'kaprodi', 'kalab']);
+})->with(['pengaju-unit', 'kaprodi', 'kalab', 'mahasiswa']);
 
 it('admin menugaskan pengaju dan kepala unit lewat formulir unit kerja', function () {
     Filament\Facades\Filament::setCurrentPanel('admin');

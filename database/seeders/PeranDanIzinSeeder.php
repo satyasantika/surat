@@ -19,6 +19,7 @@ class PeranDanIzinSeeder extends Seeder
         'ormawa.lihat', 'ormawa.kelola', 'ormawa.kelola-binaan', 'ormawa.kelola-sendiri',
         'permohonan.lihat', 'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
         'permohonan.ajukan-unit', 'permohonan.setujui-unit',
+        'usulan.ajukan',
         'ruangan.kelola', 'ruangan.kelola-jadwal',
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
         'laporan.lihat',
@@ -67,6 +68,8 @@ class PeranDanIzinSeeder extends Seeder
         'pengaju-unit' => ['permohonan.ajukan-unit'],
         'kaprodi' => ['permohonan.setujui-unit'],
         'kalab' => ['permohonan.setujui-unit'],
+        // Mahasiswa perorangan: mengusulkan kepada ormawa atau program studi/laboratorium (perantara), tidak langsung ke fakultas.
+        'mahasiswa' => ['usulan.ajukan'],
     ];
 
     public function run(): void

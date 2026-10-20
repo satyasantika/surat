@@ -108,6 +108,10 @@
      "judul": "Akun dan preferensi notifikasi",
      "teks": "Atur kanal surel/WhatsApp per kategori, nomor WhatsApp opsional, dan ganti kata sandi.",
      "url": "/profil"
+    },
+    {
+     "judul": "Usulan mahasiswa",
+     "teks": "Mahasiswa dapat mengusulkan kepada ormawa Anda. Dari beranda ormawa buka **Lihat dan pilah usulan mahasiswa**: pilih satu atau beberapa usulan dan **Jadikan dasar permohonan** (digabung menjadi satu pengajuan), atau kembalikan/tolak dengan catatan."
     }
    ],
    "faq": [
@@ -232,6 +236,10 @@
      "teks": "Setelah masuk, Anda tiba di **Ruang Unit** yang memuat program studi atau laboratorium tempat Anda ditugaskan beserta jumlah permohonannya (alamat `/unit`)."
     },
     {
+     "judul": "Usulan mahasiswa",
+     "teks": "Mahasiswa dapat mengusulkan kepada unit Anda. Buka **Usulan mahasiswa** pada unit, pilih satu atau beberapa usulan, lalu **Jadikan dasar permohonan** untuk membuka formulir pengajuan dengan dasar terpilih; usulan juga dapat dikembalikan atau ditolak dengan catatan."
+    },
+    {
      "judul": "Ajukan permohonan",
      "teks": "Pilih **Ajukan baru** pada unit. Isi empat langkah seperti pengajuan ormawa: kegiatan, ruangan, penanggung jawab, dan berkas. Pengajuan ditolak bila unit belum memiliki kepala penyetuju aktif; hubungi admin fakultas."
     },
@@ -310,6 +318,37 @@
     [
      "Mengapa permohonan lab lain tidak tampil?",
      "Kepala unit hanya melihat permohonan unit yang ditugaskan kepadanya."
+    ]
+   ]
+  },
+  {
+   "kode": "mahasiswa",
+   "judul": "Mahasiswa pengusul",
+   "akun": "panduan.mahasiswa@contoh.test",
+   "tujuan": "Mengusulkan kegiatan atau keperluan surat kepada ormawa atau program studi/laboratorium, dan memantau nasib usulan sampai menjadi dasar permohonan ke fakultas.",
+   "masuk": "Daftar di halaman **Daftar** dengan surel mahasiswa dan pilih **Mahasiswa**, atau minta admin membuatkan akun berperan mahasiswa. Setelah masuk Anda tiba di **Ruang Mahasiswa** (`/mahasiswa`).",
+   "langkah": [
+    {
+     "judul": "Ajukan usulan",
+     "teks": "Pilih **Ajukan usulan**, tentukan ormawa atau program studi/laboratorium tujuan, isi perihal dan uraian, lalu tambahkan tautan lampiran bila perlu. Usulan tidak langsung ke fakultas."
+    },
+    {
+     "judul": "Perantara memilah",
+     "teks": "Pengurus ormawa atau pengelola unit memeriksa usulan Anda. Mereka dapat meneruskannya sebagai dasar permohonan, **menggabungkannya** dengan usulan lain menjadi satu permohonan, mengembalikannya untuk diperbaiki, atau menolaknya dengan catatan."
+    },
+    {
+     "judul": "Pantau status",
+     "teks": "Ruang Mahasiswa menampilkan status tiap usulan. Setelah dipakai sebagai dasar, tampil nomor permohonan dan tahapnya; Anda juga mendapat notifikasi setiap tahap berubah. Usulan dapat dibatalkan selama belum dipakai."
+    }
+   ],
+   "faq": [
+    [
+     "Apakah saya bisa mengusulkan langsung ke fakultas?",
+     "Tidak. Usulan selalu melalui ormawa atau program studi/laboratorium sebagai perantara."
+    ],
+    [
+     "Usulan saya digabung dengan usulan lain, apakah hilang?",
+     "Tidak. Usulan tetap tercatat sebagai dasar permohonan dan statusnya mengikuti permohonan itu."
     ]
    ]
   },

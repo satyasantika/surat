@@ -4,19 +4,23 @@ namespace App\Livewire\Ormawa;
 
 use App\Actions\Permohonan\AjukanPermohonan as AksiAjukan;
 use App\Contracts\LayananRuangan;
+use App\Enums\StatusUsulan;
 use App\Exceptions\LayananRuanganTidakTersedia;
 use App\Models\JenisPermohonan;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use App\Services\Ruangan\KetersediaanRuangan;
 use App\Support\Pengaturan;
 use App\Support\SesiRuangan;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
@@ -26,6 +30,10 @@ class AjukanPermohonan extends Component
 {
     #[Locked]
     public string $ormawaId = '';
+
+    /** @var list<string> usulan mahasiswa yang dijadikan dasar permohonan (dipilih di halaman usulan masuk) */
+    #[Url(as: 'dasar')]
+    public array $dasar = [];
 
     public int $langkah = 1;
 
@@ -69,6 +77,7 @@ class AjukanPermohonan extends Component
         abort_unless($this->pengguna()->ormawaAktif()->contains('id', $model->getKey()), 403);
         $this->ormawaId = $model->getKey();
         $this->jenis = (string) JenisPermohonan::where('aktif', true)->orderBy('nama')->value('id');
+        $this->muatDasar();
     }
 
     public function lanjut(): void
@@ -117,6 +126,7 @@ class AjukanPermohonan extends Component
                 'penanggung_jawab' => ['ketua' => $kosongKeNull($this->pj['ketua']), 'wakil' => $kosongKeNull($this->pj['wakil']), 'sekretaris' => $kosongKeNull($this->pj['sekretaris'])],
                 'fasilitas_rektorat' => $jenis->butuh_fasilitas_rektorat ? array_map(fn ($f) => $kosongKeNull($f), $this->fasilitas) : null,
                 'berkas' => array_filter($this->berkas, fn ($v) => $v !== ''),
+                'dasar_usulan' => $this->dasar,
                 'ruangan' => $jenis->butuh_ruangan ? $ruangan : [],
             ]);
         } catch (TooManyRequestsHttpException) {
@@ -142,6 +152,39 @@ class AjukanPermohonan extends Component
     protected function ajukan(JenisPermohonan $jenis, array $data): Permohonan
     {
         return app(AksiAjukan::class)->jalankan($this->pengguna(), $this->ormawa(), $jenis, $data);
+    }
+
+    /**
+     * Kolom tujuan usulan yang boleh menjadi dasar: ormawa ini (bagi pengaju unit, unit ini).
+     *
+     * @return array<string, string>
+     */
+    protected function kolomTujuan(): array
+    {
+        return ['ormawa_id' => $this->ormawaId];
+    }
+
+    /** @return Collection<int, UsulanMahasiswa> usulan dasar yang sah (milik perantara ini, masih menunggu, dapat ditangani pengguna) */
+    protected function usulanDasar(): Collection
+    {
+        if ($this->dasar === []) {
+            return new Collection;
+        }
+
+        return UsulanMahasiswa::with('mahasiswa')->where($this->kolomTujuan())->where('status', StatusUsulan::Diajukan->value)
+            ->whereIn('id', $this->dasar)->get()->filter(fn (UsulanMahasiswa $u) => Gate::forUser($this->pengguna())->allows('tangani', $u))->values();
+    }
+
+    /** Buang usulan dasar yang tidak sah dan isi awal perihal/uraian dari usulan yang dipilih. */
+    protected function muatDasar(): void
+    {
+        $usulan = $this->usulanDasar();
+        $this->dasar = $usulan->pluck('id')->all();
+
+        if ($usulan->isNotEmpty() && $this->perihal === '' && $this->deskripsi === '') {
+            $this->perihal = $usulan->count() === 1 ? $usulan->first()->perihal : 'Usulan kolektif: '.$usulan->pluck('perihal')->take(3)->implode('; ');
+            $this->deskripsi = $usulan->map(fn (UsulanMahasiswa $u) => "- {$u->perihal}: {$u->uraian}")->implode("\n");
+        }
     }
 
     protected function urlSetelahKirim(): string
@@ -172,6 +215,7 @@ class AjukanPermohonan extends Component
 
         return view('livewire.ormawa.ajukan-permohonan', [
             'pengaju' => $this->infoPengaju(),
+            'usulanDasar' => $this->usulanDasar(),
             'jenisDaftar' => JenisPermohonan::where('aktif', true)->orderBy('nama')->get(),
             'jenisTerpilih' => $jenis,
             'terlambat' => $terlambat,

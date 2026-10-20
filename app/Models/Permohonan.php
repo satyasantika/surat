@@ -140,6 +140,16 @@ class Permohonan extends Model
         return $this->belongsTo(Naskah::class, 'naskah_izin_id');
     }
 
+    /**
+     * Usulan mahasiswa yang menjadi dasar permohonan ini (satu atau beberapa digabung oleh perantara).
+     *
+     * @return HasMany<UsulanMahasiswa, $this>
+     */
+    public function usulanDasar(): HasMany
+    {
+        return $this->hasMany(UsulanMahasiswa::class);
+    }
+
     /** @return HasMany<PermohonanRuangan, $this> */
     public function ruangan(): HasMany
     {

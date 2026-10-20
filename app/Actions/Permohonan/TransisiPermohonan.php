@@ -3,10 +3,12 @@
 namespace App\Actions\Permohonan;
 
 use App\Enums\StatusPermohonan;
+use App\Enums\StatusUsulan;
 use App\Models\Permohonan;
 use App\Models\PermohonanRuangan;
 use App\Models\RiwayatPermohonan;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use App\Services\Notifikasi\NotifikasiAlur;
 use App\Support\AlurPermohonan;
 use Closure;
@@ -73,6 +75,20 @@ class TransisiPermohonan
         }
 
         app(NotifikasiAlur::class)->permohonanBerubah($permohonan, $ke, $oleh);
+
+        // Setelah pengusul diberi tahu: usulan dasar dilepas kembali ke perantara.
+        if (! AlurPermohonan::menahanRuangan($ke)) {
+            $this->lepasDasar($permohonan, $ke);
+        }
+    }
+
+    /** Usulan mahasiswa yang menjadi dasar permohonan ditolak/dibatalkan kembali menunggu perantara (dapat dipakai lagi). */
+    public function lepasDasar(Permohonan $permohonan, StatusPermohonan $ke): int
+    {
+        return UsulanMahasiswa::where('permohonan_id', $permohonan->getKey())->update([
+            'permohonan_id' => null, 'status' => StatusUsulan::Diajukan->value,
+            'catatan' => "Permohonan {$permohonan->nomor} {$ke->value}; usulan kembali menunggu perantara.",
+        ]);
     }
 
     /** Ruangan yang ditahan dilepas (ditolak/dibatalkan); yang sudah dikonfirmasi tidak disentuh. */

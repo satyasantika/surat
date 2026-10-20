@@ -34,6 +34,7 @@ class Linimasa
         'pengaju-unit' => 'Pengaju program studi/laboratorium',
         'kaprodi' => 'Ketua program studi',
         'kalab' => 'Kepala laboratorium',
+        'mahasiswa' => 'Mahasiswa',
         'admin-persuratan' => 'Admin persuratan',
         'staf-khusus' => 'Staf khusus dekanat',
         'operator-layanan' => 'Operator layanan',

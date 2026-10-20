@@ -13,7 +13,7 @@
             <p class="text-sm text-slate-600">{{ $u->tipe->label() }} · {{ ($jumlah[$u->id] ?? 0) > 0 ? $jumlah[$u->id].' permohonan tercatat.' : 'Belum ada permohonan.' }}</p>
             <p class="mt-2 flex gap-4 text-sm">
                 <a class="text-blue-800 underline" href="{{ route('unit.permohonan', $u) }}">Progres</a>
-                @if (in_array($u->id, $bolehAjukan, true))<a class="text-blue-800 underline" href="{{ route('unit.permohonan.baru', $u) }}">Ajukan baru</a>@endif
+                @if (in_array($u->id, $bolehAjukan, true))<a class="text-blue-800 underline" href="{{ route('unit.permohonan.baru', $u) }}">Ajukan baru</a><a class="text-blue-800 underline" href="{{ route('unit.usulan', $u) }}">Usulan mahasiswa</a>@endif
             </p>
         </section>
     @empty

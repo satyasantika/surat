@@ -24,6 +24,13 @@ class AjukanPermohonan extends FormulirOrmawa
         Gate::forUser($this->pengguna())->authorize('ajukanPermohonan', $model);
         $this->unitId = $model->getKey();
         $this->jenis = (string) JenisPermohonan::where('aktif', true)->orderBy('nama')->value('id');
+        $this->muatDasar();
+    }
+
+    /** @return array<string, string> */
+    protected function kolomTujuan(): array
+    {
+        return ['unit_kerja_id' => $this->unitId];
     }
 
     protected function ajukan(JenisPermohonan $jenis, array $data): Permohonan

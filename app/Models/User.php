@@ -36,7 +36,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     use HasFactory, HasRoles, HasUuids, Notifiable, TercatatAktivitas;
 
     /** Peran yang memakai halaman Livewire, bukan panel Filament. */
-    public const PERAN_TANPA_PANEL = ['pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab'];
+    public const PERAN_TANPA_PANEL = ['pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab', 'mahasiswa'];
 
     protected function namaLog(): string
     {

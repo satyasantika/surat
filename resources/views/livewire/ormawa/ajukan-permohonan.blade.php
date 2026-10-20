@@ -3,6 +3,13 @@
     <h2 class="text-lg font-semibold">Ajukan permohonan — {{ $pengaju['nama'] }}</h2>
     <p class="text-sm text-slate-600" aria-live="polite">Langkah {{ $langkah }} dari 4</p>
 
+    @if ($usulanDasar->isNotEmpty())
+        <section class="rounded-lg bg-blue-50 p-3 text-sm" aria-label="Dasar permohonan">
+            <p class="font-medium">Dasar permohonan: {{ $usulanDasar->count() }} usulan mahasiswa</p>
+            <ul class="mt-1 list-disc pl-5">@foreach ($usulanDasar as $u)<li wire:key="d-{{ $u->id }}">{{ $u->perihal }} <span class="text-slate-500">— {{ $u->mahasiswa->name }}</span></li>@endforeach</ul>
+        </section>
+    @endif
+
     @if ($errors->any())
         <ul class="rounded bg-red-50 p-3 text-sm text-red-800" role="alert">@foreach ($errors->all() as $galat)<li>{{ $galat }}</li>@endforeach</ul>
     @endif
