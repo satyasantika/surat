@@ -49,6 +49,7 @@ for (const peran of alur.peran) {
   mkdirSync(dir, { recursive: true });
 
   for (const l of peran.langkah) {
+    if (!l.gambar) continue; // langkah teks saja (tanpa tangkapan layar)
     const akun = 'akun' in l ? l.akun : peran.akun;
     const page = await halaman(akun, l.viewport ?? 'desktop');
     const resp = await page.goto(`${dasar}${l.url}`, { waitUntil: 'networkidle' });

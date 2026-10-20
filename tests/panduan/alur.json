@@ -221,6 +221,79 @@
    ]
   },
   {
+   "kode": "pengaju-unit",
+   "judul": "Pengaju program studi / laboratorium",
+   "akun": "panduan.pengaju-unit@contoh.test",
+   "tujuan": "Mengajukan permohonan kegiatan atas nama program studi atau laboratorium, memantau progresnya, dan merevisi bila dikembalikan.",
+   "masuk": "Admin membuatkan akun berperan pengaju-unit lalu menugaskannya pada unit kerja di **Master › Unit kerja**. Masuk lewat **Masuk**; peran ini memakai halaman aplikasi, bukan panel admin.",
+   "langkah": [
+    {
+     "judul": "Penugasan unit",
+     "teks": "Anda hanya dapat mengajukan atas nama unit tempat Anda ditugaskan. Satu akun boleh ditugaskan pada beberapa unit."
+    },
+    {
+     "judul": "Persetujuan kepala unit",
+     "teks": "Permohonan unit disetujui ketua program studi atau kepala laboratorium sebelum masuk ke fakultas; tahap ini tampil di halaman lacak."
+    },
+    {
+     "judul": "Status fitur",
+     "teks": "Formulir pengajuan dan halaman progres unit sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+    }
+   ],
+   "faq": [
+    [
+     "Mengapa unit saya tidak tampil?",
+     "Minta admin menugaskan akun Anda pada unit tersebut dan pastikan unitnya aktif."
+    ]
+   ]
+  },
+  {
+   "kode": "kaprodi",
+   "judul": "Ketua program studi",
+   "akun": "panduan.kaprodi@contoh.test",
+   "tujuan": "Menyetujui, mengembalikan, atau menolak permohonan program studi sebelum diteruskan ke fakultas.",
+   "masuk": "Admin membuatkan akun berperan kaprodi lalu menugaskannya sebagai kepala unit pada program studi di **Master › Unit kerja**. Peran ini memakai halaman aplikasi, bukan panel admin.",
+   "langkah": [
+    {
+     "judul": "Penugasan unit",
+     "teks": "Anda hanya melihat dan memutus permohonan program studi tempat Anda ditugaskan."
+    },
+    {
+     "judul": "Status fitur",
+     "teks": "Halaman persetujuan sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+    }
+   ],
+   "faq": [
+    [
+     "Mengapa permohonan prodi lain tidak tampil?",
+     "Kepala unit hanya melihat permohonan unit yang ditugaskan kepadanya."
+    ]
+   ]
+  },
+  {
+   "kode": "kalab",
+   "judul": "Kepala laboratorium",
+   "akun": "panduan.kalab@contoh.test",
+   "tujuan": "Menyetujui, mengembalikan, atau menolak permohonan laboratorium sebelum diteruskan ke fakultas.",
+   "masuk": "Admin membuatkan akun berperan kalab lalu menugaskannya sebagai kepala unit pada laboratorium di **Master › Unit kerja**. Peran ini memakai halaman aplikasi, bukan panel admin.",
+   "langkah": [
+    {
+     "judul": "Penugasan unit",
+     "teks": "Anda hanya melihat dan memutus permohonan laboratorium tempat Anda ditugaskan."
+    },
+    {
+     "judul": "Status fitur",
+     "teks": "Halaman persetujuan sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+    }
+   ],
+   "faq": [
+    [
+     "Mengapa permohonan lab lain tidak tampil?",
+     "Kepala unit hanya melihat permohonan unit yang ditugaskan kepadanya."
+    ]
+   ]
+  },
+  {
    "kode": "dekan",
    "judul": "Dekan",
    "akun": "panduan.dekan@contoh.test",

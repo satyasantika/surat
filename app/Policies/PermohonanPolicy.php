@@ -8,7 +8,7 @@ use App\Models\Permohonan;
 use App\Models\User;
 
 /**
- * Pengurus aktif melihat permohonan ormawanya; pembina atas binaannya; admin, dekan, WD, kasubag melihat
+ * Pengurus aktif melihat permohonan ormawanya; pengaju dan kepala unit atas permohonan prodi/laboratoriumnya; pembina atas binaannya; admin, dekan, WD, kasubag melihat
  * semua untuk memutus. Data pribadi penanggung jawab (BR-18) hanya untuk admin validasi, ketua/sekretaris,
  * dan pengaju.
  */
@@ -24,21 +24,23 @@ class PermohonanPolicy
     {
         return $pelaku->canAny(['permohonan.lihat', 'permohonan.validasi', 'permohonan.putuskan'])
             || $this->petugasUnit($pelaku, $permohonan)
-            || $permohonan->ormawa->pembina_user_id === $pelaku->getKey()
-            || $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id);
+            || $permohonan->ormawa?->pembina_user_id === $pelaku->getKey()
+            || ($permohonan->ormawa_id !== null && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id))
+            || $this->anggotaUnit($pelaku, $permohonan);
     }
 
     public function lihatDataPribadi(User $pelaku, Permohonan $permohonan): bool
     {
         return $pelaku->can('permohonan.validasi')
             || $permohonan->diajukan_oleh === $pelaku->getKey()
-            || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa);
+            || ($permohonan->ormawa !== null && $pelaku->dapatMengelolaOrmawa($permohonan->ormawa))
+            || $this->penyetujuUnit($pelaku, $permohonan);
     }
 
     public function setujuiPembina(User $pelaku, Permohonan $permohonan): bool
     {
         return $pelaku->can('permohonan.setujui-pembina')
-            && $permohonan->ormawa->pembina_user_id === $pelaku->getKey()
+            && $permohonan->ormawa?->pembina_user_id === $pelaku->getKey()
             && $permohonan->status === StatusPermohonan::PersetujuanPembina;
     }
 
@@ -57,8 +59,8 @@ class PermohonanPolicy
     public function revisi(User $pelaku, Permohonan $permohonan): bool
     {
         return $permohonan->status === StatusPermohonan::Dikembalikan
-            && $pelaku->can('permohonan.ajukan')
-            && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id);
+            && (($pelaku->can('permohonan.ajukan') && $permohonan->ormawa_id !== null && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id))
+                || $this->pengajuUnit($pelaku, $permohonan));
     }
 
     /** Pembatalan oleh pengurus aktif (ketua/sekretaris atau pengaju) sebelum penerbitan. */
@@ -66,8 +68,32 @@ class PermohonanPolicy
     {
         return ! $permohonan->status->akhir()
             && ! in_array($permohonan->status, [StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan], true)
-            && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id)
-            && ($permohonan->diajukan_oleh === $pelaku->getKey() || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa));
+            && (
+                ($permohonan->ormawa !== null && $pelaku->ormawaAktif()->contains('id', $permohonan->ormawa_id)
+                    && ($permohonan->diajukan_oleh === $pelaku->getKey() || $pelaku->dapatMengelolaOrmawa($permohonan->ormawa)))
+                || ($this->pengajuUnit($pelaku, $permohonan) && $permohonan->diajukan_oleh === $pelaku->getKey())
+            );
+    }
+
+    /** Pengaju yang ditugaskan pada unit kerja (prodi/laboratorium) permohonan, aktif, dan berizin ajukan-unit. */
+    public function pengajuUnit(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->jenis_pengaju->berunit() && $permohonan->unit_kerja_id !== null
+            && $pelaku->can('permohonan.ajukan-unit')
+            && $pelaku->unitDiajukan()->whereKey($permohonan->unit_kerja_id)->exists();
+    }
+
+    /** Kepala unit (kaprodi/kalab) yang ditugaskan pada unit kerja permohonan. */
+    public function penyetujuUnit(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $permohonan->jenis_pengaju->berunit() && $permohonan->unit_kerja_id !== null
+            && $pelaku->can('permohonan.setujui-unit')
+            && $pelaku->unitDisetujui()->whereKey($permohonan->unit_kerja_id)->exists();
+    }
+
+    private function anggotaUnit(User $pelaku, Permohonan $permohonan): bool
+    {
+        return $this->pengajuUnit($pelaku, $permohonan) || $this->penyetujuUnit($pelaku, $permohonan);
     }
 
     /** Dekan mendisposisikan (atau menolak) permohonan yang sudah divalidasi. */

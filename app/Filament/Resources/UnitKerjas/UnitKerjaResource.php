@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UnitKerjas;
 
+use App\Enums\TipeUnitKerja;
 use App\Filament\Resources\UnitKerjas\Pages\ManageUnitKerjas;
 use App\Models\UnitKerja;
 use BackedEnum;
@@ -38,9 +39,17 @@ class UnitKerjaResource extends Resource
         return $schema->components([
             TextInput::make('kode')->required()->maxLength(20)->unique(ignoreRecord: true),
             TextInput::make('nama')->required()->maxLength(255),
+            Select::make('tipe')->label('Tipe unit')->options(collect(TipeUnitKerja::cases())->mapWithKeys(fn (TipeUnitKerja $t) => [$t->value => $t->label()]))->required()->default('lainnya')
+                ->helperText('Program studi dan laboratorium dapat mengajukan permohonan sendiri.'),
             Select::make('induk_id')->label('Unit induk')
                 ->relationship('induk', 'nama')->searchable()->preload(),
             Toggle::make('aktif')->default(true),
+            Select::make('pengaju')->label('Pengaju permohonan')->relationship('pengaju', 'name')->multiple()->preload()->searchable()
+                ->visible(fn (?UnitKerja $record) => $record !== null)
+                ->helperText('Akun berperan pengaju-unit yang mengajukan permohonan atas nama unit ini (khusus program studi/laboratorium).'),
+            Select::make('penyetuju')->label('Kepala unit (penyetuju)')->relationship('penyetuju', 'name')->multiple()->preload()->searchable()
+                ->visible(fn (?UnitKerja $record) => $record !== null)
+                ->helperText('Akun berperan kaprodi/kalab yang menyetujui permohonan unit ini sebelum masuk ke fakultas.'),
         ]);
     }
 
@@ -51,6 +60,7 @@ class UnitKerjaResource extends Resource
             ->columns([
                 TextColumn::make('kode')->searchable()->sortable(),
                 TextColumn::make('nama')->searchable(),
+                TextColumn::make('tipe')->badge()->formatStateUsing(fn ($state) => $state instanceof TipeUnitKerja ? $state->label() : $state),
                 TextColumn::make('induk.nama')->label('Induk')->placeholder('—'),
                 IconColumn::make('aktif')->boolean(),
             ])

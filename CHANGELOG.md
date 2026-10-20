@@ -11,6 +11,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 - Container `queue`, `redis`, `gotenberg`, dan `db` (profil `db-lokal`) dari `docker-compose.prod.yml`.
 
 ### Ditambahkan
+- Peran dan penugasan unit (tahap 2): peran `pengaju-unit`, `kaprodi`, `kalab` (halaman Livewire, bukan panel), izin `permohonan.ajukan-unit` dan `permohonan.setujui-unit`, tabel `penugasan_unit` (pengaju/penyetuju per unit kerja), pengaturan penugasan di formulir Unit kerja, serta `PermohonanPolicy` yang aman untuk permohonan tanpa ormawa dan `UnitKerjaPolicy::ajukanPermohonan`.
 - Pengaju generik (tahap 1): `permohonan.jenis_pengaju` (ormawa/prodi/laboratorium), `unit_kerja_id`, `diajukan_atas_nama` (terenkripsi), `ormawa_id` kini boleh kosong untuk pengaju unit (CHECK menjaga konsistensi); `unit_kerja.tipe`; jenis pengirim surat masuk `laboratorium`. Perilaku ormawa tidak berubah.
 - Antrean database dua jalur: koneksi `database` dan `database-berat` (`retry_after` 960), worker dinyalakan penjadwal tiap menit (`--stop-when-empty`), detak penjadwal, serta `queue:prune-failed` dan `queue:prune-batches`.
 - `/api/health` memuat `job_tertunda` (> 10 menit), `job_gagal_24j`, dan `detak_penjadwal`; 503 hanya bila DB (atau Gotenberg yang diaktifkan lewat ADR) gagal.
