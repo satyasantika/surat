@@ -4,9 +4,7 @@ use App\Actions\Migrasi\ImporOrmawaHub;
 use App\Actions\Nomor\AmbilNomorBerikutnya;
 use App\Exceptions\PemetaanTidakLengkap;
 use App\Models\Disposisi;
-use App\Models\Galeri;
 use App\Models\ImporLog;
-use App\Models\Kabar;
 use App\Models\Lpj;
 use App\Models\Naskah;
 use App\Models\NilaiLpj;
@@ -30,6 +28,7 @@ use Database\Seeders\StrukturFkipSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Schema;
 use Tests\Fixtures\OrmawaHubFixture;
 
 uses(RefreshDatabase::class);
@@ -206,53 +205,34 @@ describe('LPJ dan nilai', function () {
     });
 });
 
-describe('kabar dan galeri', function () {
-    it('mengimpor kabar dengan status terpetakan, isi disanitasi, dan hanya yang terbit tampil publik', function () {
+describe('sheet konten lama', function () {
+    it('mengabaikan sheet Blogs dan Galleries karena kabar dan galeri sudah ditiadakan', function () {
         imporLengkap($this->fx, $this->admin);
 
-        $b1 = Kabar::where('sumber_id_lama', 'B1')->firstOrFail();
-
-        expect($b1->status)->toBe('terbit')->and($b1->isi)->toContain('Isi aman')->and($b1->isi)->not->toContain('script')->not->toContain('onerror')
-            ->and($b1->tag)->toBe(['seminar', 'nasional'])->and($b1->terbit_pada->toDateString())->toBe('2026-03-03')->and($b1->penulis_id)->toBe($this->admin->id)
-            ->and($b1->ormawa->nama)->toBe('HIMA Matematika')->and($b1->tautan()->where('jenis', 'foto')->count())->toBe(1)
-            ->and(Kabar::where('sumber_id_lama', 'B2')->value('status'))->toBe('diajukan')
-            ->and(Kabar::where('sumber_id_lama', 'B3')->first()->status)->toBe('ditolak')->and(Kabar::where('sumber_id_lama', 'B3')->first()->catatan_admin)->toBe('Kurang foto')
-            ->and(Kabar::where('sumber_id_lama', 'B4')->first()->tautan()->count())->toBe(0)
-            ->and(Kabar::where('sumber_id_lama', 'B5')->exists())->toBeFalse()->and(statusLog('Blogs', 'B5'))->toBe('lewati')
-            ->and(Kabar::terbit()->count())->toBe(2);
-    });
-
-    it('mengimpor galeri menurut tipe, memvalidasi tautan, dan menautkan permohonan', function () {
-        imporLengkap($this->fx, $this->admin);
-
-        expect(Galeri::where('sumber_id_lama', 'G1')->first()->tipe)->toBe('foto')->and(Galeri::where('sumber_id_lama', 'G1')->first()->permohonan_id)->toBe(lama('PR-2026-001')->id)
-            ->and(Galeri::where('sumber_id_lama', 'G2')->first()->tipe)->toBe('instagram')
-            ->and(Galeri::where('sumber_id_lama', 'G3')->first()->tipe)->toBe('video')->and(Galeri::where('sumber_id_lama', 'G3')->first()->aktif)->toBeFalse()
-            ->and(Galeri::where('sumber_id_lama', 'G4')->exists())->toBeFalse()->and(statusLog('Galleries', 'G4'))->toBe('galat')
-            ->and(Galeri::aktif()->count())->toBe(2);
+        expect(ImporLog::whereIn('sheet', ['Blogs', 'Galleries'])->count())->toBe(0)
+            ->and(Schema::hasTable('kabar'))->toBeFalse()->and(Schema::hasTable('galeri'))->toBeFalse();
     });
 });
 
 describe('keseluruhan', function () {
     it('idempoten: impor kedua tidak menggandakan apa pun dan tidak mengubah register nomor', function () {
         imporLengkap($this->fx, $this->admin);
-        $hitung = fn () => [Permohonan::count(), RiwayatPermohonan::count(), PermohonanRuangan::count(), PemakaianRuanganLokal::count(), Disposisi::count(), PersetujuanWd::count(), Naskah::count(), NomorTerpakai::count(), Lpj::count(), NilaiLpj::count(), Kabar::count(), Galeri::count(), TautanBerkas::count()];
+        $hitung = fn () => [Permohonan::count(), RiwayatPermohonan::count(), PermohonanRuangan::count(), PemakaianRuanganLokal::count(), Disposisi::count(), PersetujuanWd::count(), Naskah::count(), NomorTerpakai::count(), Lpj::count(), NilaiLpj::count(), TautanBerkas::count()];
         $sebelum = $hitung();
 
         $k = imporLengkap($this->fx, $this->admin);
 
         expect($hitung())->toBe($sebelum)->and($k->jumlah('Requests', 'ok') + $k->jumlah('Requests', 'peringatan'))->toBe(0)
-            ->and($k->jumlah('Laporan', 'ok') + $k->jumlah('Laporan', 'peringatan'))->toBe(0)
-            ->and($k->jumlah('Blogs', 'ok') + $k->jumlah('Blogs', 'peringatan'))->toBe(0);
+            ->and($k->jumlah('Laporan', 'ok') + $k->jumlah('Laporan', 'peringatan'))->toBe(0);
     });
 
     it('dry-run tidak meninggalkan apa pun dan register nomor tidak berubah', function () {
         imporLengkap($this->fx, $this->admin, dry: true);
 
-        expect(Permohonan::count())->toBe(0)->and(NomorTerpakai::count())->toBe(0)->and(Naskah::count())->toBe(0)->and(Kabar::count())->toBe(0)->and(ImporLog::count())->toBe(0);
+        expect(Permohonan::count())->toBe(0)->and(NomorTerpakai::count())->toBe(0)->and(Naskah::count())->toBe(0)->and(ImporLog::count())->toBe(0);
     });
 
-    it('mewajibkan pelaksana impor bila ada sheet Requests/Blogs', function () {
+    it('mewajibkan pelaksana impor bila ada sheet Requests', function () {
         expect(fn () => app(ImporOrmawaHub::class)->jalankan($this->fx['xlsx'], $this->fx['pemetaan']))->toThrow(InvalidArgumentException::class, 'Pelaksana');
     });
 

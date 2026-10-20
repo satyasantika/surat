@@ -65,9 +65,6 @@ function matriksIzin(): array
         'lpj.isi' => ['pengurus-ormawa'],
         'lpj.nilai' => $pimpinan,
         'lpj.lihat' => ['pembina-ormawa'],
-        'kabar.kelola' => [$admin],
-        'kabar.usul' => ['pengurus-ormawa'],
-        'galeri.kelola' => [$admin],
         'laporan.lihat' => [$admin, ...$pimpinan],
         'master.kelola' => [],
         'pengguna.kelola' => [],
@@ -93,10 +90,10 @@ it('operator-layanan tanpa izin bawaan; hanya izin yang diberikan yang berlaku',
 
     expect(collect(PeranDanIzinSeeder::IZIN)->filter(fn ($i) => $op->can($i))->all())->toBe([]);
 
-    $op->givePermissionTo(['kabar.kelola', 'galeri.kelola']);
+    $op->givePermissionTo(['ruangan.kelola-jadwal', 'laporan.lihat']);
     $op = $op->fresh();
 
-    expect($op->can('kabar.kelola'))->toBeTrue()->and($op->can('galeri.kelola'))->toBeTrue()->and($op->can('masuk.registrasi'))->toBeFalse()->and($op->can('pengguna.kelola'))->toBeFalse();
+    expect($op->can('ruangan.kelola-jadwal'))->toBeTrue()->and($op->can('laporan.lihat'))->toBeTrue()->and($op->can('masuk.registrasi'))->toBeFalse()->and($op->can('pengguna.kelola'))->toBeFalse();
 });
 
 it('pengguna tanpa peran tidak memiliki izin apa pun', function () {

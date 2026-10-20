@@ -6,7 +6,7 @@ use App\Support\UrlBerkas;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-/** Tautan media publik (Instagram/YouTube) untuk LPJ dan galeri: https dan domain daftar putih media. */
+/** Tautan media publik (Instagram/YouTube) untuk LPJ: https dan domain daftar putih media. */
 class TautanMediaValid implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void

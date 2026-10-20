@@ -23,7 +23,7 @@ it('semua respons web memuat header dasar keamanan', function (string $url) {
 
     expect($r->headers->get('X-Content-Type-Options'))->toBe('nosniff')->and($r->headers->get('X-Frame-Options'))->toBeIn(['SAMEORIGIN', 'DENY'])
         ->and($r->headers->get('Referrer-Policy'))->not->toBeNull()->and($r->headers->get('Permissions-Policy'))->toContain('camera=()');
-})->with(['/', '/masuk', '/kabar', '/galeri', '/organisasi', '/verifikasi', '/admin/login', '/tidak-ada-halaman']);
+})->with(['/', '/masuk', '/organisasi', '/verifikasi', '/admin/login', '/tidak-ada-halaman']);
 
 it('halaman aplikasi memakai CSP berbasis nonce tanpa unsafe-inline untuk skrip', function () {
     foreach (['/masuk', '/daftar', '/lupa-sandi'] as $url) {
@@ -42,7 +42,7 @@ it('nonce berbeda pada setiap respons', function () {
 });
 
 it('halaman publik tanpa skrip inline dan tidak dapat dibingkai', function () {
-    $r = $this->get('/kabar');
+    $r = $this->get('/');
     $csp = (string) $r->headers->get('Content-Security-Policy');
 
     expect($csp)->toContain("script-src 'self'")->toContain("frame-ancestors 'none'")->and(preg_match('/script-src[^;]*unsafe-(inline|eval)/', $csp))->toBe(0);

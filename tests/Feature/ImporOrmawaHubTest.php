@@ -65,7 +65,7 @@ describe('impor pengguna', function () {
             ->and(PemangkuJabatan::where('user_id', $dekan->id)->first()->jabatan->kode)->toBe('dekan')
             ->and(PemangkuJabatan::where('user_id', User::firstWhere('email', 'kasubag.fkip@unsil.ac.id')->id)->first()->jabatan->kode)->toBe('kasubag-umum')
             ->and($op->hasRole('operator-layanan'))->toBeTrue()
-            ->and($op->getDirectPermissions()->pluck('name')->sort()->values()->all())->toBe(['galeri.kelola', 'kabar.kelola', 'permohonan.validasi']);
+            ->and($op->getDirectPermissions()->pluck('name')->sort()->values()->all())->toBe(['permohonan.validasi']);
     });
 
     it('tidak menyimpan kata sandi lama dan tidak membuat akun ormawa bersama atau contoh', function () {

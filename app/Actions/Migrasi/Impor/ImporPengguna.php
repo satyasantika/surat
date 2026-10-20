@@ -27,7 +27,7 @@ class ImporPengguna
         'permohonan' => ['permohonan.validasi'],
         'penerbitan_surat' => ['naskah.draf', 'nomor.terbitkan'],
         'plot_ruangan' => ['ruangan.kelola-jadwal'],
-        'admin_galeri' => ['kabar.kelola', 'galeri.kelola'],
+        'admin_galeri' => [],
         'settings' => [],
     ];
 

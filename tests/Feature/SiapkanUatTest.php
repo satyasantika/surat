@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Galeri;
-use App\Models\Kabar;
 use App\Models\Lpj;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
@@ -38,9 +36,7 @@ it('menyiapkan akun per peran, tiga ormawa, dan permohonan di setiap tahap', fun
     expect($status->all())->toMatchArray(['validasi_admin' => 1, 'disposisi_dekan' => 1, 'persetujuan_wd' => 1, 'rekomendasi_kasubag' => 1, 'penerbitan' => 1, 'dikembalikan' => 1, 'ditolak' => 1, 'selesai' => 3]);
 
     $lpj = Lpj::pluck('status')->countBy();
-    expect($lpj->all())->toMatchArray(['draf' => 1, 'diajukan' => 1, 'dinilai' => 1])
-        ->and(Kabar::pluck('status')->unique()->sort()->values()->all())->toBe(['diajukan', 'ditolak', 'draf', 'terbit'])
-        ->and(Galeri::count())->toBe(3);
+    expect($lpj->all())->toMatchArray(['draf' => 1, 'diajukan' => 1, 'dinilai' => 1]);
 });
 
 it('data rekaan memakai domain contoh.test, tanpa data pribadi asli, dan kata sandi hanya berupa hash', function () {
@@ -63,7 +59,7 @@ it('kata sandi acak dicetak sekali dan akun pejabat bermasa jabatan', function (
 it('idempoten: menjalankan ulang tidak menggandakan akun/data dan tidak mengubah kata sandi', function () {
     $this->artisan('surat:siapkan-uat')->assertSuccessful();
     $hash = User::firstWhere('email', 'uat.dekan@contoh.test')->password;
-    $hitung = fn () => [User::count(), Ormawa::count(), SuratMasuk::count(), Permohonan::count(), Lpj::count(), Kabar::count(), Galeri::count()];
+    $hitung = fn () => [User::count(), Ormawa::count(), SuratMasuk::count(), Permohonan::count(), Lpj::count()];
     $sebelum = $hitung();
 
     $this->artisan('surat:siapkan-uat')->expectsOutputToContain('akun sudah ada')->assertSuccessful();

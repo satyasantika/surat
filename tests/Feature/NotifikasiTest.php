@@ -2,10 +2,6 @@
 
 use App\Actions\Disposisi\BuatDisposisi;
 use App\Actions\Disposisi\LaporTindakLanjut;
-use App\Actions\Kabar\AjukanKabar;
-use App\Actions\Kabar\SimpanKabar;
-use App\Actions\Kabar\TerbitkanKabar;
-use App\Actions\Kabar\TolakKabar;
 use App\Actions\Lpj\IsiLpj;
 use App\Actions\Lpj\NilaiLpj;
 use App\Actions\Masuk\RegistrasiSuratMasuk;
@@ -256,7 +252,7 @@ describe('permohonan ormawa', function () {
     });
 });
 
-describe('LPJ dan kabar', function () {
+describe('LPJ', function () {
     it('LPJ diajukan memberitahu penilai; nilai akhir memberitahu ormawa', function () {
         $o = Ormawa::create(['nama' => 'HIMA Lpj', 'tingkat' => 'prodi']);
         $o->sk()->create(['nomor_sk' => 'SK/1', 'tanggal_sk' => '2026-01-01', 'periode_mulai' => '2026-01-01', 'periode_selesai' => '2026-12-31']);
@@ -291,26 +287,6 @@ describe('LPJ dan kabar', function () {
         $n = terkirim($u, 'lpj');
         expect($n)->toHaveCount(1)->and($n[0]->judul)->toBe('LPJ telah dinilai')->and($n[0]->ringkas)->toContain('100');
     });
-
-    it('kabar: diajukan ke admin, disetujui/ditolak ke penulis', function () {
-        $admin = pejabatNotif('admin-persuratan');
-        $o = Ormawa::create(['nama' => 'HIMA Kabar N', 'tingkat' => 'prodi']);
-        $o->sk()->create(['nomor_sk' => 'SK/1', 'tanggal_sk' => '2026-01-01', 'periode_mulai' => '2026-01-01', 'periode_selesai' => '2026-12-31']);
-        $u = User::factory()->create(['nip_nim' => '7654321'])->assignRole('pengurus-ormawa');
-        PengurusOrmawa::create(['ormawa_id' => $o->id, 'user_id' => $u->id, 'nama' => $u->name, 'jabatan' => 'ketua']);
-
-        $k = app(SimpanKabar::class)->jalankan($u, ['ormawa_id' => $o->id, 'judul' => 'Kabar Notif', 'isi' => '<p>x</p>']);
-        app(AjukanKabar::class)->jalankan($k, $u);
-        expect(judulTerkirim($admin))->toBe(['Kabar menunggu persetujuan']);
-
-        app(TolakKabar::class)->jalankan($k->fresh(), $admin, 'Tambah foto');
-        $n = terkirim($u, 'kabar');
-        expect($n[0]->judul)->toBe('Kabar Anda ditolak')->and($n[0]->ringkas)->toContain('Tambah foto')->and($n[0]->url)->toBe(route('ormawa.kabar', $o));
-
-        app(AjukanKabar::class)->jalankan($k->fresh(), $u);
-        app(TerbitkanKabar::class)->jalankan($k->fresh(), $admin);
-        expect(collect(judulTerkirim($u))->last())->toBe('Kabar Anda disetujui dan terbit');
-    });
 });
 
 describe('kanal dan preferensi', function () {
@@ -340,7 +316,7 @@ describe('kanal dan preferensi', function () {
 
         $u->refresh();
         expect($u->preferensiNotifikasi('naskah'))->toBe(['mail' => true, 'whatsapp' => false])->and($u->preferensiNotifikasi('lpj'))->toBe(['mail' => true, 'whatsapp' => true])
-            ->and($u->preferensiNotifikasi('kabar'))->toBe(['mail' => false, 'whatsapp' => false])->and($u->telepon)->toBe('0812 3456 7890')
+            ->and($u->preferensiNotifikasi('pengingat'))->toBe(['mail' => false, 'whatsapp' => false])->and($u->telepon)->toBe('0812 3456 7890')
             ->and(array_keys($u->preferensi_notifikasi))->not->toContain('tidak-ada');
 
         expect(fn () => app(SimpanPreferensiNotifikasi::class)->jalankan($u, ['telepon' => '<script>']))->toThrow(ValidationException::class);

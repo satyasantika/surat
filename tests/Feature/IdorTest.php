@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Ormawa\Kabar as KomponenKabar;
+use App\Livewire\Ormawa\Progres as KomponenProgres;
 use App\Models\Jabatan;
 use App\Models\JenisNaskah;
 use App\Models\JenisPermohonan;
@@ -39,7 +39,7 @@ function idorOrmawa(string $nama): array
     return [$o, $u];
 }
 
-it('pengurus tidak dapat membuka halaman ormawa lain (profil, permohonan, kabar, LPJ)', function () {
+it('pengurus tidak dapat membuka halaman ormawa lain (profil, permohonan, LPJ)', function () {
     [$a, $ua] = idorOrmawa('HIMA A');
     [$b] = idorOrmawa('HIMA B');
     $p = (new Permohonan)->forceFill([
@@ -50,7 +50,7 @@ it('pengurus tidak dapat membuka halaman ormawa lain (profil, permohonan, kabar,
     $lpj = new Lpj;
     $lpj->forceFill(['permohonan_id' => $p->id, 'batas_waktu' => '2026-05-25'])->save();
 
-    foreach ([route('ormawa.profil', $b), route('ormawa.permohonan', $b), route('ormawa.permohonan.baru', $b), route('ormawa.kabar', $b), route('ormawa.lpj', ['ormawa' => $b->id, 'lpj' => $lpj->id]), route('ormawa.lpj', ['ormawa' => $a->id, 'lpj' => $lpj->id])] as $url) {
+    foreach ([route('ormawa.profil', $b), route('ormawa.permohonan', $b), route('ormawa.permohonan.baru', $b), route('ormawa.lpj', ['ormawa' => $b->id, 'lpj' => $lpj->id]), route('ormawa.lpj', ['ormawa' => $a->id, 'lpj' => $lpj->id])] as $url) {
         $status = $this->actingAs($ua)->get($url)->status();
         expect($status)->toBeIn([403, 404], "{$url} seharusnya ditolak, status {$status}");
     }
@@ -62,7 +62,7 @@ it('properti terkunci Livewire tidak dapat diganti ke ormawa lain dari klien', f
     [$a, $ua] = idorOrmawa('HIMA A');
     [$b] = idorOrmawa('HIMA B');
 
-    expect(fn () => Livewire::actingAs($ua)->test(KomponenKabar::class, ['ormawa' => $a->id])->set('ormawaId', $b->id))->toThrow(Exception::class, 'Cannot update locked property');
+    expect(fn () => Livewire::actingAs($ua)->test(KomponenProgres::class, ['ormawa' => $a->id])->set('ormawaId', $b->id))->toThrow(Exception::class, 'Cannot update locked property');
 });
 
 it('tautan berkas milik ormawa lain tidak dapat dibuka; tautan tanda tangan tidak pernah dapat dibuka', function () {

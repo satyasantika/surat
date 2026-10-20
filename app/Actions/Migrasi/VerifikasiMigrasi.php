@@ -24,7 +24,7 @@ class VerifikasiMigrasi
     private const KOLOM_CONTOH = [
         'users' => ['name', 'email'], 'ormawa' => ['nama', 'singkatan', 'akun_media', 'surel_organisasi', 'visi', 'misi'],
         'pengurus_ormawa' => ['nama', 'prodi'], 'permohonan' => ['nama_kegiatan', 'perihal', 'deskripsi'],
-        'kabar' => ['judul', 'subjudul', 'isi'], 'galeri' => ['judul', 'url'], 'tautan_berkas' => ['url', 'label'], 'ruangan_lokal' => ['nama', 'gedung'],
+        'tautan_berkas' => ['url', 'label'], 'ruangan_lokal' => ['nama', 'gedung'],
     ];
 
     private const POLA_CONTOH = ['fakultas teknik', 'bem ft', 'ukm robotik', '@ormawahub.ac.id', 'unsplash'];

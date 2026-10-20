@@ -11,7 +11,6 @@ class Kategori
         'naskah' => 'Naskah (paraf, tanda tangan, terbit)',
         'permohonan' => 'Permohonan ormawa',
         'lpj' => 'LPJ',
-        'kabar' => 'Kabar',
         'pengingat' => 'Pengingat tenggat',
     ];
 

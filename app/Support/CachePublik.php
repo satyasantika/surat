@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Cache halaman publik (HTML jadi) maksimal 5 menit. Setiap perubahan model yang tampil publik menaikkan
- * versi sehingga konten baru langsung tampil dan konten yang ditarik (mis. kabar dibatalkan) tidak bertahan.
+ * versi sehingga konten baru langsung tampil dan konten yang ditarik tidak bertahan.
  */
 class CachePublik
 {

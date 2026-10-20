@@ -10,7 +10,7 @@ class SiapkanUat extends Command
 {
     protected $signature = 'surat:siapkan-uat {--domain=contoh.test : Domain surel akun rekaan} {--awalan=uat : Awalan surel akun rekaan}';
 
-    protected $description = 'Menyiapkan data REKAAN uji penerimaan (staging): akun per peran, 3 ormawa, surat masuk, permohonan di tiap tahap, LPJ, kabar, galeri';
+    protected $description = 'Menyiapkan data REKAAN uji penerimaan (staging): akun per peran, 3 ormawa, surat masuk, permohonan di tiap tahap, LPJ';
 
     public function handle(): int
     {
