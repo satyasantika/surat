@@ -2,7 +2,6 @@
 
 namespace App\Services\Notifikasi;
 
-use App\Enums\JenisPengirim;
 use App\Enums\KlasifikasiKeamanan;
 use App\Enums\StatusNaskah;
 use App\Enums\StatusPermohonan;
@@ -159,7 +158,7 @@ class NotifikasiAlur
             $internal = Penerima::izin('masuk.teruskan')->merge(array_filter([$surat->diregistrasi_oleh ? User::find($surat->diregistrasi_oleh) : null]));
             $this->kirim->kirim($internal, 'surat-masuk', 'Hasil surat masuk dikirim kepada pengirim', $ringkas, SuratMasukResource::getUrl('edit', ['record' => $surat]), $petugas);
 
-            if ($surat->jenis_pengirim === JenisPengirim::Prodi && $surat->pengirim_unit_kerja_id !== null) {
+            if ($surat->jenis_pengirim->berunit() && $surat->pengirim_unit_kerja_id !== null) {
                 $this->kirim->kirim(Penerima::pimpinanUnit($surat->pengirim_unit_kerja_id), 'surat-masuk', 'Surat Anda telah selesai diproses', 'Surat dari unit Anda kepada Dekan telah selesai diproses. Lihat hasilnya: '.$surat->tautanLacak(), $surat->tautanLacak(), $petugas);
             }
 

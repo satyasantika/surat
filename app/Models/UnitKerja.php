@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TipeUnitKerja;
 use App\Models\Concerns\TercatatAktivitas;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -9,18 +10,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['kode', 'nama', 'induk_id', 'aktif'])]
+#[Fillable(['kode', 'nama', 'tipe', 'induk_id', 'aktif'])]
 class UnitKerja extends Model
 {
     use HasUuids, TercatatAktivitas;
 
     protected $table = 'unit_kerja';
 
-    protected $attributes = ['aktif' => true];
+    protected $attributes = ['aktif' => true, 'tipe' => 'lainnya'];
 
     protected function casts(): array
     {
-        return ['aktif' => 'boolean'];
+        return ['aktif' => 'boolean', 'tipe' => TipeUnitKerja::class];
     }
 
     /** @return BelongsTo<UnitKerja, $this> */

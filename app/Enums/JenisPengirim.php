@@ -6,6 +6,7 @@ enum JenisPengirim: string
 {
     case Ormawa = 'ormawa';
     case Prodi = 'prodi';
+    case Laboratorium = 'laboratorium';
     case Eksternal = 'eksternal';
 
     public function label(): string
@@ -13,8 +14,15 @@ enum JenisPengirim: string
         return match ($this) {
             self::Ormawa => 'Ormawa',
             self::Prodi => 'Program studi',
+            self::Laboratorium => 'Laboratorium',
             self::Eksternal => 'Eksternal (UKM/umum)',
         };
+    }
+
+    /** Pengirim resmi yang diwakili unit kerja (wajib memilih unit). */
+    public function berunit(): bool
+    {
+        return $this === self::Prodi || $this === self::Laboratorium;
     }
 
     /** @return array<string, string> */

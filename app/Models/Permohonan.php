@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JenisPengaju;
 use App\Enums\StatusPermohonan;
 use App\Models\Concerns\MemilikiKodeLacak;
 use App\Models\Concerns\TercatatAktivitas;
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property StatusPermohonan $status
+ * @property JenisPengaju $jenis_pengaju
+ * @property ?string $unit_kerja_id
+ * @property ?string $ormawa_id
  * @property string|null $mode_wd
  * @property string $kode_lacak
  * @property ?CarbonImmutable $hasil_dikirim_pada
@@ -25,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property array<string, array<string, mixed>> $penanggung_jawab
  * @property list<array<string, mixed>>|null $fasilitas_rektorat
  */
-#[Fillable(['ormawa_id', 'jenis_permohonan_id', 'diajukan_oleh', 'nama_kegiatan', 'perihal', 'nomor_surat_ormawa', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'tempat_lain', 'deskripsi', 'penanggung_jawab', 'fasilitas_rektorat', 'alasan_mendesak'])]
+#[Fillable(['ormawa_id', 'jenis_pengaju', 'unit_kerja_id', 'jenis_permohonan_id', 'diajukan_oleh', 'nama_kegiatan', 'perihal', 'nomor_surat_ormawa', 'tanggal_mulai', 'tanggal_selesai', 'jam_mulai', 'jam_selesai', 'tempat_lain', 'deskripsi', 'penanggung_jawab', 'fasilitas_rektorat', 'alasan_mendesak'])]
 class Permohonan extends Model
 {
     use HasUuids, MemilikiKodeLacak, TercatatAktivitas;
@@ -42,15 +46,17 @@ class Permohonan extends Model
 
     protected $table = 'permohonan';
 
-    protected $attributes = ['sumber' => 'aplikasi'];
+    protected $attributes = ['sumber' => 'aplikasi', 'jenis_pengaju' => 'ormawa'];
 
     /** Data pribadi penanggung jawab (BR-18) tidak ikut serialisasi maupun jejak audit. */
-    protected $hidden = ['penanggung_jawab', 'kode_lacak'];
+    protected $hidden = ['penanggung_jawab', 'kode_lacak', 'diajukan_atas_nama'];
 
     protected function casts(): array
     {
         return [
             'status' => StatusPermohonan::class,
+            'jenis_pengaju' => JenisPengaju::class,
+            'diajukan_atas_nama' => 'encrypted',
             'tanggal_mulai' => 'date',
             'tanggal_selesai' => 'date',
             'diajukan_pada' => 'datetime',
@@ -70,6 +76,22 @@ class Permohonan extends Model
     public function ormawa(): BelongsTo
     {
         return $this->belongsTo(Ormawa::class);
+    }
+
+    /**
+     * Unit kerja pengaju (prodi/laboratorium); kosong untuk pengaju ormawa.
+     *
+     * @return BelongsTo<UnitKerja, $this>
+     */
+    public function unitKerja(): BelongsTo
+    {
+        return $this->belongsTo(UnitKerja::class);
+    }
+
+    /** Nama pihak pengaju untuk tampilan: ormawa atau unit kerja. */
+    public function namaPengaju(): string
+    {
+        return $this->jenis_pengaju->berunit() ? (string) $this->unitKerja?->nama : (string) $this->ormawa?->nama;
     }
 
     /** @return BelongsTo<JenisPermohonan, $this> */

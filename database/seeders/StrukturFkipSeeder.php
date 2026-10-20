@@ -12,7 +12,7 @@ class StrukturFkipSeeder extends Seeder
     {
         $fakultas = UnitKerja::updateOrCreate(
             ['kode' => 'UN58.10'],
-            ['nama' => 'Fakultas Keguruan dan Ilmu Pendidikan', 'aktif' => true],
+            ['nama' => 'Fakultas Keguruan dan Ilmu Pendidikan', 'tipe' => 'fakultas', 'aktif' => true],
         );
 
         $jabatan = [
