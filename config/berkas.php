@@ -13,7 +13,7 @@ return [
         '*.sharepoint.com',
     ],
 
-    // Tautan media publik (LPJ/galeri): hanya domain berikut.
+    // Tautan media publik (LPJ): hanya domain berikut.
     'domain_media' => ['instagram.com', '*.instagram.com', 'youtube.com', '*.youtube.com', 'youtu.be'],
 
     // Pemendek URL yang ditolak.

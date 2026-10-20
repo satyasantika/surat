@@ -43,13 +43,13 @@ it('memberi izin sesuai matriks per peran', function (string $peran, array $bole
     }
 })->with([
     'admin-persuratan' => ['admin-persuratan', ['masuk.registrasi', 'nomor.terbitkan', 'permohonan.validasi', 'naskah.templat'], ['naskah.tandatangan', 'disposisi.buat', 'pengguna.kelola', 'lpj.nilai']],
-    'operator-layanan' => ['operator-layanan', [], ['masuk.registrasi', 'kabar.kelola', 'ruangan.kelola']],
+    'operator-layanan' => ['operator-layanan', [], ['masuk.registrasi', 'ruangan.kelola']],
     'staf-khusus' => ['staf-khusus', ['masuk.registrasi', 'masuk.teruskan', 'permohonan.lihat'], ['disposisi.buat', 'permohonan.validasi', 'permohonan.putuskan', 'nomor.terbitkan', 'naskah.tandatangan', 'pengguna.kelola']],
     'dekan' => ['dekan', ['disposisi.buat', 'naskah.tandatangan', 'permohonan.putuskan', 'lpj.nilai'], ['nomor.terbitkan', 'masuk.registrasi', 'masuk.teruskan', 'pengguna.kelola']],
     'wakil-dekan' => ['wakil-dekan', ['disposisi.tindaklanjut', 'naskah.paraf', 'naskah.tandatangan', 'lpj.nilai'], ['nomor.terbitkan', 'permohonan.validasi']],
     'kasubag' => ['kasubag', ['naskah.paraf', 'permohonan.putuskan', 'lpj.nilai'], ['naskah.tandatangan', 'nomor.terbitkan']],
     'pembina-ormawa' => ['pembina-ormawa', ['permohonan.setujui-pembina', 'lpj.lihat'], ['lpj.nilai', 'permohonan.ajukan', 'masuk.lihat']],
-    'pengurus-ormawa' => ['pengurus-ormawa', ['permohonan.ajukan', 'lpj.isi', 'kabar.usul'], ['kabar.kelola', 'masuk.lihat', 'lpj.nilai']],
+    'pengurus-ormawa' => ['pengurus-ormawa', ['permohonan.ajukan', 'lpj.isi'], ['masuk.lihat', 'lpj.nilai']],
     'pegawai' => ['pegawai', ['masuk.lihat', 'disposisi.tindaklanjut'], ['disposisi.buat', 'arsip.lihat', 'naskah.draf']],
 ]);
 

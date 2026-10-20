@@ -13,7 +13,6 @@ use App\Filament\Resources\SuratMasuks\SuratMasukResource;
 use App\Jobs\KirimHasilKePengirim;
 use App\Models\Disposisi;
 use App\Models\DisposisiPenerima;
-use App\Models\Kabar;
 use App\Models\Lpj;
 use App\Models\Naskah;
 use App\Models\Ormawa;
@@ -200,20 +199,6 @@ class NotifikasiAlur
             $p = $lpj->permohonan;
 
             $this->kirim->kirim(Penerima::ormawa($p->ormawa, $p), 'lpj', 'LPJ telah dinilai', "LPJ {$p->nama_kegiatan}: nilai akhir {$lpj->nilai_akhir}.", route('ormawa.lpj', ['ormawa' => $p->ormawa_id, 'lpj' => $lpj->getKey()]));
-        });
-    }
-
-    public function kabarDiajukan(Kabar $kabar, User $pelaku): void
-    {
-        $this->aman(fn () => $this->kirim->kirim(Penerima::izin('kabar.kelola'), 'kabar', 'Kabar menunggu persetujuan', Str::limit($kabar->judul, 120), url('/admin/kabar'), $pelaku));
-    }
-
-    public function kabarDiputuskan(Kabar $kabar, User $oleh): void
-    {
-        $this->aman(function () use ($kabar, $oleh) {
-            $terbit = $kabar->status === Kabar::TERBIT;
-
-            $this->kirim->kirim([$kabar->penulis], 'kabar', $terbit ? 'Kabar Anda disetujui dan terbit' : 'Kabar Anda ditolak', Str::limit($kabar->judul, 120).(! $terbit && $kabar->catatan_admin ? " — catatan: {$kabar->catatan_admin}" : ''), $kabar->ormawa_id ? route('ormawa.kabar', $kabar->ormawa_id) : null, $oleh);
         });
     }
 

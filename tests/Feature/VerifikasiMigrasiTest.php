@@ -5,7 +5,6 @@ use App\Actions\Migrasi\UndangPengguna;
 use App\Actions\Migrasi\VerifikasiMigrasi;
 use App\Filament\Resources\ImporLogs\Pages\ListImporLogs;
 use App\Models\ImporLog;
-use App\Models\Kabar;
 use App\Models\Lpj;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
@@ -74,7 +73,7 @@ describe('ormawahub:verifikasi', function () {
 
         $h = hasilCek('Jumlah baris per sheet');
 
-        expect($h['ok'])->toBeFalse()->and($h['rincian'])->toContain('baris galat: 3');
+        expect($h['ok'])->toBeFalse()->and($h['rincian'])->toContain('baris galat: 2');
         $this->artisan('ormawahub:verifikasi')->assertFailed();
     });
 
@@ -84,7 +83,7 @@ describe('ormawahub:verifikasi', function () {
 
     it('gagal bila baris hasil impor dihapus dari tabel tujuan', function () {
         imporBersih();
-        Kabar::where('sumber_id_lama', 'B2')->delete();
+        Lpj::where('sumber_id_lama', 'LAP-PR-2026-001')->delete();
 
         expect(hasilCek('Jumlah baris per sheet')['ok'])->toBeFalse();
     });

@@ -2,7 +2,6 @@
 
 namespace App\Actions\Migrasi;
 
-use App\Actions\Migrasi\Impor\ImporKonten;
 use App\Actions\Migrasi\Impor\ImporLpj;
 use App\Actions\Migrasi\Impor\ImporOrmawa;
 use App\Actions\Migrasi\Impor\ImporPengguna;
@@ -29,7 +28,7 @@ class ImporOrmawaHub
     /** Urutan impor (§7) dan sheet wajib/opsional. */
     private const WAJIB = ['Users', 'Ormawa_Profiles', 'Pengurus'];
 
-    private const OPSIONAL = ['Rooms', 'RektoratRooms', 'Requests', 'Laporan', 'Blogs', 'Galleries'];
+    private const OPSIONAL = ['Rooms', 'RektoratRooms', 'Requests', 'Laporan'];
 
     public function jalankan(string $xlsx, string $direktoriPemetaan, bool $dryRun = false, ?User $pelaksana = null): KonteksImpor
     {
@@ -49,8 +48,8 @@ class ImporOrmawaHub
 
         $k = new KonteksImpor((string) Str::uuid(), $pemetaan, $mode, $pelaksana);
 
-        if ($pelaksana === null && array_intersect(['Requests', 'Blogs'], array_keys($sheet)) !== []) {
-            throw new InvalidArgumentException('Pelaksana impor (admin) wajib ditentukan untuk mengimpor permohonan dan kabar.');
+        if ($pelaksana === null && isset($sheet['Requests'])) {
+            throw new InvalidArgumentException('Pelaksana impor (admin) wajib ditentukan untuk mengimpor permohonan.');
         }
 
         DB::beginTransaction();
@@ -67,14 +66,6 @@ class ImporOrmawaHub
                     app(ImporPermohonan::class)->jalankan($k, $b);
                 },
                 'Laporan' => fn ($b) => app(ImporLpj::class)->jalankan($k, $b),
-                'Blogs' => function ($b) use ($k, $sheet) {
-                    Bantu::petaNamaOrmawa($k, $sheet['Ormawa_Profiles']);
-                    app(ImporKonten::class)->blogs($k, $b);
-                },
-                'Galleries' => function ($b) use ($k, $sheet) {
-                    Bantu::petaNamaOrmawa($k, $sheet['Ormawa_Profiles']);
-                    app(ImporKonten::class)->galeri($k, $b);
-                },
             ];
 
             foreach ($langkah as $nama => $impor) {

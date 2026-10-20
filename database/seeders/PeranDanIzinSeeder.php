@@ -20,8 +20,6 @@ class PeranDanIzinSeeder extends Seeder
         'permohonan.lihat', 'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
         'ruangan.kelola', 'ruangan.kelola-jadwal',
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
-        'kabar.kelola', 'kabar.usul',
-        'galeri.kelola',
         'laporan.lihat',
         'master.kelola',
         'pengguna.kelola',
@@ -36,7 +34,7 @@ class PeranDanIzinSeeder extends Seeder
         'super-admin' => [],
         'admin-persuratan' => [
             'masuk.lihat', 'masuk.registrasi', 'naskah.draf', 'naskah.templat', 'naskah.batalkan', 'nomor.terbitkan', 'arsip.lihat',
-            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'kabar.kelola', 'galeri.kelola', 'laporan.lihat',
+            'ormawa.lihat', 'ormawa.kelola', 'permohonan.validasi', 'ruangan.kelola-jadwal', 'laporan.lihat',
         ],
         'operator-layanan' => [],
         // Penerima awal di dekanat: meregistrasi surat masuk (termasuk pengirim eksternal/prodi) dan meneruskannya ke dekan.
@@ -59,7 +57,7 @@ class PeranDanIzinSeeder extends Seeder
             'ormawa.kelola-binaan', 'permohonan.setujui-pembina', 'lpj.lihat',
         ],
         'pengurus-ormawa' => [
-            'permohonan.ajukan', 'lpj.isi', 'ormawa.kelola-sendiri', 'kabar.usul',
+            'permohonan.ajukan', 'lpj.isi', 'ormawa.kelola-sendiri',
         ],
         'pegawai' => [
             'masuk.lihat', 'disposisi.tindaklanjut',

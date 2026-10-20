@@ -27,7 +27,7 @@ it('menampilkan halaman 403 bermerek saat akses ditolak', function () {
 });
 
 it('halaman error memuat identitas FKIP', function () {
-    $r = $this->withoutVite()->get('/kabar/tidak-ada-slug-ini')->assertNotFound();
+    $r = $this->withoutVite()->get('/organisasi/tidak-ada-slug-ini')->assertNotFound();
 
     $r->assertSee(config('app.name'))->assertSee('FKIP Universitas Siliwangi');
 });

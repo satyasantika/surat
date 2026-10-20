@@ -64,7 +64,7 @@ dan `srp php artisan queue:failed`.
 ## Uji penerimaan (staging)
 
 `php artisan surat:siapkan-uat` menyiapkan data **rekaan** (ditolak di produksi): akun per peran (`uat.<peran>@contoh.test`, kata sandi acak dicetak sekali),
-3 ormawa, surat masuk, permohonan di setiap tahap, LPJ (terlambat/diajukan/dinilai), kabar, dan galeri; idempoten.
+3 ormawa, surat masuk, permohonan di setiap tahap, dan LPJ (terlambat/diajukan/dinilai); idempoten.
 Panduan pengguna: **docs/PANDUAN-ADMIN.md**, **docs/PANDUAN-PIMPINAN.md**, **docs/PANDUAN-ORMAWA.md** (versi HTML dengan tangkapan layar di `public/panduan/`).
 
 ## Memperbarui panduan

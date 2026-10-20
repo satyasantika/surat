@@ -87,10 +87,6 @@
         section.gelap { background: var(--kertas-2); border-block: 1px solid var(--garis); }
         h2 { font: 700 clamp(28px, 3.6vw, 38px)/1.15 var(--serif); letter-spacing: -.025em; margin: 14px 0 14px; max-width: 22ch; }
         .pengantar { color: var(--tinta-2); max-width: 60ch; font-size: 17px; margin: 0 0 48px; }
-        .judul-baris { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 36px; }
-        .judul-baris h2 { margin-bottom: 0; }
-        .judul-baris a { font-weight: 600; font-size: 14.5px; color: var(--amber-tua); text-decoration: none; }
-
         .fitur { display: grid; gap: 1px; background: var(--garis); border: 1px solid var(--garis); border-radius: 16px; overflow: hidden; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
         .fitur article { background: var(--kertas); padding: 32px 28px; }
         .fitur .no { font: 700 13px var(--sans); color: var(--amber-tua); letter-spacing: .1em; }
@@ -122,17 +118,6 @@
         .centang { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 14px; }
         .centang li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; font-size: 16px; }
         .centang svg { width: 22px; height: 22px; color: var(--hijau); margin-top: 2px; }
-
-        .kartu-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-        .kartu { background: var(--kertas); border: 1px solid var(--garis); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
-        .kartu img, .kartu iframe { width: 100%; height: 180px; object-fit: cover; border: 0; background: var(--kertas-2); }
-        .kartu .isi { padding: 18px 20px 22px; }
-        .kartu h3 { margin: 0 0 6px; font-size: 17px; line-height: 1.35; }
-        .kartu h3 a { text-decoration: none; }
-        .kartu h3 a:hover { color: var(--amber-tua); }
-        .kartu .meta { font-size: 12.5px; color: var(--tinta-2); margin: 0; }
-        .kartu p.ringkas { font-size: 14.5px; color: var(--tinta-2); margin: 8px 0 0; }
-        .kosong { color: var(--tinta-2); font-size: 15px; margin: 0; }
 
         .penutup { background: linear-gradient(135deg, #172554, #1e3a8a); color: #fff; text-align: center; }
         .penutup h2 { margin-inline: auto; color: #fff; }
@@ -166,7 +151,6 @@
             <a href="#layanan">Layanan</a>
             <a href="#alur">Alur</a>
             <a href="#peran">Peran</a>
-            <a href="{{ route('kabar') }}">Kabar</a>
             <a href="{{ route('organisasi') }}">Organisasi</a>
             <a href="{{ asset('panduan/index.html') }}">Panduan</a>
             <a class="tombol utama" href="{{ route('login') }}">Masuk</a>
@@ -271,7 +255,7 @@
                     <span class="lencana biru">Pengurus ormawa</span>
                     <h3>Mahasiswa pengurus organisasi</h3>
                     <p>Mengajukan kegiatan dan ruangan, memantau progres, serta mengisi LPJ.</p>
-                    <ul><li>Ajukan permohonan</li><li>Unduh surat izin</li><li>Kelola profil &amp; kabar</li></ul>
+                    <ul><li>Ajukan permohonan</li><li>Unduh surat izin</li><li>Kelola profil ormawa</li></ul>
                     <span class="menuju">Buka panduan →</span>
                 </a>
                 <a href="{{ asset('panduan/dekan.html') }}">
@@ -284,56 +268,10 @@
                 <a href="{{ asset('panduan/admin-persuratan.html') }}">
                     <span class="lencana kuning">Admin persuratan</span>
                     <h3>Staf persuratan fakultas</h3>
-                    <p>Meregistrasi surat, menerbitkan naskah bernomor, dan mengelola ormawa, kabar, serta arsip.</p>
+                    <p>Meregistrasi surat, menerbitkan naskah bernomor, dan mengelola ormawa serta arsip.</p>
                     <ul><li>Register &amp; arsip</li><li>Validasi permohonan</li><li>Laporan</li></ul>
                     <span class="menuju">Buka panduan →</span>
                 </a>
-            </div>
-        </div>
-    </section>
-
-    <section id="kabar" class="gelap" aria-label="Kabar terbaru">
-        <div class="wrap">
-            <div class="judul-baris">
-                <div><span class="label">Kabar</span><h2>Kabar kegiatan terbaru</h2></div>
-                <a href="{{ route('kabar') }}">Semua kabar →</a>
-            </div>
-            <div class="kartu-grid">
-                @forelse ($kabar as $k)
-                    <article class="kartu">
-                        @if ($k->sampulUrl())<img src="{{ $k->sampulUrl() }}" alt="" loading="lazy" referrerpolicy="no-referrer">@endif
-                        <div class="isi">
-                            <h3><a href="{{ route('kabar.tampil', $k->slug) }}">{{ $k->judul }}</a></h3>
-                            <p class="meta">{{ $k->ormawa?->nama ?? 'Fakultas' }} · {{ $k->terbit_pada?->locale('id')->translatedFormat('d F Y') }}</p>
-                            @if ($k->subjudul)<p class="ringkas">{{ $k->subjudul }}</p>@endif
-                        </div>
-                    </article>
-                @empty
-                    <p class="kosong">Belum ada kabar terbit.</p>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section id="galeri" aria-label="Galeri">
-        <div class="wrap">
-            <div class="judul-baris">
-                <div><span class="label">Galeri</span><h2>Dokumentasi kegiatan</h2></div>
-                <a href="{{ route('galeri') }}">Semua galeri →</a>
-            </div>
-            <div class="kartu-grid">
-                @forelse ($galeri as $g)
-                    <figure class="kartu" style="margin:0">
-                        @if ($g->tipe === 'foto' && $g->gambarUrl())
-                            <img src="{{ $g->gambarUrl() }}" alt="{{ $g->judul }}" loading="lazy" referrerpolicy="no-referrer">
-                        @elseif ($g->tipe === 'video' && $g->embedUrl())
-                            <iframe src="{{ $g->embedUrl() }}" title="{{ $g->judul }}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>
-                        @endif
-                        <figcaption class="isi"><h3>{{ $g->judul }}</h3></figcaption>
-                    </figure>
-                @empty
-                    <p class="kosong">Belum ada galeri.</p>
-                @endforelse
             </div>
         </div>
     </section>

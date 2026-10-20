@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Header keamanan halaman publik: hanya sumber gambar/video yang dipakai galeri dan kabar yang diizinkan. */
+/** Header keamanan halaman publik: hanya sumber gambar yang dipakai profil ormawa yang diizinkan. */
 class HeaderHalamanPublik
 {
     public function handle(Request $request, Closure $next): Response
@@ -18,7 +18,6 @@ class HeaderHalamanPublik
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 "img-src 'self' data: https://lh3.googleusercontent.com https://*.unsil.ac.id",
-                'frame-src https://www.youtube-nocookie.com https://drive.google.com',
                 "style-src 'self' 'unsafe-inline'",
                 "script-src 'self'",
                 "base-uri 'self'",

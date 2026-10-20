@@ -78,11 +78,11 @@ it('memberi operator hanya izin yang dicentang', function () {
     Notification::fake();
 
     $op = app(SimpanPengguna::class)->jalankan(null, dataPengguna([
-        'peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola', 'galeri.kelola'],
+        'peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal', 'laporan.lihat'],
     ]), pengelola());
 
-    expect($op->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe(['galeri.kelola', 'kabar.kelola'])
-        ->and($op->can('kabar.kelola'))->toBeTrue()
+    expect($op->getAllPermissions()->pluck('name')->sort()->values()->all())->toBe(['laporan.lihat', 'ruangan.kelola-jadwal'])
+        ->and($op->can('ruangan.kelola-jadwal'))->toBeTrue()
         ->and($op->can('ruangan.kelola'))->toBeFalse()
         ->and($op->can('masuk.registrasi'))->toBeFalse();
 });
@@ -91,12 +91,12 @@ it('mencabut izin langsung saat izin dihapus atau peran bukan operator', functio
     Notification::fake();
     $aksi = app(SimpanPengguna::class);
     $pelaku = pengelola();
-    $op = $aksi->jalankan(null, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola', 'galeri.kelola']]), $pelaku);
+    $op = $aksi->jalankan(null, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal', 'laporan.lihat']]), $pelaku);
 
-    $aksi->jalankan($op, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['galeri.kelola']]), $pelaku);
-    expect($op->fresh()->can('kabar.kelola'))->toBeFalse()->and($op->fresh()->can('galeri.kelola'))->toBeTrue();
+    $aksi->jalankan($op, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['laporan.lihat']]), $pelaku);
+    expect($op->fresh()->can('ruangan.kelola-jadwal'))->toBeFalse()->and($op->fresh()->can('laporan.lihat'))->toBeTrue();
 
-    $aksi->jalankan($op, dataPengguna(['peran' => ['pegawai'], 'izin_langsung' => ['galeri.kelola']]), $pelaku);
+    $aksi->jalankan($op, dataPengguna(['peran' => ['pegawai'], 'izin_langsung' => ['laporan.lihat']]), $pelaku);
     expect($op->fresh()->getDirectPermissions())->toBeEmpty();
 });
 
@@ -122,16 +122,16 @@ it('tidak mengizinkan non-super-admin mencabut peran terbatas', function () {
 
 it('tidak mengizinkan memberi izin yang tidak dimiliki pelaku', function () {
     Notification::fake();
-    $pelaku = pengelola('operator-layanan', ['pengguna.kelola', 'kabar.kelola']);
+    $pelaku = pengelola('operator-layanan', ['pengguna.kelola', 'ruangan.kelola-jadwal']);
 
     expect(fn () => app(SimpanPengguna::class)->jalankan(null, dataPengguna([
-        'peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola', 'pengaturan.kelola'],
+        'peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal', 'pengaturan.kelola'],
     ]), $pelaku))->toThrow(ValidationException::class);
 
     $ok = app(SimpanPengguna::class)->jalankan(null, dataPengguna([
-        'peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola'],
+        'peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal'],
     ]), $pelaku);
-    expect($ok->can('kabar.kelola'))->toBeTrue();
+    expect($ok->can('ruangan.kelola-jadwal'))->toBeTrue();
 });
 
 it('menolak peran dan izin yang tidak dikenal', function () {
@@ -174,16 +174,16 @@ it('melarang non-super-admin membuka akun admin-persuratan dan tidak menyediakan
 it('mengubah akun lewat formulir dan memuat peran serta izin', function () {
     Notification::fake();
     $pelaku = pengelola();
-    $op = app(SimpanPengguna::class)->jalankan(null, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola']]), $pelaku);
+    $op = app(SimpanPengguna::class)->jalankan(null, dataPengguna(['peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal']]), $pelaku);
     $this->actingAs($pelaku);
 
     Livewire::test(EditUser::class, ['record' => $op->getKey()])
-        ->assertFormSet(['peran' => ['operator-layanan'], 'izin_langsung' => ['kabar.kelola']])
-        ->fillForm(['telepon' => '0822', 'izin_langsung' => ['galeri.kelola']])
+        ->assertFormSet(['peran' => ['operator-layanan'], 'izin_langsung' => ['ruangan.kelola-jadwal']])
+        ->fillForm(['telepon' => '0822', 'izin_langsung' => ['laporan.lihat']])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($op->fresh()->telepon)->toBe('0822')->and($op->fresh()->can('galeri.kelola'))->toBeTrue();
+    expect($op->fresh()->telepon)->toBe('0822')->and($op->fresh()->can('laporan.lihat'))->toBeTrue();
 });
 
 it('menampilkan daftar pengguna dengan filter peran', function () {

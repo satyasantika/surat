@@ -3,10 +3,6 @@
 namespace App\Support\Uat;
 
 use App\Actions\Disposisi\BuatDisposisi;
-use App\Actions\Kabar\AjukanKabar;
-use App\Actions\Kabar\SimpanKabar;
-use App\Actions\Kabar\TerbitkanKabar;
-use App\Actions\Kabar\TolakKabar;
 use App\Actions\Lpj\IsiLpj;
 use App\Actions\Lpj\NilaiLpj;
 use App\Actions\Masuk\RegistrasiSuratMasuk;
@@ -19,10 +15,8 @@ use App\Actions\Permohonan\TolakPermohonan;
 use App\Actions\Permohonan\TransisiPermohonan;
 use App\Actions\Permohonan\ValidasiPermohonan;
 use App\Enums\StatusPermohonan;
-use App\Models\Galeri;
 use App\Models\Jabatan;
 use App\Models\JenisPermohonan;
-use App\Models\Kabar;
 use App\Models\Lpj;
 use App\Models\Ormawa;
 use App\Models\PemangkuJabatan;
@@ -37,7 +31,7 @@ use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * Data REKAAN untuk uji penerimaan (UAT) dan panduan: akun per peran, tiga ormawa, surat masuk, permohonan di setiap tahap,
- * LPJ, kabar, dan galeri. Dibangun lewat Action sungguhan agar riwayat dan aturan bisnisnya sah. Idempoten per surel akun:
+ * dan LPJ. Dibangun lewat Action sungguhan agar riwayat dan aturan bisnisnya sah. Idempoten per surel akun:
  * menjalankan ulang tidak menggandakan akun, tetapi data transaksi ditambahkan hanya bila ormawa uji belum punya permohonan.
  * TIDAK PERNAH dipakai di produksi (pemanggil menjaga lingkungan). Tidak ada data pribadi asli.
  */
@@ -87,7 +81,6 @@ class DataUat
         $ormawa = $this->buatOrmawa();
         $this->buatSurat();
         $this->buatPermohonan($ormawa);
-        $this->buatKonten($ormawa);
 
         return ['akun' => $this->laporan, 'ringkasan' => $this->ringkasan];
     }
@@ -111,7 +104,7 @@ class DataUat
             }
         }
 
-        $this->akun['operator']->givePermissionTo(['kabar.kelola', 'galeri.kelola', 'ruangan.kelola-jadwal']);
+        $this->akun['operator']->givePermissionTo(['ruangan.kelola-jadwal']);
     }
 
     private function pengguna(string $kunci, string $peran, string $nama, ?string $nipNim): User
@@ -253,30 +246,5 @@ class DataUat
             }
             app(NilaiLpj::class)->jalankan($lpj->fresh(), $this->akun['kasubag'], ['kelengkapan' => ['nilai' => 17], 'kontribusi_fakultas' => ['nilai' => 4, 'catatan' => 'Baik']]);
         }
-    }
-
-    /** @param  array<string, array{ormawa: Ormawa, ketua: User}>  $ormawa */
-    private function buatKonten(array $ormawa): void
-    {
-        if (Kabar::where('judul', 'like', '%(rekaan)%')->exists()) {
-            return;
-        }
-
-        $kabar = fn (string $kunci, string $judul) => app(SimpanKabar::class)->jalankan($ormawa[$kunci]['ketua'], ['ormawa_id' => $ormawa[$kunci]['ormawa']->getKey(), 'judul' => $judul, 'subjudul' => 'Kabar rekaan', 'isi' => '<p>Ini kabar rekaan untuk uji penerimaan dan panduan.</p>', 'tag' => ['uat', 'rekaan']]);
-
-        $terbit = $kabar('matematika', 'Seminar Pendidikan Sukses (rekaan)');
-        app(AjukanKabar::class)->jalankan($terbit, $ormawa['matematika']['ketua']);
-        app(TerbitkanKabar::class)->jalankan($terbit->fresh(), $this->akun['admin']);
-        app(AjukanKabar::class)->jalankan($kabar('bem', 'Pendaftaran Pengurus Baru (rekaan)'), $ormawa['bem']['ketua']);
-        $kabar('seni', 'Draf Pentas Seni (rekaan)');
-        $tolak = $kabar('seni', 'Pengumuman Lomba (rekaan)');
-        app(AjukanKabar::class)->jalankan($tolak, $ormawa['seni']['ketua']);
-        app(TolakKabar::class)->jalankan($tolak->fresh(), $this->akun['admin'], 'Tambahkan foto kegiatan (data rekaan).');
-
-        Galeri::firstOrCreate(['judul' => 'Foto Seminar (rekaan)'], ['tipe' => 'foto', 'url' => 'https://drive.google.com/file/d/1UatFotoSeminar12345/view', 'aktif' => true, 'ormawa_id' => $ormawa['matematika']['ormawa']->getKey()]);
-        Galeri::firstOrCreate(['judul' => 'Video Festival (rekaan)'], ['tipe' => 'video', 'url' => 'https://youtu.be/dQw4w9WgXcQ', 'aktif' => true, 'ormawa_id' => $ormawa['seni']['ormawa']->getKey()]);
-        Galeri::firstOrCreate(['judul' => 'Instagram Festival (rekaan)'], ['tipe' => 'instagram', 'url' => 'https://www.instagram.com/p/UatContoh123/', 'aktif' => true]);
-
-        $this->ringkasan['kabar'] = Kabar::count();
     }
 }

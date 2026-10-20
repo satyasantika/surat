@@ -4,33 +4,14 @@
    "kode": "publik",
    "judul": "Pengunjung (publik)",
    "akun": null,
-   "tujuan": "Melihat kabar kegiatan ormawa, galeri, profil organisasi, dan memeriksa keaslian surat bertanda QR tanpa perlu akun.",
+   "tujuan": "Melihat profil organisasi dan memeriksa keaslian surat bertanda QR tanpa perlu akun.",
    "masuk": "Tidak perlu masuk. Buka alamat aplikasi; halaman publik tersedia untuk semua orang.",
    "langkah": [
     {
      "gambar": "01-beranda",
      "judul": "Beranda",
-     "teks": "Beranda menampilkan kabar terbaru dan cuplikan galeri. Menu atas memuat **Kabar**, **Galeri**, **Organisasi**, dan **Verifikasi surat**.",
+     "teks": "Beranda memperkenalkan layanan persuratan. Menu atas memuat **Organisasi**, **Verifikasi surat**, **Lacak surat**, dan **Panduan**.",
      "url": "/"
-    },
-    {
-     "gambar": "02-kabar",
-     "judul": "Daftar kabar",
-     "teks": "Hanya kabar yang sudah disetujui admin yang tampil. Gunakan tombol halaman di bawah daftar untuk kabar sebelumnya.",
-     "url": "/kabar"
-    },
-    {
-     "gambar": "03-kabar-detail",
-     "judul": "Membaca kabar",
-     "teks": "Klik judul kabar untuk membaca isi lengkap, tag, dan organisasi penulisnya.",
-     "url": "/kabar",
-     "klik": "Seminar Pendidikan Sukses (rekaan)"
-    },
-    {
-     "gambar": "04-galeri",
-     "judul": "Galeri",
-     "teks": "Foto, video YouTube, dan tautan Instagram kegiatan. Video diputar tanpa pelacak; Instagram dibuka di tab baru.",
-     "url": "/galeri"
     },
     {
      "gambar": "05-organisasi",
@@ -71,7 +52,7 @@
    "kode": "pengurus-ormawa",
    "judul": "Pengurus ormawa",
    "akun": "panduan.pengurus-bem@contoh.test",
-   "tujuan": "Mengajukan permohonan kegiatan dan ruangan, memantau progres, mengunduh surat izin, mengisi LPJ, mengelola profil, dan mengusulkan kabar untuk organisasi Anda.",
+   "tujuan": "Mengajukan permohonan kegiatan dan ruangan, memantau progres, mengunduh surat izin, mengisi LPJ, mengelola profil untuk organisasi Anda.",
    "masuk": "Daftar di halaman **Daftar** dengan surel `…@student.unsil.ac.id`, verifikasi surel, lalu minta ketua/sekretaris atau admin menautkan akun Anda ke ormawa (berdasarkan NIM). Masuk lewat halaman **Masuk**; akun bersama organisasi tidak ada.",
    "langkah": [
     {
@@ -84,7 +65,7 @@
     {
      "gambar": "02-beranda",
      "judul": "Beranda ormawa",
-     "teks": "Ringkasan ormawa, SK dan periode, jumlah permohonan, LPJ jatuh tempo, serta tautan kabar. Bila Anda pengurus beberapa ormawa, pilih lewat tab di atas.",
+     "teks": "Ringkasan ormawa, SK dan periode, jumlah permohonan, LPJ jatuh tempo, serta tautan ke progres dan permohonan baru. Bila Anda pengurus beberapa ormawa, pilih lewat tab di atas.",
      "url": "/ormawa"
     },
     {
@@ -117,16 +98,9 @@
      "akun": "panduan.pengurus-matematika@contoh.test"
     },
     {
-     "gambar": "07-kabar",
-     "judul": "Mengusulkan kabar",
-     "teks": "Tulis judul, isi, tag, dan tautan foto sampul; **Simpan draf** atau **Simpan & ajukan**. Kabar tampil publik setelah disetujui admin; bila ditolak, catatan admin ditampilkan.",
-     "url": "/ormawa",
-     "klik": "Tulis dan kelola kabar ormawa"
-    },
-    {
      "gambar": "08-notifikasi",
      "judul": "Notifikasi",
-     "teks": "Setiap perpindahan tahap permohonan, penilaian LPJ, dan keputusan kabar tercatat di sini dan dikirim ke surel.",
+     "teks": "Setiap perpindahan tahap permohonan, dan penilaian LPJ tercatat di sini dan dikirim ke surel.",
      "url": "/notifikasi"
     },
     {
@@ -407,7 +381,7 @@
    "kode": "admin-persuratan",
    "judul": "Admin persuratan",
    "akun": "panduan.admin@contoh.test",
-   "tujuan": "Meregistrasi surat masuk, menyusun dan menerbitkan naskah bernomor, memvalidasi permohonan ormawa, mengelola ormawa/kabar/galeri, serta laporan dan arsip.",
+   "tujuan": "Meregistrasi surat masuk, menyusun dan menerbitkan naskah bernomor, memvalidasi permohonan ormawa, mengelola ormawa, serta laporan dan arsip.",
    "masuk": "Akun dibuat super-admin. Wajib menyiapkan **MFA** pada masuk pertama ke `/admin`.",
    "langkah": [
     {
@@ -445,12 +419,6 @@
      "judul": "Plot ruangan",
      "teks": "Kalender ruangan × sesi: pemakaian layanan, ditahan, dan dikonfirmasi; catat pemakaian manual.",
      "url": "/admin/plot-ruangan"
-    },
-    {
-     "gambar": "07-kabar",
-     "judul": "Kabar",
-     "teks": "Terbitkan atau tolak kabar usulan ormawa; buat kabar fakultas.",
-     "url": "/admin/kabar"
     },
     {
      "gambar": "08-register",
@@ -494,7 +462,7 @@
    "kode": "operator-layanan",
    "judul": "Operator layanan",
    "akun": "panduan.operator@contoh.test",
-   "tujuan": "Mengelola bagian tertentu yang diizinkan admin (mis. kabar, galeri, dan jadwal ruangan) tanpa akses penuh.",
+   "tujuan": "Mengelola bagian tertentu yang diizinkan admin (mis. jadwal ruangan) tanpa akses penuh.",
    "masuk": "Akun dibuat super-admin dengan izin granular per modul. Menu panel hanya memuat modul yang diizinkan.",
    "langkah": [
     {
@@ -502,18 +470,6 @@
      "judul": "Dasbor terbatas",
      "teks": "Hanya menu sesuai izin Anda yang tampil.",
      "url": "/admin"
-    },
-    {
-     "gambar": "02-kabar",
-     "judul": "Kabar",
-     "teks": "Terbitkan atau tolak kabar usulan ormawa (bila diberi izin kabar).",
-     "url": "/admin/kabar"
-    },
-    {
-     "gambar": "03-galeri",
-     "judul": "Galeri",
-     "teks": "Tambah foto/video/Instagram dan aktifkan; **Ambil saran dari LPJ** menyalin tautan media LPJ sebagai item nonaktif.",
-     "url": "/admin/galeri"
     },
     {
      "gambar": "04-plot-ruangan",

@@ -1,7 +1,5 @@
 <?php
 
-use App\Actions\Kabar\SimpanKabar;
-use App\Actions\Kabar\TerbitkanKabar;
 use App\Actions\Naskah\SimpanDraf;
 use App\Models\JenisNaskah;
 use App\Models\Ormawa;
@@ -40,33 +38,12 @@ function bersihXss(string $html): void
     }
 }
 
-it('isi kabar disanitasi saat simpan dan saat tampil publik', function () {
-    $admin = User::factory()->create()->assignRole('admin-persuratan');
-    $k = app(SimpanKabar::class)->jalankan($admin, ['judul' => 'Kabar Xss', 'isi' => '<p>Aman</p>'.SERANGAN_XSS]);
-    app(TerbitkanKabar::class)->jalankan($k, $admin);
-
-    bersihXss($k->fresh()->isi);
-    $html = $this->get("/kabar/{$k->slug}")->assertOk()->assertSee('Aman')->getContent();
-    bersihXss(artikelXss($html));
-
-    // Kebal terhadap data yang masuk lewat jalur lain (mis. impor/basis data): disanitasi ulang saat render.
-    DB::table('kabar')->where('id', $k->id)->update(['isi' => '<p>Aman</p>'.SERANGAN_XSS]);
-    Cache::flush();
-    $html = $this->get("/kabar/{$k->slug}")->getContent();
-    bersihXss(artikelXss($html));
-});
-
-it('judul kabar, nama ormawa, dan nama pengurus di halaman publik di-escape', function () {
-    $admin = User::factory()->create()->assignRole('admin-persuratan');
-    $judul = '<img src=x onerror=alert(1)>Judul';
-    $k = app(SimpanKabar::class)->jalankan($admin, ['judul' => $judul, 'isi' => '<p>x</p>']);
-    app(TerbitkanKabar::class)->jalankan($k, $admin);
-
+it('nama ormawa dan nama pengurus di halaman publik di-escape', function () {
     $o = Ormawa::create(['nama' => '<script>alert("o")</script>HIMA', 'tingkat' => 'prodi']);
     $o->sk()->create(['nomor_sk' => 'SK/1', 'tanggal_sk' => '2026-01-01', 'periode_mulai' => '2026-01-01', 'periode_selesai' => '2099-12-31']);
     PengurusOrmawa::create(['ormawa_id' => $o->id, 'user_id' => User::factory()->create()->id, 'nama' => '<b onmouseover=alert(1)>Budi</b>', 'jabatan' => 'ketua']);
 
-    foreach (['/', '/kabar', "/kabar/{$k->slug}", '/organisasi', "/organisasi/{$o->slug}"] as $url) {
+    foreach (['/', '/organisasi', "/organisasi/{$o->slug}"] as $url) {
         $html = $this->get($url)->assertOk()->getContent();
 
         expect($html)->not->toContain('<script>alert')->not->toContain('<img src=x')->not->toContain('<b onmouseover');
