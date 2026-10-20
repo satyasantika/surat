@@ -1,6 +1,6 @@
 <div class="space-y-4">
-    <a href="{{ route('ormawa', ['o' => $ormawa->id]) }}" class="text-sm text-blue-800 underline">&larr; Kembali</a>
-    <h2 class="text-lg font-semibold">Ajukan permohonan — {{ $ormawa->nama }}</h2>
+    <a href="{{ $pengaju['kembali'] }}" class="text-sm text-blue-800 underline">&larr; Kembali</a>
+    <h2 class="text-lg font-semibold">Ajukan permohonan — {{ $pengaju['nama'] }}</h2>
     <p class="text-sm text-slate-600" aria-live="polite">Langkah {{ $langkah }} dari 4</p>
 
     @if ($errors->any())
@@ -16,7 +16,7 @@
             </label>
             <label class="block text-sm">Nama kegiatan <input wire:model="nama_kegiatan" class="mt-1 w-full rounded border px-3 py-2"></label>
             <label class="block text-sm">Perihal <input wire:model="perihal" class="mt-1 w-full rounded border px-3 py-2"></label>
-            <label class="block text-sm">Nomor surat ormawa <input wire:model="nomor_surat_ormawa" class="mt-1 w-full rounded border px-3 py-2"></label>
+            <label class="block text-sm">{{ $pengaju['label_nomor'] }} <input wire:model="nomor_surat_ormawa" class="mt-1 w-full rounded border px-3 py-2"></label>
             <div class="grid grid-cols-2 gap-3">
                 <label class="block text-sm">Tanggal mulai <input type="date" wire:model.live="tanggal_mulai" class="mt-1 w-full rounded border px-3 py-2"></label>
                 <label class="block text-sm">Tanggal selesai <input type="date" wire:model.live="tanggal_selesai" class="mt-1 w-full rounded border px-3 py-2"></label>

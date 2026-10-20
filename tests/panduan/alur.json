@@ -228,16 +228,20 @@
    "masuk": "Admin membuatkan akun berperan pengaju-unit lalu menugaskannya pada unit kerja di **Master › Unit kerja**. Masuk lewat **Masuk**; peran ini memakai halaman aplikasi, bukan panel admin.",
    "langkah": [
     {
-     "judul": "Penugasan unit",
-     "teks": "Anda hanya dapat mengajukan atas nama unit tempat Anda ditugaskan. Satu akun boleh ditugaskan pada beberapa unit."
+     "judul": "Ruang unit",
+     "teks": "Setelah masuk, Anda tiba di **Ruang Unit** yang memuat program studi atau laboratorium tempat Anda ditugaskan beserta jumlah permohonannya (alamat `/unit`)."
+    },
+    {
+     "judul": "Ajukan permohonan",
+     "teks": "Pilih **Ajukan baru** pada unit. Isi empat langkah seperti pengajuan ormawa: kegiatan, ruangan, penanggung jawab, dan berkas. Pengajuan ditolak bila unit belum memiliki kepala penyetuju aktif; hubungi admin fakultas."
     },
     {
      "judul": "Persetujuan kepala unit",
-     "teks": "Permohonan unit disetujui ketua program studi atau kepala laboratorium sebelum masuk ke fakultas; tahap ini tampil di halaman lacak."
+     "teks": "Permohonan lebih dulu menunggu persetujuan ketua program studi atau kepala laboratorium, baru masuk ke validasi fakultas."
     },
     {
-     "judul": "Status fitur",
-     "teks": "Formulir pengajuan dan halaman progres unit sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+     "judul": "Pantau progres",
+     "teks": "Pilih **Progres** untuk melihat linimasa dan tautan lacak yang dapat dibagikan. Bila dikembalikan, perbaiki lalu ajukan ulang; Anda juga dapat membatalkan permohonan milik Anda sebelum penerbitan."
     }
    ],
    "faq": [
@@ -255,12 +259,20 @@
    "masuk": "Admin membuatkan akun berperan kaprodi lalu menugaskannya sebagai kepala unit pada program studi di **Master › Unit kerja**. Peran ini memakai halaman aplikasi, bukan panel admin.",
    "langkah": [
     {
-     "judul": "Penugasan unit",
-     "teks": "Anda hanya melihat dan memutus permohonan program studi tempat Anda ditugaskan."
+     "judul": "Ruang unit",
+     "teks": "Setelah masuk, Ruang Unit menampilkan program studi Anda dan jumlah permohonan yang menunggu keputusan (alamat `/unit`)."
     },
     {
-     "judul": "Status fitur",
-     "teks": "Halaman persetujuan sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+     "judul": "Halaman persetujuan",
+     "teks": "Buka **Persetujuan** untuk melihat permohonan yang menunggu: nomor, kegiatan, tanggal, perihal, dan ketua pelaksana."
+    },
+    {
+     "judul": "Memutus",
+     "teks": "Pilih **Setujui** untuk meneruskan ke validasi fakultas. **Kembalikan** (agar diperbaiki) dan **Tolak** mewajibkan catatan yang akan dibaca pengaju."
+    },
+    {
+     "judul": "Pantau progres",
+     "teks": "Pada **Progres** Anda dapat melihat seluruh permohonan unit beserta linimasanya."
     }
    ],
    "faq": [
@@ -278,12 +290,20 @@
    "masuk": "Admin membuatkan akun berperan kalab lalu menugaskannya sebagai kepala unit pada laboratorium di **Master › Unit kerja**. Peran ini memakai halaman aplikasi, bukan panel admin.",
    "langkah": [
     {
-     "judul": "Penugasan unit",
-     "teks": "Anda hanya melihat dan memutus permohonan laboratorium tempat Anda ditugaskan."
+     "judul": "Ruang unit",
+     "teks": "Setelah masuk, Ruang Unit menampilkan laboratorium Anda dan jumlah permohonan yang menunggu keputusan (alamat `/unit`)."
     },
     {
-     "judul": "Status fitur",
-     "teks": "Halaman persetujuan sedang disiapkan bertahap; panduan bergambar ditambahkan saat tersedia."
+     "judul": "Halaman persetujuan",
+     "teks": "Buka **Persetujuan** untuk melihat permohonan yang menunggu: nomor, kegiatan, tanggal, perihal, dan ketua pelaksana."
+    },
+    {
+     "judul": "Memutus",
+     "teks": "Pilih **Setujui** untuk meneruskan ke validasi fakultas. **Kembalikan** (agar diperbaiki) dan **Tolak** mewajibkan catatan yang akan dibaca pengaju."
+    },
+    {
+     "judul": "Pantau progres",
+     "teks": "Pada **Progres** Anda dapat melihat seluruh permohonan unit beserta linimasanya."
     }
    ],
    "faq": [

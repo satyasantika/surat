@@ -120,11 +120,23 @@ class NotifikasiAlur
                 default => [Penerima::izin('permohonan.validasi'), 'Permohonan baru menunggu validasi'],
             };
 
-            $this->kirim->kirim($penerima, 'permohonan', $judul, $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
+            // Kepala unit tidak memakai panel admin: persetujuannya lewat halaman unit.
+            $url = $p->status === StatusPermohonan::PersetujuanUnit ? route('unit.persetujuan') : PermohonanResource::getUrl('view', ['record' => $p]);
+            $this->kirim->kirim($penerima, 'permohonan', $judul, $ringkas, $url, $pelaku);
 
             // Staf khusus dekanat mendapat tembusan (informasi) setiap permohonan baru masuk.
             $this->kirim->kirim(Penerima::peran('staf-khusus'), 'permohonan', 'Tembusan: permohonan baru dari '.$p->jenis_pengaju->label(), $ringkas, PermohonanResource::getUrl('view', ['record' => $p]), $pelaku);
         });
+    }
+
+    /** Halaman progres bagi pengirim: ruang ormawa atau ruang unit (prodi/laboratorium). */
+    private function urlProgresPengaju(Permohonan $p): ?string
+    {
+        return match (true) {
+            $p->ormawa_id !== null => route('ormawa.permohonan', $p->ormawa),
+            $p->unit_kerja_id !== null => route('unit.permohonan', ['unit' => $p->unit_kerja_id]),
+            default => null,
+        };
     }
 
     public function permohonanBerubah(Permohonan $p, StatusPermohonan $ke, User $oleh): void
@@ -145,7 +157,7 @@ class NotifikasiAlur
                 'permohonan',
                 $selesai ? 'Permohonan selesai: hasil tersedia' : 'Permohonan: '.$ke->label(),
                 $selesai ? $ringkas.' Hasil dapat dibuka dari halaman progres permohonan atau tautan lacak: '.$p->tautanLacak() : $ringkas,
-                $p->ormawa_id !== null ? route('ormawa.permohonan', $p->ormawa) : null,
+                $this->urlProgresPengaju($p),
                 $oleh,
             );
         });
@@ -220,14 +232,14 @@ class NotifikasiAlur
 
         return match ($tahap) {
             StatusPermohonan::PersetujuanPembina => [array_filter([$p->ormawa?->pembina]), 'Permohonan menunggu persetujuan pembina', $admin],
-            StatusPermohonan::PersetujuanUnit => [Penerima::penyetujuUnit((string) $p->unit_kerja_id)->all(), 'Permohonan menunggu persetujuan kepala unit', $admin],
+            StatusPermohonan::PersetujuanUnit => [Penerima::penyetujuUnit((string) $p->unit_kerja_id)->all(), 'Permohonan menunggu persetujuan kepala unit', route('unit.persetujuan')],
             StatusPermohonan::Diajukan, StatusPermohonan::ValidasiAdmin => [Penerima::izin('permohonan.validasi')->all(), 'Permohonan menunggu validasi', $admin],
             StatusPermohonan::DisposisiDekan => [Penerima::jabatan('dekan')->all(), 'Permohonan menunggu disposisi Dekan', route('disposisi')],
             StatusPermohonan::PersetujuanWd => [$this->wdMenunggu($p), 'Permohonan menunggu keputusan Anda', route('disposisi')],
             StatusPermohonan::RekomendasiKasubag => [Penerima::jabatan('kasubag-umum')->all(), 'Permohonan menunggu rekomendasi Kasubag', route('disposisi')],
             StatusPermohonan::Pembuatan => [$p->unitPembuat?->petugasAktif()->get()->all() ?? [], 'Permohonan ditugaskan kepada unit Anda untuk dibuatkan suratnya', $admin],
             StatusPermohonan::Penerbitan => [Penerima::izin('nomor.terbitkan')->all(), 'Permohonan siap diterbitkan suratnya', $admin],
-            StatusPermohonan::Dikembalikan => [Penerima::pengaju($p)->all(), 'Permohonan menunggu perbaikan Anda', $p->ormawa_id !== null ? route('ormawa.permohonan', $p->ormawa) : null],
+            StatusPermohonan::Dikembalikan => [Penerima::pengaju($p)->all(), 'Permohonan menunggu perbaikan Anda', $this->urlProgresPengaju($p)],
             default => [[], '', null],
         };
     }

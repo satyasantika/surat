@@ -24,6 +24,10 @@ use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
 use App\Livewire\Pembuat\Tugas as TugasPembuat;
 use App\Livewire\Pimpinan\KotakMasuk;
+use App\Livewire\Unit\AjukanPermohonan as AjukanPermohonanUnit;
+use App\Livewire\Unit\Beranda as BerandaUnit;
+use App\Livewire\Unit\Persetujuan as PersetujuanUnit;
+use App\Livewire\Unit\Progres as ProgresUnit;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +71,11 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/ormawa/{ormawa}/permohonan', Progres::class)->whereUuid('ormawa')->name('ormawa.permohonan');
     Route::get('/ormawa/{ormawa}/permohonan/baru', AjukanPermohonan::class)->whereUuid('ormawa')->name('ormawa.permohonan.baru');
     Route::get('/ormawa/{ormawa}/lpj/{lpj}', IsiLpj::class)->whereUuid(['ormawa', 'lpj'])->name('ormawa.lpj');
+    // Pengaju dan kepala program studi/laboratorium (alur unit: pengaju -> kepala unit -> fakultas).
+    Route::get('/unit', BerandaUnit::class)->name('unit');
+    Route::get('/unit/persetujuan', PersetujuanUnit::class)->name('unit.persetujuan');
+    Route::get('/unit/{unit}/permohonan', ProgresUnit::class)->whereUuid('unit')->name('unit.permohonan');
+    Route::get('/unit/{unit}/permohonan/baru', AjukanPermohonanUnit::class)->whereUuid('unit')->name('unit.permohonan.baru');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/pembuat', TugasPembuat::class)->name('pembuat');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');

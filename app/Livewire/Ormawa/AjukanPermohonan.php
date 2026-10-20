@@ -7,6 +7,7 @@ use App\Contracts\LayananRuangan;
 use App\Exceptions\LayananRuanganTidakTersedia;
 use App\Models\JenisPermohonan;
 use App\Models\Ormawa;
+use App\Models\Permohonan;
 use App\Models\User;
 use App\Services\Ruangan\KetersediaanRuangan;
 use App\Support\Pengaturan;
@@ -107,7 +108,7 @@ class AjukanPermohonan extends Component
         $kosongKeNull = fn (array $a) => array_map(fn ($v) => $v === '' ? null : $v, $a);
 
         try {
-            $permohonan = app(AksiAjukan::class)->jalankan($this->pengguna(), $this->ormawa(), $jenis, [
+            $permohonan = $this->ajukan($jenis, [
                 'nama_kegiatan' => $this->nama_kegiatan, 'perihal' => $this->perihal,
                 'nomor_surat_ormawa' => $this->nomor_surat_ormawa ?: null,
                 'tanggal_mulai' => $this->tanggal_mulai, 'tanggal_selesai' => $this->tanggal_selesai,
@@ -130,7 +131,30 @@ class AjukanPermohonan extends Component
 
         session()->flash('status', "Permohonan {$permohonan->nomor} berhasil diajukan.");
 
-        return $this->redirectRoute('ormawa.permohonan', ['ormawa' => $this->ormawaId], navigate: false);
+        return $this->redirect($this->urlSetelahKirim(), navigate: false);
+    }
+
+    /**
+     * Titik ganti bagi pengaju lain (prodi/laboratorium): aksi pengajuan sesuai pihak pengaju.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function ajukan(JenisPermohonan $jenis, array $data): Permohonan
+    {
+        return app(AksiAjukan::class)->jalankan($this->pengguna(), $this->ormawa(), $jenis, $data);
+    }
+
+    protected function urlSetelahKirim(): string
+    {
+        return route('ormawa.permohonan', ['ormawa' => $this->ormawaId]);
+    }
+
+    /** @return array{nama: string, kembali: string, label_nomor: string} */
+    protected function infoPengaju(): array
+    {
+        $ormawa = $this->ormawa();
+
+        return ['nama' => $ormawa->nama, 'kembali' => route('ormawa', ['o' => $ormawa->id]), 'label_nomor' => 'Nomor surat ormawa'];
     }
 
     public function render(): View
@@ -147,7 +171,7 @@ class AjukanPermohonan extends Component
         [$ketersediaan, $layananGalat] = $this->langkah === 2 && $jenis?->butuh_ruangan ? $this->hitungKetersediaan() : [[], false];
 
         return view('livewire.ormawa.ajukan-permohonan', [
-            'ormawa' => $this->ormawa(),
+            'pengaju' => $this->infoPengaju(),
             'jenisDaftar' => JenisPermohonan::where('aktif', true)->orderBy('nama')->get(),
             'jenisTerpilih' => $jenis,
             'terlambat' => $terlambat,
@@ -194,7 +218,7 @@ class AjukanPermohonan extends Component
         return [$hasil, false];
     }
 
-    private function pengguna(): User
+    protected function pengguna(): User
     {
         /** @var User $user */
         $user = auth()->user();
@@ -202,7 +226,7 @@ class AjukanPermohonan extends Component
         return $user;
     }
 
-    private function ormawa(): Ormawa
+    protected function ormawa(): Ormawa
     {
         $ormawa = Ormawa::findOrFail($this->ormawaId);
         Gate::forUser($this->pengguna())->authorize('view', $ormawa);

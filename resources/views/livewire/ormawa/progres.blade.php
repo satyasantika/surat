@@ -1,8 +1,8 @@
 <div class="space-y-4">
-    <a href="{{ route('ormawa', ['o' => $ormawa->id]) }}" class="text-sm text-blue-800 underline">&larr; Kembali</a>
+    <a href="{{ $pengaju['kembali'] }}" class="text-sm text-blue-800 underline">&larr; Kembali</a>
     <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Permohonan — {{ $ormawa->nama }}</h2>
-        <a href="{{ route('ormawa.permohonan.baru', $ormawa) }}" class="rounded bg-blue-900 px-3 py-2 text-sm text-white">Ajukan baru</a>
+        <h2 class="text-lg font-semibold">Permohonan — {{ $pengaju['nama'] }}</h2>
+        @if ($pengaju['baru'] !== '')<a href="{{ $pengaju['baru'] }}" class="rounded bg-blue-900 px-3 py-2 text-sm text-white">Ajukan baru</a>@endif
     </div>
 
     @if (session('status'))<p class="rounded bg-green-50 p-3 text-sm text-green-800" role="status">{{ session('status') }}</p>@endif
