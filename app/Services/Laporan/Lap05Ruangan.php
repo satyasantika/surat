@@ -5,7 +5,7 @@ namespace App\Services\Laporan;
 use App\Models\PermohonanRuangan;
 use Carbon\CarbonImmutable;
 
-/** LAP-05: pemakaian ruangan oleh ormawa (permohonan dikonfirmasi). */
+/** LAP-05: pemakaian ruangan oleh ormawa, program studi, dan laboratorium (permohonan dikonfirmasi). */
 class Lap05Ruangan extends Laporan
 {
     public function kode(): string
@@ -15,12 +15,12 @@ class Lap05Ruangan extends Laporan
 
     public function judul(): string
     {
-        return 'LAP-05 Pemakaian ruangan oleh ormawa';
+        return 'LAP-05 Pemakaian ruangan';
     }
 
     public function deskripsi(): string
     {
-        return 'Pemakaian ruangan yang dikonfirmasi pada periode, per bulan, ruangan, dan ormawa.';
+        return 'Pemakaian ruangan yang dikonfirmasi pada periode, per bulan, ruangan, dan pengaju.';
     }
 
     public function susun(CarbonImmutable $dari, CarbonImmutable $sampai): array
@@ -31,6 +31,6 @@ class Lap05Ruangan extends Laporan
             ->map(fn ($k, $kunci) => [...explode('|', $kunci, 3), $k->count(), $k->pluck('tanggal')->map->toDateString()->unique()->count()])
             ->sortKeys()->values()->all();
 
-        return [['judul' => 'Pemakaian per bulan, ruangan, dan ormawa', 'kolom' => ['Bulan', 'Ruangan', 'Ormawa', 'Jumlah sesi', 'Jumlah hari'], 'baris' => $baris]];
+        return [['judul' => 'Pemakaian per bulan, ruangan, dan pengaju', 'kolom' => ['Bulan', 'Ruangan', 'Pengaju', 'Jumlah sesi', 'Jumlah hari'], 'baris' => $baris]];
     }
 }

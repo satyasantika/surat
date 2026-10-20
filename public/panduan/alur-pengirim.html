@@ -49,7 +49,7 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 <main>
 <nav><a href="index.html">&larr; Semua panduan</a></nav>
 <h1>Bagan alur untuk pengirim surat</h1>
-<p>Ikuti panah dari atas ke bawah. Pilih jalur sesuai siapa Anda: <strong>pengurus ormawa</strong> (mengajukan lewat akun sendiri) atau <strong>program studi / pihak eksternal</strong> (menyerahkan surat kepada staf khusus dekanat). Keduanya bertemu di langkah akhir yang sama: melacak dan mengambil hasil.</p>
+<p>Ikuti panah dari atas ke bawah. Pilih jalur sesuai siapa Anda: <strong>pengurus ormawa</strong>, <strong>mahasiswa</strong> (mengusulkan lewat ormawa atau program studi), <strong>program studi / laboratorium</strong> (mengajukan lewat akun unit), atau <strong>pihak eksternal</strong> (menyerahkan surat kepada staf khusus dekanat). Semua jalur bertemu di langkah akhir yang sama: melacak dan mengambil hasil.</p>
 <p class="legenda" aria-label="Keterangan simbol">
 <span><i></i>Langkah Anda</span><span><i class="p"></i>Diproses petugas fakultas</span><span><i class="k"></i>Pertanyaan / percabangan</span><span><i class="s"></i>Awal &amp; akhir</span>
 </p>
@@ -60,7 +60,9 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 <li class="tanya"><span class="kotak"><b>Anda mengirim sebagai siapa?</b>
 <span class="cabang">
 <span class="ya"><strong>Pengurus ormawa</strong> (mahasiswa) &rarr; ikuti <a href="#jalur-ormawa">Jalur A</a></span>
-<span class="ya"><strong>Program studi / pihak eksternal</strong> (UKM, instansi, umum) &rarr; ikuti <a href="#jalur-eksternal">Jalur B</a></span>
+<span class="ya"><strong>Pihak eksternal</strong> (UKM, instansi, umum) &rarr; ikuti <a href="#jalur-eksternal">Jalur B</a></span>
+<span class="ya"><strong>Mahasiswa</strong> yang ingin mengusulkan lewat ormawa atau program studi &rarr; ikuti <a href="#jalur-mahasiswa">Jalur C</a></span>
+<span class="ya"><strong>Program studi / laboratorium</strong> (pengaju yang ditugaskan) &rarr; ikuti <a href="#jalur-unit">Jalur D</a></span>
 </span></span></li>
 </ol>
 
@@ -77,6 +79,12 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 <span class="tidak">SK habis / LPJ terlambat &rarr; perbarui SK atau ajukan LPJ dulu</span>
 </span></span></li>
 <li><span class="kotak"><b><span class="no">3</span>Ajukan permohonan baru</b><small>Menu <strong>Ajukan permohonan</strong>: pilih jenis, isi data kegiatan, pilih ruangan &amp; sesi, lampirkan <strong>tautan</strong> surat dan proposal (Google Drive / unsil.ac.id, bukan unggahan file).</small></span></li>
+<li class="tanya"><span class="kotak"><b>Ada usulan dari mahasiswa?</b>
+<span class="cabang">
+<span class="ya">Ya &rarr; menu <strong>Usulan mahasiswa</strong>: pilih satu atau beberapa usulan lalu <strong>Jadikan dasar permohonan</strong> (beberapa usulan dapat digabung menjadi satu pengajuan)</span>
+<span class="ulang">Kurang jelas &rarr; <strong>Kembalikan</strong> dengan catatan, atau <strong>Tolak</strong></span>
+<span class="ya">Tidak ada &rarr; lanjut ke pengajuan biasa</span>
+</span></span></li>
 <li class="petugas"><span class="kotak"><b>Pembina menyetujui</b><small>Hanya bila tahap ini diaktifkan fakultas</small></span></li>
 <li class="petugas"><span class="kotak"><b>Admin persuratan memvalidasi</b>
 <span class="cabang">
@@ -92,8 +100,8 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 </section>
 
 <section class="lajur" id="jalur-eksternal" aria-labelledby="jb">
-<h3 id="jb">Jalur B — Prodi &amp; pihak eksternal</h3>
-<p>Tanpa akun; surat diserahkan, petugas yang mendaftarkan.</p>
+<h3 id="jb">Jalur B — Pihak eksternal</h3>
+<p>Tanpa akun; surat diserahkan, petugas yang mendaftarkan. Program studi atau laboratorium yang belum memakai akun unit juga dapat menempuh jalur ini.</p>
 <ol class="alur">
 <li><span class="kotak"><b><span class="no">1</span>Siapkan surat &amp; pindaiannya</b><small>Surat resmi bernomor dan bertanggal, beserta pindaian (tautan berkas) yang dapat dibuka.</small></span></li>
 <li><span class="kotak"><b><span class="no">2</span>Serahkan ke staf khusus dekanat</b><small>Antar langsung atau kirim melalui kanal resmi fakultas. <strong>Sertakan kontak</strong>: nama, instansi, serta surel <em>atau</em> nomor WhatsApp yang aktif.</small></span></li>
@@ -102,6 +110,45 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 <li class="petugas"><span class="kotak"><b>Ditugaskan ke unit pembuat</b><small>Bila perlu dibuatkan surat balasan atau tindak lanjut</small></span></li>
 <li><span class="kotak"><b><span class="no">3</span>Terima kode lacak</b><small>Dikirim lewat surel / WhatsApp, atau diberikan staf khusus. Simpan kode seperti <code>K7M2-9QXD-4WPT</code>.</small></span></li>
 <li class="petugas"><span class="kotak"><b>Hasil dikirim kepada Anda</b><small>Petugas mengirim tautan hasil lewat surel / WhatsApp</small></span></li>
+</ol>
+</section>
+
+<section class="lajur" id="jalur-mahasiswa" aria-labelledby="jc">
+<h3 id="jc">Jalur C — Mahasiswa (lewat ormawa atau program studi)</h3>
+<p>Mahasiswa perorangan tidak mengajukan langsung ke fakultas; usulan dipilah perantara lebih dulu.</p>
+<ol class="alur">
+<li><span class="kotak"><b><span class="no">1</span>Daftar sebagai mahasiswa</b><small>Halaman <code>/daftar</code>, pilih <strong>Mahasiswa</strong>, lalu verifikasi surel. Setelah <strong>Masuk</strong> Anda tiba di Ruang Mahasiswa.</small></span></li>
+<li><span class="kotak"><b><span class="no">2</span>Ajukan usulan</b><small><strong>Ajukan usulan</strong>: pilih ormawa atau program studi/laboratorium tujuan, isi perihal dan uraian, tambahkan tautan lampiran bila perlu.</small></span></li>
+<li class="petugas"><span class="kotak"><b>Perantara memilah usulan</b>
+<span class="cabang">
+<span class="ya">Layak &rarr; diteruskan, sendiri atau <strong>digabung</strong> dengan usulan lain menjadi dasar satu permohonan</span>
+<span class="ulang">Kurang jelas &rarr; <em>Dikembalikan</em>: baca catatan, lalu ajukan usulan yang diperbaiki</span>
+<span class="tidak">Tidak sesuai &rarr; <em>Ditolak</em> dengan catatan</span>
+</span></span></li>
+<li class="petugas"><span class="kotak"><b>Permohonan perantara berjalan</b><small>Persetujuan pembina / kepala unit, validasi admin, lalu Dekan &rarr; Wakil Dekan &rarr; Kasubag, dan penerbitan surat. Bila permohonan ditolak atau dibatalkan, usulan Anda kembali menunggu perantara.</small></span></li>
+<li><span class="kotak"><b><span class="no">3</span>Pantau di Ruang Mahasiswa</b><small>Status usulan, nomor permohonan dasar, dan tahapnya tampil di sana; notifikasi dikirim tiap tahap berubah.</small></span></li>
+</ol>
+</section>
+
+<section class="lajur" id="jalur-unit" aria-labelledby="jd">
+<h3 id="jd">Jalur D — Program studi &amp; laboratorium</h3>
+<p>Lewat akun pengaju yang ditugaskan admin pada unit; kepala unit menyetujui sebelum ke fakultas.</p>
+<ol class="alur">
+<li><span class="kotak"><b><span class="no">1</span>Akun ditugaskan pada unit</b><small>Minta admin fakultas menugaskan akun Anda sebagai pengaju di <strong>Master › Unit kerja</strong>. Setelah <strong>Masuk</strong>, buka Ruang Unit.</small></span></li>
+<li class="tanya"><span class="kotak"><b>Bisakah mengajukan?</b>
+<span class="cabang">
+<span class="ya">Unit punya kepala (kaprodi / kalab) penyetuju aktif &rarr; lanjut</span>
+<span class="tidak">Belum ada kepala penyetuju &rarr; minta admin menugaskan lebih dulu</span>
+</span></span></li>
+<li><span class="kotak"><b><span class="no">2</span>Ajukan permohonan atau pilah usulan</b><small><strong>Ajukan baru</strong> dengan formulir empat langkah, atau buka <strong>Usulan mahasiswa</strong> untuk menjadikan satu atau beberapa usulan sebagai dasar pengajuan.</small></span></li>
+<li class="petugas"><span class="kotak"><b>Kepala program studi / laboratorium memutus</b>
+<span class="cabang">
+<span class="ya">Setuju &rarr; masuk ke validasi admin fakultas</span>
+<span class="ulang">Dikembalikan &rarr; perbaiki lalu ajukan ulang</span>
+<span class="tidak">Ditolak &rarr; alasan tertera</span>
+</span></span></li>
+<li class="petugas"><span class="kotak"><b>Admin &rarr; Dekan &rarr; Wakil Dekan &rarr; Kasubag</b><small>Sama dengan jalur ormawa; surat izin dialamatkan kepada ketua program studi atau kepala laboratorium.</small></span></li>
+<li><span class="kotak"><b><span class="no">3</span>Pantau progres</b><small><strong>Progres</strong> pada Ruang Unit memuat linimasa dan tautan lacak yang dapat dibagikan. LPJ tidak berlaku bagi pengaju unit.</small></span></li>
 </ol>
 </section>
 </div>
@@ -122,10 +169,10 @@ details{margin:6px 0}summary{cursor:pointer;font-weight:600}
 <p class="pusat" style="text-align:center"><a class="tombol" href="../lacak">Buka halaman lacak</a></p>
 
 <h2>Tanya jawab</h2>
-<details><summary>Saya tidak punya kode lacak.</summary><p>Pengurus ormawa: lihat halaman <strong>Progres permohonan</strong> setelah masuk. Pengirim prodi/eksternal: minta kode kepada staf khusus dekanat, atau periksa surel/WhatsApp yang Anda berikan saat menyerahkan surat.</p></details>
+<details><summary>Saya tidak punya kode lacak.</summary><p>Pengurus ormawa dan pengaju unit: lihat halaman <strong>Progres permohonan</strong> setelah masuk. Mahasiswa: pantau di Ruang Mahasiswa. Pengirim prodi/eksternal: minta kode kepada staf khusus dekanat, atau periksa surel/WhatsApp yang Anda berikan saat menyerahkan surat.</p></details>
 <details><summary>Tautan berkas saya ditolak.</summary><p>Gunakan satu berkas Google Drive atau unsil.ac.id (bukan folder, bukan pemendek URL seperti bit.ly) dan atur agar dapat dibuka.</p></details>
 <details><summary>Siapa yang melihat kontak saya?</summary><p>Surel dan WhatsApp disimpan terenkripsi dan tidak tampil di halaman lacak. Halaman lacak hanya memuat tahap, jabatan pemroses, dan tautan hasil.</p></details>
-<details><summary>Panduan lengkap dengan tangkapan layar?</summary><p><a href="pengurus-ormawa.html">Pengurus ormawa</a> · <a href="melacak-surat.html">Melacak surat</a> · <a href="index.html">Semua panduan</a></p></details>
+<details><summary>Panduan lengkap dengan tangkapan layar?</summary><p><a href="pengurus-ormawa.html">Pengurus ormawa</a> · <a href="mahasiswa.html">Mahasiswa</a> · <a href="pengaju-unit.html">Pengaju unit</a> · <a href="melacak-surat.html">Melacak surat</a> · <a href="index.html">Semua panduan</a></p></details>
 <p><a href="index.html">&larr; Kembali ke daftar panduan</a></p>
 </main>
 <footer>Bagan ini menyederhanakan alur resmi; urutan tahap dapat berbeda sesuai pengaturan fakultas. Kendala? Hubungi admin persuratan FKIP.</footer>

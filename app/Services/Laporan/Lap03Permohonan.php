@@ -7,7 +7,7 @@ use App\Models\Permohonan;
 use App\Models\RiwayatPermohonan;
 use Carbon\CarbonImmutable;
 
-/** LAP-03: rekap permohonan per bulan/ormawa/status dan rata-rata waktu per tahap (dari riwayat_permohonan). */
+/** LAP-03: rekap permohonan per bulan/pengaju (ormawa, prodi, laboratorium)/status dan rata-rata waktu per tahap (dari riwayat_permohonan). */
 class Lap03Permohonan extends Laporan
 {
     public function kode(): string
@@ -17,12 +17,12 @@ class Lap03Permohonan extends Laporan
 
     public function judul(): string
     {
-        return 'LAP-03 Rekap permohonan ormawa';
+        return 'LAP-03 Rekap permohonan';
     }
 
     public function deskripsi(): string
     {
-        return 'Permohonan yang diajukan pada periode: jumlah per bulan, ormawa, dan status; serta rata-rata waktu yang dihabiskan pada setiap tahap.';
+        return 'Permohonan yang diajukan pada periode: jumlah per bulan, pengaju (ormawa, program studi, laboratorium), dan status; serta rata-rata waktu yang dihabiskan pada setiap tahap.';
     }
 
     public function susun(CarbonImmutable $dari, CarbonImmutable $sampai): array
@@ -48,7 +48,7 @@ class Lap03Permohonan extends Laporan
         $perTahap = collect($durasi)->map(fn ($d, $status) => [StatusPermohonan::tryFrom($status)?->label() ?? $status, count($d), self::hari(array_sum($d) / count($d)), self::hari(max($d))])->sortBy(fn ($b) => $b[0])->values()->all();
 
         return [
-            ['judul' => 'Jumlah per bulan, ormawa, dan status', 'kolom' => ['Bulan', 'Ormawa', 'Status', 'Jumlah'], 'baris' => $rekap],
+            ['judul' => 'Jumlah per bulan, pengaju, dan status', 'kolom' => ['Bulan', 'Pengaju', 'Status', 'Jumlah'], 'baris' => $rekap],
             ['judul' => 'Waktu per tahap (hari)', 'kolom' => ['Tahap', 'Jumlah transisi', 'Rata-rata (hari)', 'Terlama (hari)'], 'baris' => $perTahap],
         ];
     }

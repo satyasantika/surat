@@ -250,7 +250,7 @@ describe('ekspor XLSX', function () {
         expect($berkas)->toHaveCount(1);
 
         $baris = SimpleExcelReader::create($berkas[0])->getRows()->all();
-        expect($baris)->toHaveCount(1)->and($baris[0]['Ormawa'])->toBe("'=HYPERLINK(\"http://x\")")->and($baris[0]['Jumlah sesi'])->toBe(1);
+        expect($baris)->toHaveCount(1)->and($baris[0]['Pengaju'])->toBe("'=HYPERLINK(\"http://x\")")->and($baris[0]['Jumlah sesi'])->toBe(1);
 
         $n = $dekan->notifications()->first();
         expect($n->data['title'])->toBe('Laporan siap diunduh')->and($n->data['actions'][0]['url'])->toContain('/ekspor/laporan-lap-05-');
@@ -299,7 +299,7 @@ describe('halaman laporan', function () {
         $admin = lapUser('admin-persuratan');
 
         Livewire::actingAs($admin)->test(HalamanLaporan::class)->fillForm(['jenis' => 'lap-05', 'dari' => '2026-03-01', 'sampai' => '2026-03-31'])
-            ->call('tampilkan')->assertSee('LAP-05 Pemakaian ruangan oleh ormawa')->assertSee('AULA — Aula');
+            ->call('tampilkan')->assertSee('LAP-05 Pemakaian ruangan')->assertSee('AULA — Aula');
 
         $this->actingAs(lapUser('pegawai'))->get('/admin/laporan')->assertForbidden();
         $this->actingAs(lapUser('pengurus-ormawa'))->get('/admin/laporan')->assertForbidden();

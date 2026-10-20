@@ -114,3 +114,14 @@ Atas permintaan pemilik: kabar dan galeri tidak berkaitan dengan alur persuratan
 2. Basis data: migrasi baru `2026_10_20_100000_drop_kabar_dan_galeri_tables` menghapus tabel `kabar` dan `galeri`, baris `tautan_berkas` milik kabar, serta izin `kabar.kelola`, `kabar.usul`, `galeri.kelola`. `down()` hanya membuat ulang struktur kosong; **data kabar/galeri yang sudah ada hilang**, cadangkan basis data produksi sebelum menerapkan.
 3. CSP halaman publik tidak lagi mengizinkan bingkai YouTube/Drive (hanya gambar profil ormawa dari `lh3.googleusercontent.com` dan `*.unsil.ac.id`).
 4. Tangkapan layar panduan untuk kabar/galeri dihapus; tangkapan beranda pengurus ormawa dan beranda publik masih versi lama sampai `composer panduan` dijalankan ulang.
+
+## K-17 — Titik awal persuratan: pengaju generik, usulan mahasiswa, dan usulan kolektif (20 Oktober 2026)
+
+Atas permintaan pemilik: persuratan dapat dimulai dari mahasiswa > ormawa/prodi > fakultas, ormawa > fakultas, prodi > fakultas, kalab > fakultas, dan eksternal > fakultas. **Menunggu peninjauan pemilik**; (!) menyentuh kebijakan.
+
+1. (!) Satu mesin alur: `Permohonan` kini dapat diajukan oleh ormawa, program studi, atau laboratorium (`jenis_pengaju`, `unit_kerja_id`; `ormawa_id` boleh kosong, dijaga CHECK). Eksternal tetap lewat surat masuk (staf khusus) karena tidak punya akun.
+2. (!) Prodi dan laboratorium mengajukan sendiri lewat peran `pengaju-unit` yang ditugaskan per unit (`penugasan_unit`); `kaprodi`/`kalab` menyetujui pada status baru `persetujuan_unit` sebelum validasi fakultas. Pengajuan ditolak bila unit tak punya penyetuju aktif (tidak ada pelompatan persetujuan diam-diam). Revisi setelah dikembalikan masuk ke validasi admin (sama dengan jalur pembina).
+3. (!) Mahasiswa perorangan memakai peran `mahasiswa` (daftar mandiri memilih jalur) dan hanya dapat mengusulkan kepada perantara (ormawa atau prodi/lab aktif), tidak langsung ke fakultas. Usulan adalah entitas ringan `usulan_mahasiswa`, bukan `Permohonan`, karena tidak punya tanggal kegiatan, penanggung jawab, dan berkas wajib.
+4. (!) Perantara (pengurus ormawa atau pengaju unit) memilah usulan: meneruskan satu usulan atau **menggabungkan beberapa usulan** menjadi dasar satu permohonan (`usulan_mahasiswa.permohonan_id`, status `dipakai`), atau mengembalikan/menolak dengan catatan wajib. Persetujuan pembina/kepala unit atas permohonan hasilnya berjalan seperti biasa. Bila permohonan ditolak/dibatalkan, usulan dasar kembali menunggu perantara; mahasiswa diberi tahu tiap perubahan tahap.
+5. Permohonan unit tidak membuat LPJ (LPJ dan blokirnya melekat pada ormawa). Surat izin dialamatkan kepada "Ketua Program Studi …" atau "Kepala …".
+6. Belum dikerjakan: halaman lacak publik untuk usulan mahasiswa (mahasiswa memantau lewat akun), LPJ bagi pengaju unit, tangkapan layar panduan peran baru (jalankan `composer panduan`), dan pencantuman usulan dasar pada isi naskah.
