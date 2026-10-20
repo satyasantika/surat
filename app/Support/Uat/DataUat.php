@@ -53,9 +53,12 @@ class DataUat
         'kasubag' => ['kasubag', 'Kepala Subbagian Umum'],
         'pembina' => ['pembina-ormawa', 'Dosen Pembina'],
         'pegawai' => ['pegawai', 'Pegawai Penerima Disposisi'],
+        // Ditambah di akhir agar NIP rekaan akun yang sudah ada tidak bergeser.
+        'staf' => ['staf-khusus', 'Staf Khusus Dekanat'],
+        'super-admin' => ['super-admin', 'Super Admin'],
     ];
 
-    private const JABATAN = ['dekan' => 'dekan', 'wd-akademik' => 'wd-akademik', 'wd-umum' => 'wd-umum-keuangan', 'wd-kemahasiswaan' => 'wd-kemahasiswaan', 'kasubag' => 'kasubag-umum'];
+    private const JABATAN = ['dekan' => 'dekan', 'wd-akademik' => 'wd-akademik', 'wd-umum' => 'wd-umum-keuangan', 'wd-kemahasiswaan' => 'wd-kemahasiswaan', 'kasubag' => 'kasubag-umum', 'staf' => 'staf-khusus-dekan'];
 
     private const ORMAWA = [
         'matematika' => ['HIMA Uji Matematika', 'prodi'], 'bem' => ['BEM Uji FKIP', 'fakultas'], 'seni' => ['UKM Uji Seni', 'ukm'],
