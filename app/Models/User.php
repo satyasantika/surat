@@ -36,7 +36,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     use HasFactory, HasRoles, HasUuids, Notifiable, TercatatAktivitas;
 
     /** Peran yang memakai halaman Livewire, bukan panel Filament. */
-    public const PERAN_TANPA_PANEL = ['pengurus-ormawa', 'pegawai'];
+    public const PERAN_TANPA_PANEL = ['pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab', 'mahasiswa'];
 
     protected function namaLog(): string
     {
@@ -69,6 +69,26 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function unitPembuat(): BelongsToMany
     {
         return $this->belongsToMany(UnitPembuat::class, 'unit_pembuat_petugas', 'user_id', 'unit_pembuat_id')->withTimestamps();
+    }
+
+    /**
+     * Unit kerja (prodi/laboratorium) yang boleh diajukan permohonannya oleh pengguna ini (akun aktif saja).
+     *
+     * @return BelongsToMany<UnitKerja, $this>
+     */
+    public function unitDiajukan(): BelongsToMany
+    {
+        return $this->belongsToMany(UnitKerja::class, 'penugasan_unit', 'user_id', 'unit_kerja_id')->wherePivot('peran', UnitKerja::PERAN_PENGAJU)->where('unit_kerja.aktif', true);
+    }
+
+    /**
+     * Unit kerja yang permohonannya disetujui pengguna ini sebagai kepala unit.
+     *
+     * @return BelongsToMany<UnitKerja, $this>
+     */
+    public function unitDisetujui(): BelongsToMany
+    {
+        return $this->belongsToMany(UnitKerja::class, 'penugasan_unit', 'user_id', 'unit_kerja_id')->wherePivot('peran', UnitKerja::PERAN_PENYETUJU)->where('unit_kerja.aktif', true);
     }
 
     /**

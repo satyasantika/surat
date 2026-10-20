@@ -22,7 +22,7 @@ class PengingatPermohonan extends Command
         $terkirim = 0;
 
         Permohonan::whereNotIn('status', [StatusPermohonan::Selesai->value, StatusPermohonan::Ditolak->value, StatusPermohonan::Dibatalkan->value])
-            ->with(['ormawa', 'riwayat'])->orderBy('id')
+            ->with(['ormawa', 'unitKerja', 'riwayat'])->orderBy('id')
             ->each(function (Permohonan $p) use ($alur, $batas, &$terkirim) {
                 $sejak = $p->riwayat->max('created_at') ?? $p->diajukan_pada;
 

@@ -12,6 +12,8 @@ class Beranda
         return match (true) {
             $pengguna->hasAnyRole(['dekan', 'wakil-dekan', 'kasubag', 'pegawai']) => route('disposisi'),
             $pengguna->hasRole('pengurus-ormawa') => route('ormawa'),
+            $pengguna->hasAnyRole(['pengaju-unit', 'kaprodi', 'kalab']) => route('unit'),
+            $pengguna->hasRole('mahasiswa') => route('mahasiswa'),
             default => route('profil'),
         };
     }

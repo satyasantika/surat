@@ -22,7 +22,7 @@ class KembalikanPermohonan
         }
 
         return $this->transisi->dalamKunci($permohonan, function (Permohonan $segar) use ($pelaku, $catatan) {
-            $this->transisi->pastikanStatus($segar, [StatusPermohonan::PersetujuanPembina, StatusPermohonan::ValidasiAdmin]);
+            $this->transisi->pastikanStatus($segar, [StatusPermohonan::PersetujuanPembina, StatusPermohonan::PersetujuanUnit, StatusPermohonan::ValidasiAdmin]);
             Gate::forUser($pelaku)->authorize('putusTahapAwal', $segar);
             $this->transisi->ke($segar, StatusPermohonan::Dikembalikan, $pelaku, $catatan);
 

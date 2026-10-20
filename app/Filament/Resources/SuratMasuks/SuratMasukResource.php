@@ -76,9 +76,9 @@ class SuratMasukResource extends Resource
             Section::make('Pengirim')->columns(2)->schema([
                 Select::make('jenis_pengirim')->label('Jenis pengirim')->options(JenisPengirim::pilihan())->default('eksternal')->required()->live()
                     ->helperText('Eksternal: UKM/umum yang tidak punya akun; staf khusus meregistrasi atas namanya.'),
-                Select::make('pengirim_unit_kerja_id')->label('Program studi / unit pengirim')
+                Select::make('pengirim_unit_kerja_id')->label('Program studi / laboratorium pengirim')
                     ->options(fn () => UnitKerja::where('aktif', true)->orderBy('nama')->pluck('nama', 'id'))->searchable()
-                    ->visible(fn (Get $get) => $get('jenis_pengirim') === 'prodi')->required(fn (Get $get) => $get('jenis_pengirim') === 'prodi'),
+                    ->visible(fn (Get $get) => in_array($get('jenis_pengirim'), ['prodi', 'laboratorium'], true))->required(fn (Get $get) => in_array($get('jenis_pengirim'), ['prodi', 'laboratorium'], true)),
                 TextInput::make('pengirim_nama')->label('Nama pengirim')->maxLength(150)
                     ->visible(fn (Get $get) => $get('jenis_pengirim') === 'eksternal')
                     ->required(fn (Get $get) => $get('jenis_pengirim') === 'eksternal' && (auth()->user()?->hasRole('staf-khusus') ?? false)),

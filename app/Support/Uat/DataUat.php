@@ -11,9 +11,12 @@ use App\Actions\Permohonan\DisposisiPermohonan;
 use App\Actions\Permohonan\KembalikanPermohonan;
 use App\Actions\Permohonan\PutusanWd;
 use App\Actions\Permohonan\RekomendasiKasubag;
+use App\Actions\Permohonan\SetujuiUnit;
 use App\Actions\Permohonan\TolakPermohonan;
 use App\Actions\Permohonan\TransisiPermohonan;
 use App\Actions\Permohonan\ValidasiPermohonan;
+use App\Actions\Usulan\AjukanUsulan;
+use App\Actions\Usulan\PutusUsulan;
 use App\Enums\StatusPermohonan;
 use App\Models\Jabatan;
 use App\Models\JenisPermohonan;
@@ -23,7 +26,9 @@ use App\Models\PemangkuJabatan;
 use App\Models\PengurusOrmawa;
 use App\Models\Permohonan;
 use App\Models\SuratMasuk;
+use App\Models\UnitKerja;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use Closure;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\Notification;
@@ -50,6 +55,10 @@ class DataUat
         // Ditambah di akhir agar NIP rekaan akun yang sudah ada tidak bergeser.
         'staf' => ['staf-khusus', 'Staf Khusus Dekanat'],
         'super-admin' => ['super-admin', 'Super Admin'],
+        'pengaju-unit' => ['pengaju-unit', 'Pengaju Unit'],
+        'kaprodi' => ['kaprodi', 'Ketua Program Studi'],
+        'kalab' => ['kalab', 'Kepala Laboratorium'],
+        'mahasiswa' => ['mahasiswa', 'Mahasiswa'],
     ];
 
     private const JABATAN = ['dekan' => 'dekan', 'wd-akademik' => 'wd-akademik', 'wd-umum' => 'wd-umum-keuangan', 'wd-kemahasiswaan' => 'wd-kemahasiswaan', 'kasubag' => 'kasubag-umum', 'staf' => 'staf-khusus-dekan'];
@@ -81,6 +90,7 @@ class DataUat
         $ormawa = $this->buatOrmawa();
         $this->buatSurat();
         $this->buatPermohonan($ormawa);
+        $this->buatAlurUnit($ormawa);
 
         return ['akun' => $this->laporan, 'ringkasan' => $this->ringkasan];
     }
@@ -218,6 +228,67 @@ class DataUat
 
         $this->ringkasan['permohonan'] = Permohonan::whereIn('ormawa_id', collect($ormawa)->pluck('ormawa.id'))->count();
         $this->ringkasan['lpj'] = Lpj::count();
+    }
+
+    /**
+     * Alur unit: program studi dan laboratorium mengajukan sendiri (dengan kepala unit), serta usulan mahasiswa kepada
+     * ormawa dan prodi (menunggu, dikembalikan, dan digabung menjadi dasar satu permohonan).
+     *
+     * @param  array<string, array{ormawa: Ormawa, ketua: User}>  $ormawa
+     */
+    private function buatAlurUnit(array $ormawa): void
+    {
+        $prodi = UnitKerja::firstOrCreate(['kode' => 'UAT-PMAT'], ['nama' => 'Program Studi Uji Matematika', 'tipe' => 'prodi']);
+        $lab = UnitKerja::firstOrCreate(['kode' => 'UAT-LAB'], ['nama' => 'Laboratorium Uji Komputer', 'tipe' => 'laboratorium']);
+        $prodi->pengaju()->syncWithoutDetaching([$this->akun['pengaju-unit']->getKey()]);
+        $lab->pengaju()->syncWithoutDetaching([$this->akun['pengaju-unit']->getKey()]);
+        $prodi->penyetuju()->syncWithoutDetaching([$this->akun['kaprodi']->getKey()]);
+        $lab->penyetuju()->syncWithoutDetaching([$this->akun['kalab']->getKey()]);
+
+        if (UsulanMahasiswa::whereIn('unit_kerja_id', [$prodi->getKey(), $lab->getKey()])->orWhere('perihal', 'like', '%(rekaan)%')->exists()) {
+            return;
+        }
+
+        $jenis = JenisPermohonan::firstWhere('kode', 'kegiatan');
+        $n = 0;
+        $dataPermohonan = function (string $nama, array $tambahan = []) use (&$n): array {
+            $n++;
+
+            return $tambahan + [
+                'nama_kegiatan' => $nama, 'perihal' => "Izin kegiatan {$nama}", 'tanggal_mulai' => now()->addDays(40 + $n)->toDateString(), 'tanggal_selesai' => now()->addDays(41 + $n)->toDateString(),
+                'deskripsi' => 'Kegiatan rekaan untuk uji penerimaan.', 'penanggung_jawab' => ['ketua' => ['nama' => 'Dr. Rekaan', 'prodi' => 'Program Studi Uji']],
+                'berkas' => ['surat_permohonan' => 'https://drive.google.com/file/d/1UatUnitSurat'.str_pad((string) $n, 4, '0', STR_PAD_LEFT).'AbCd/view', 'proposal' => 'https://drive.google.com/file/d/1UatUnitProp'.str_pad((string) $n, 4, '0', STR_PAD_LEFT).'AbCdE/view'],
+            ];
+        };
+        $ajukanUnit = function (UnitKerja $unit, string $nama) use ($jenis, $dataPermohonan): Permohonan {
+            RateLimiter::clear('ajukan-permohonan:'.$this->akun['pengaju-unit']->getKey());
+
+            return app(AjukanPermohonan::class)->jalankanUnit($this->akun['pengaju-unit'], $unit, $jenis, $dataPermohonan($nama));
+        };
+
+        $ajukanUnit($prodi, 'Lokakarya Kurikulum (menunggu kaprodi)');
+        app(SetujuiUnit::class)->jalankan($ajukanUnit($prodi, 'Seminar Dosen (disetujui kaprodi)'), $this->akun['kaprodi'], 'Layak (data rekaan).');
+        app(KembalikanPermohonan::class)->jalankan($ajukanUnit($lab, 'Pelatihan Perangkat Lunak (dikembalikan kalab)'), $this->akun['kalab'], 'Lengkapi daftar peserta (data rekaan).');
+
+        // Usulan mahasiswa: dua digabung menjadi dasar satu permohonan ormawa, satu menunggu, satu dikembalikan, satu untuk prodi.
+        $mahasiswa = $this->akun['mahasiswa'];
+        $usul = function (string $tujuan, string $perihal) use ($mahasiswa): UsulanMahasiswa {
+            RateLimiter::clear('usulan-mahasiswa:'.$mahasiswa->getKey());
+
+            return app(AjukanUsulan::class)->jalankan($mahasiswa, ['tujuan' => $tujuan, 'perihal' => "{$perihal} (rekaan)", 'uraian' => 'Usulan rekaan untuk uji penerimaan dan panduan.']);
+        };
+        $hima = $ormawa['bem'];
+        $a = $usul("ormawa:{$hima['ormawa']->getKey()}", 'Delegasi lomba olimpiade');
+        $b = $usul("ormawa:{$hima['ormawa']->getKey()}", 'Dana pendamping lomba olimpiade');
+        $usul("ormawa:{$hima['ormawa']->getKey()}", 'Peminjaman aula untuk latihan');
+        app(PutusUsulan::class)->kembalikan($usul("ormawa:{$hima['ormawa']->getKey()}", 'Studi tiru ke kampus lain'), $hima['ketua'], 'Jelaskan tujuan dan anggaran (data rekaan).');
+        $usul("unit:{$prodi->getKey()}", 'Permintaan jadwal konsultasi skripsi');
+
+        RateLimiter::clear('ajukan-permohonan:'.$hima['ketua']->getKey());
+        app(AjukanPermohonan::class)->jalankan($hima['ketua'], $hima['ormawa'], $jenis, $dataPermohonan('Delegasi Olimpiade (gabungan usulan)', ['dasar_usulan' => [$a->getKey(), $b->getKey()]]));
+
+        $this->ringkasan['permohonan_unit'] = Permohonan::whereIn('unit_kerja_id', [$prodi->getKey(), $lab->getKey()])->count();
+        $this->ringkasan['usulan'] = UsulanMahasiswa::count();
     }
 
     private function selesaikan(Permohonan $p, string $keadaan): void

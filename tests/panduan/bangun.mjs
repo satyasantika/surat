@@ -61,6 +61,7 @@ let ada = 0;
 for (const p of alur.peran) {
   const tujuan = p.internal ? dalam : keluar;
   const langkah = p.langkah.map((l, i) => {
+    if (!l.gambar) return `<li class="kartu langkah"><div><strong>${e(l.judul)}</strong><br>${md(l.teks)}</div></li>`;
     const berkas = `img/${p.kode}/${l.gambar}.png`;
     if (!existsSync(join(tujuan, berkas))) console.warn(`PERINGATAN: ${berkas} belum ada (jalankan tangkap.mjs)`);
     else ada++;

@@ -21,14 +21,14 @@ function penggunaDenganPeran(string $peran): User
 it('membuat seluruh peran PRD §3', function () {
     expect(array_keys(PeranDanIzinSeeder::PERAN))->toBe([
         'super-admin', 'admin-persuratan', 'operator-layanan', 'staf-khusus', 'dekan', 'wakil-dekan',
-        'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai',
+        'kasubag', 'pembina-ormawa', 'pengurus-ormawa', 'pegawai', 'pengaju-unit', 'kaprodi', 'kalab', 'mahasiswa',
     ]);
 });
 
 it('idempoten saat dijalankan ulang', function () {
     $this->seed(PeranDanIzinSeeder::class);
 
-    expect(Role::count())->toBe(10)
+    expect(Role::count())->toBe(14)
         ->and(Permission::count())->toBe(count(PeranDanIzinSeeder::IZIN));
 });
 
@@ -51,6 +51,10 @@ it('memberi izin sesuai matriks per peran', function (string $peran, array $bole
     'pembina-ormawa' => ['pembina-ormawa', ['permohonan.setujui-pembina', 'lpj.lihat'], ['lpj.nilai', 'permohonan.ajukan', 'masuk.lihat']],
     'pengurus-ormawa' => ['pengurus-ormawa', ['permohonan.ajukan', 'lpj.isi'], ['masuk.lihat', 'lpj.nilai']],
     'pegawai' => ['pegawai', ['masuk.lihat', 'disposisi.tindaklanjut'], ['disposisi.buat', 'arsip.lihat', 'naskah.draf']],
+    'pengaju-unit' => ['pengaju-unit', ['permohonan.ajukan-unit'], ['permohonan.ajukan', 'permohonan.setujui-unit', 'permohonan.validasi', 'masuk.lihat']],
+    'kaprodi' => ['kaprodi', ['permohonan.setujui-unit'], ['permohonan.ajukan-unit', 'permohonan.setujui-pembina', 'permohonan.putuskan', 'masuk.lihat']],
+    'mahasiswa' => ['mahasiswa', ['usulan.ajukan'], ['permohonan.ajukan', 'permohonan.ajukan-unit', 'masuk.lihat', 'permohonan.validasi']],
+    'kalab' => ['kalab', ['permohonan.setujui-unit'], ['permohonan.ajukan-unit', 'permohonan.setujui-pembina', 'permohonan.putuskan', 'masuk.lihat']],
 ]);
 
 it('memberi super-admin semua akses lewat Gate::before', function () {

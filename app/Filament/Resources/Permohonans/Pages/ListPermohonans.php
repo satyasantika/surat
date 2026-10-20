@@ -18,7 +18,7 @@ class ListPermohonans extends ListRecords
         $tab = ['semua' => Tab::make('Semua')];
 
         foreach ([
-            StatusPermohonan::PersetujuanPembina, StatusPermohonan::ValidasiAdmin, StatusPermohonan::Dikembalikan,
+            StatusPermohonan::PersetujuanPembina, StatusPermohonan::PersetujuanUnit, StatusPermohonan::ValidasiAdmin, StatusPermohonan::Dikembalikan,
             StatusPermohonan::DisposisiDekan, StatusPermohonan::PersetujuanWd, StatusPermohonan::RekomendasiKasubag,
             StatusPermohonan::Pembuatan, StatusPermohonan::Penerbitan, StatusPermohonan::Selesai, StatusPermohonan::Ditolak,
         ] as $status) {

@@ -5,14 +5,19 @@ namespace App\Actions\Permohonan;
 use App\Actions\Nomor\AmbilNomorBerikutnya;
 use App\Contracts\LayananRuangan;
 use App\Contracts\PenyimpananBerkas;
+use App\Enums\JenisPengaju;
 use App\Enums\StatusPermohonan;
+use App\Enums\StatusUsulan;
+use App\Enums\TipeUnitKerja;
 use App\Models\JenisPermohonan;
 use App\Models\Ormawa;
 use App\Models\Permohonan;
 use App\Models\PermohonanRuangan;
 use App\Models\RegisterNomor;
 use App\Models\RiwayatPermohonan;
+use App\Models\UnitKerja;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use App\Rules\TautanBerkasValid;
 use App\Services\Notifikasi\NotifikasiAlur;
 use App\Services\Ruangan\KetersediaanRuangan;
@@ -22,6 +27,7 @@ use App\Support\SesiRuangan;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -50,13 +56,37 @@ class AjukanPermohonan
         $this->batasiLaju($pelaku);
         $this->otorisasi($pelaku, $ormawa);
 
+        return $this->buat($pelaku, $ormawa, null, $jenis, $data);
+    }
+
+    /**
+     * Pengajuan atas nama program studi/laboratorium: hanya pengaju yang ditugaskan pada unit aktif itu, dan unit wajib
+     * punya kepala (penyetuju) aktif karena persetujuan kepala unit mendahului validasi fakultas.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function jalankanUnit(User $pelaku, UnitKerja $unit, JenisPermohonan $jenis, array $data): Permohonan
+    {
+        $this->batasiLaju($pelaku);
+        $this->otorisasiUnit($pelaku, $unit);
+
+        return $this->buat($pelaku, null, $unit, $jenis, $data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function buat(User $pelaku, ?Ormawa $ormawa, ?UnitKerja $unit, JenisPermohonan $jenis, array $data): Permohonan
+    {
+
         $valid = $this->validasi($jenis, $data);
+        $dasar = array_values(array_unique(array_filter((array) ($data['dasar_usulan'] ?? []), 'is_string')));
         $valid['penanggung_jawab'] = $this->bersihkanPenanggungJawab($valid['penanggung_jawab']);
         $ruangan = $jenis->butuh_ruangan ? $this->validasiRuangan($valid) : [];
 
         $butir = collect($ruangan)->map(fn (array $r) => ['kode' => $r['kode'], 'tanggal' => $r['tanggal']])->all();
 
-        return KunciRuangan::dengan($butir, fn () => DB::transaction(function () use ($pelaku, $ormawa, $jenis, $valid, $ruangan) {
+        return KunciRuangan::dengan($butir, fn () => DB::transaction(function () use ($pelaku, $ormawa, $unit, $jenis, $valid, $ruangan, $dasar) {
             $this->pastikanTersedia($ruangan);
 
             $sekarang = now();
@@ -65,7 +95,9 @@ class AjukanPermohonan
                 'tempat_lain', 'deskripsi', 'penanggung_jawab', 'fasilitas_rektorat', 'alasan_mendesak',
             ])->all());
             $permohonan->id = $permohonan->newUniqueId();
-            $permohonan->ormawa_id = $ormawa->getKey();
+            $permohonan->jenis_pengaju = $unit !== null ? ($unit->tipe === TipeUnitKerja::Laboratorium ? JenisPengaju::Laboratorium : JenisPengaju::Prodi) : JenisPengaju::Ormawa;
+            $permohonan->ormawa_id = $ormawa?->getKey();
+            $permohonan->unit_kerja_id = $unit?->getKey();
             $permohonan->jenis_permohonan_id = $jenis->getKey();
             $permohonan->diajukan_oleh = $pelaku->getKey();
             $permohonan->diajukan_pada = $sekarang;
@@ -85,10 +117,13 @@ class AjukanPermohonan
             }
 
             $this->catat($permohonan, null, StatusPermohonan::Diajukan, $pelaku, null);
+            $this->tautkanDasar($permohonan, $pelaku, $dasar);
 
-            $tujuan = Pengaturan::get('persetujuan_pembina_aktif') && $ormawa->pembina_user_id !== null
-                ? StatusPermohonan::PersetujuanPembina
-                : StatusPermohonan::ValidasiAdmin;
+            $tujuan = match (true) {
+                $unit !== null => StatusPermohonan::PersetujuanUnit,
+                Pengaturan::get('persetujuan_pembina_aktif') && $ormawa?->pembina_user_id !== null => StatusPermohonan::PersetujuanPembina,
+                default => StatusPermohonan::ValidasiAdmin,
+            };
 
             $permohonan->status = $tujuan;
             $permohonan->save();
@@ -108,6 +143,50 @@ class AjukanPermohonan
         }
 
         RateLimiter::hit($kunci, 3600);
+    }
+
+    /**
+     * Usulan mahasiswa dijadikan dasar permohonan (satu atau beberapa digabung): harus berstatus diajukan, ditujukan
+     * kepada ormawa/unit yang sama, dan dapat ditangani pengaju. Baris dikunci agar tidak dipakai dua permohonan.
+     *
+     * @param  list<string>  $ids
+     */
+    private function tautkanDasar(Permohonan $permohonan, User $pelaku, array $ids): void
+    {
+        if ($ids === []) {
+            return;
+        }
+
+        $usulan = UsulanMahasiswa::whereIn('id', $ids)->lockForUpdate()->get();
+
+        if ($usulan->count() !== count($ids)) {
+            throw ValidationException::withMessages(['dasar' => 'Ada usulan dasar yang tidak ditemukan.']);
+        }
+
+        foreach ($usulan as $u) {
+            $sama = $permohonan->ormawa_id !== null ? $u->ormawa_id === $permohonan->ormawa_id : $u->unit_kerja_id === $permohonan->unit_kerja_id;
+
+            if (! $sama || $u->status !== StatusUsulan::Diajukan || ! Gate::forUser($pelaku)->allows('tangani', $u)) {
+                throw ValidationException::withMessages(['dasar' => "Usulan \"{$u->perihal}\" tidak dapat dijadikan dasar (bukan untuk perantara ini atau sudah diproses)."]);
+            }
+        }
+
+        UsulanMahasiswa::whereIn('id', $ids)->update(['permohonan_id' => $permohonan->getKey(), 'status' => StatusUsulan::Dipakai->value]);
+    }
+
+    private function otorisasiUnit(User $pelaku, UnitKerja $unit): void
+    {
+        if (! Gate::forUser($pelaku)->allows('ajukanPermohonan', $unit)) {
+            throw new AuthorizationException('Hanya pengaju yang ditugaskan pada program studi/laboratorium ini yang dapat mengajukan atas namanya.');
+        }
+
+        if (! in_array($unit->tipe, [TipeUnitKerja::Prodi, TipeUnitKerja::Laboratorium], true)) {
+            throw ValidationException::withMessages(['unit' => 'Hanya program studi atau laboratorium yang dapat mengajukan permohonan.']);
+        }
+
+        if (! $unit->penyetuju()->where('users.aktif', true)->exists()) {
+            throw ValidationException::withMessages(['unit' => 'Unit ini belum memiliki kepala penyetuju aktif. Hubungi admin fakultas.']);
+        }
     }
 
     private function otorisasi(User $pelaku, Ormawa $ormawa): void

@@ -13,7 +13,8 @@ class BuatLpj
     {
         $permohonan->loadMissing('jenis');
 
-        if (! $permohonan->jenis->butuh_lpj) {
+        // LPJ (dan blokirnya) melekat pada ormawa; pengaju prodi/laboratorium tidak memakainya.
+        if ($permohonan->jenis_pengaju->berunit() || ! $permohonan->jenis->butuh_lpj) {
             return null;
         }
 

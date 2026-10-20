@@ -21,7 +21,7 @@ class BuatPengantarRektorat
     {
         Gate::forUser($admin)->authorize('pengantarRektorat', $permohonan);
 
-        $permohonan->loadMissing(['ormawa', 'jenis']);
+        $permohonan->loadMissing(['ormawa', 'unitKerja', 'jenis']);
 
         if (! $permohonan->jenis->butuh_fasilitas_rektorat || empty($permohonan->fasilitas_rektorat)) {
             throw ValidationException::withMessages(['fasilitas' => 'Permohonan ini tidak memuat fasilitas rektorat.']);
@@ -48,7 +48,7 @@ class BuatPengantarRektorat
             'mode_tanda_tangan' => $jenis->mode_tanda_tangan_diizinkan[0],
             'data' => ['tujuan' => 'Rektor Universitas Siliwangi'],
             'tujuan' => [['nama' => 'Rektor Universitas Siliwangi']],
-            'isi' => "<p>Sehubungan dengan kegiatan {$permohonan->nama_kegiatan} oleh {$permohonan->ormawa->nama}, mohon bantuan fasilitas berikut:</p><ul>{$daftar}</ul>",
+            'isi' => "<p>Sehubungan dengan kegiatan {$permohonan->nama_kegiatan} oleh {$permohonan->namaPengaju()}, mohon bantuan fasilitas berikut:</p><ul>{$daftar}</ul>",
         ], $admin);
 
         $naskah->forceFill(['permohonan_id' => $permohonan->getKey()])->save();

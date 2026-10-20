@@ -17,13 +17,21 @@ use App\Http\Controllers\Publik\LacakController;
 use App\Http\Controllers\Publik\VerifikasiController;
 use App\Http\Middleware\HeaderHalamanPublik;
 use App\Http\Middleware\PastikanAktif;
+use App\Livewire\Mahasiswa\Beranda as BerandaMahasiswa;
+use App\Livewire\Mahasiswa\UsulanBaru;
 use App\Livewire\Ormawa\AjukanPermohonan;
 use App\Livewire\Ormawa\Beranda as BerandaOrmawa;
 use App\Livewire\Ormawa\IsiLpj;
 use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
+use App\Livewire\Ormawa\UsulanMasuk as UsulanMasukOrmawa;
 use App\Livewire\Pembuat\Tugas as TugasPembuat;
 use App\Livewire\Pimpinan\KotakMasuk;
+use App\Livewire\Unit\AjukanPermohonan as AjukanPermohonanUnit;
+use App\Livewire\Unit\Beranda as BerandaUnit;
+use App\Livewire\Unit\Persetujuan as PersetujuanUnit;
+use App\Livewire\Unit\Progres as ProgresUnit;
+use App\Livewire\Unit\UsulanMasuk as UsulanMasukUnit;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 
@@ -66,7 +74,17 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     Route::get('/ormawa/{ormawa}/profil', ProfilOrmawa::class)->whereUuid('ormawa')->name('ormawa.profil');
     Route::get('/ormawa/{ormawa}/permohonan', Progres::class)->whereUuid('ormawa')->name('ormawa.permohonan');
     Route::get('/ormawa/{ormawa}/permohonan/baru', AjukanPermohonan::class)->whereUuid('ormawa')->name('ormawa.permohonan.baru');
+    Route::get('/ormawa/{ormawa}/usulan', UsulanMasukOrmawa::class)->whereUuid('ormawa')->name('ormawa.usulan');
     Route::get('/ormawa/{ormawa}/lpj/{lpj}', IsiLpj::class)->whereUuid(['ormawa', 'lpj'])->name('ormawa.lpj');
+    // Mahasiswa perorangan mengusulkan kepada ormawa atau program studi/laboratorium.
+    Route::get('/mahasiswa', BerandaMahasiswa::class)->name('mahasiswa');
+    Route::get('/mahasiswa/usulan/baru', UsulanBaru::class)->name('mahasiswa.usulan.baru');
+    // Pengaju dan kepala program studi/laboratorium (alur unit: pengaju -> kepala unit -> fakultas).
+    Route::get('/unit', BerandaUnit::class)->name('unit');
+    Route::get('/unit/persetujuan', PersetujuanUnit::class)->name('unit.persetujuan');
+    Route::get('/unit/{unit}/permohonan', ProgresUnit::class)->whereUuid('unit')->name('unit.permohonan');
+    Route::get('/unit/{unit}/usulan', UsulanMasukUnit::class)->whereUuid('unit')->name('unit.usulan');
+    Route::get('/unit/{unit}/permohonan/baru', AjukanPermohonanUnit::class)->whereUuid('unit')->name('unit.permohonan.baru');
     Route::get('/disposisi', KotakMasuk::class)->name('disposisi');
     Route::get('/pembuat', TugasPembuat::class)->name('pembuat');
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil');

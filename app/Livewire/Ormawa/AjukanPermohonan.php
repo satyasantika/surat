@@ -4,18 +4,23 @@ namespace App\Livewire\Ormawa;
 
 use App\Actions\Permohonan\AjukanPermohonan as AksiAjukan;
 use App\Contracts\LayananRuangan;
+use App\Enums\StatusUsulan;
 use App\Exceptions\LayananRuanganTidakTersedia;
 use App\Models\JenisPermohonan;
 use App\Models\Ormawa;
+use App\Models\Permohonan;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use App\Services\Ruangan\KetersediaanRuangan;
 use App\Support\Pengaturan;
 use App\Support\SesiRuangan;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
@@ -25,6 +30,10 @@ class AjukanPermohonan extends Component
 {
     #[Locked]
     public string $ormawaId = '';
+
+    /** @var list<string> usulan mahasiswa yang dijadikan dasar permohonan (dipilih di halaman usulan masuk) */
+    #[Url(as: 'dasar')]
+    public array $dasar = [];
 
     public int $langkah = 1;
 
@@ -68,6 +77,7 @@ class AjukanPermohonan extends Component
         abort_unless($this->pengguna()->ormawaAktif()->contains('id', $model->getKey()), 403);
         $this->ormawaId = $model->getKey();
         $this->jenis = (string) JenisPermohonan::where('aktif', true)->orderBy('nama')->value('id');
+        $this->muatDasar();
     }
 
     public function lanjut(): void
@@ -107,7 +117,7 @@ class AjukanPermohonan extends Component
         $kosongKeNull = fn (array $a) => array_map(fn ($v) => $v === '' ? null : $v, $a);
 
         try {
-            $permohonan = app(AksiAjukan::class)->jalankan($this->pengguna(), $this->ormawa(), $jenis, [
+            $permohonan = $this->ajukan($jenis, [
                 'nama_kegiatan' => $this->nama_kegiatan, 'perihal' => $this->perihal,
                 'nomor_surat_ormawa' => $this->nomor_surat_ormawa ?: null,
                 'tanggal_mulai' => $this->tanggal_mulai, 'tanggal_selesai' => $this->tanggal_selesai,
@@ -116,6 +126,7 @@ class AjukanPermohonan extends Component
                 'penanggung_jawab' => ['ketua' => $kosongKeNull($this->pj['ketua']), 'wakil' => $kosongKeNull($this->pj['wakil']), 'sekretaris' => $kosongKeNull($this->pj['sekretaris'])],
                 'fasilitas_rektorat' => $jenis->butuh_fasilitas_rektorat ? array_map(fn ($f) => $kosongKeNull($f), $this->fasilitas) : null,
                 'berkas' => array_filter($this->berkas, fn ($v) => $v !== ''),
+                'dasar_usulan' => $this->dasar,
                 'ruangan' => $jenis->butuh_ruangan ? $ruangan : [],
             ]);
         } catch (TooManyRequestsHttpException) {
@@ -130,7 +141,63 @@ class AjukanPermohonan extends Component
 
         session()->flash('status', "Permohonan {$permohonan->nomor} berhasil diajukan.");
 
-        return $this->redirectRoute('ormawa.permohonan', ['ormawa' => $this->ormawaId], navigate: false);
+        return $this->redirect($this->urlSetelahKirim(), navigate: false);
+    }
+
+    /**
+     * Titik ganti bagi pengaju lain (prodi/laboratorium): aksi pengajuan sesuai pihak pengaju.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function ajukan(JenisPermohonan $jenis, array $data): Permohonan
+    {
+        return app(AksiAjukan::class)->jalankan($this->pengguna(), $this->ormawa(), $jenis, $data);
+    }
+
+    /**
+     * Kolom tujuan usulan yang boleh menjadi dasar: ormawa ini (bagi pengaju unit, unit ini).
+     *
+     * @return array<string, string>
+     */
+    protected function kolomTujuan(): array
+    {
+        return ['ormawa_id' => $this->ormawaId];
+    }
+
+    /** @return Collection<int, UsulanMahasiswa> usulan dasar yang sah (milik perantara ini, masih menunggu, dapat ditangani pengguna) */
+    protected function usulanDasar(): Collection
+    {
+        if ($this->dasar === []) {
+            return new Collection;
+        }
+
+        return UsulanMahasiswa::with('mahasiswa')->where($this->kolomTujuan())->where('status', StatusUsulan::Diajukan->value)
+            ->whereIn('id', $this->dasar)->get()->filter(fn (UsulanMahasiswa $u) => Gate::forUser($this->pengguna())->allows('tangani', $u))->values();
+    }
+
+    /** Buang usulan dasar yang tidak sah dan isi awal perihal/uraian dari usulan yang dipilih. */
+    protected function muatDasar(): void
+    {
+        $usulan = $this->usulanDasar();
+        $this->dasar = $usulan->pluck('id')->all();
+
+        if ($usulan->isNotEmpty() && $this->perihal === '' && $this->deskripsi === '') {
+            $this->perihal = $usulan->count() === 1 ? $usulan->first()->perihal : 'Usulan kolektif: '.$usulan->pluck('perihal')->take(3)->implode('; ');
+            $this->deskripsi = $usulan->map(fn (UsulanMahasiswa $u) => "- {$u->perihal}: {$u->uraian}")->implode("\n");
+        }
+    }
+
+    protected function urlSetelahKirim(): string
+    {
+        return route('ormawa.permohonan', ['ormawa' => $this->ormawaId]);
+    }
+
+    /** @return array{nama: string, kembali: string, label_nomor: string} */
+    protected function infoPengaju(): array
+    {
+        $ormawa = $this->ormawa();
+
+        return ['nama' => $ormawa->nama, 'kembali' => route('ormawa', ['o' => $ormawa->id]), 'label_nomor' => 'Nomor surat ormawa'];
     }
 
     public function render(): View
@@ -147,7 +214,8 @@ class AjukanPermohonan extends Component
         [$ketersediaan, $layananGalat] = $this->langkah === 2 && $jenis?->butuh_ruangan ? $this->hitungKetersediaan() : [[], false];
 
         return view('livewire.ormawa.ajukan-permohonan', [
-            'ormawa' => $this->ormawa(),
+            'pengaju' => $this->infoPengaju(),
+            'usulanDasar' => $this->usulanDasar(),
             'jenisDaftar' => JenisPermohonan::where('aktif', true)->orderBy('nama')->get(),
             'jenisTerpilih' => $jenis,
             'terlambat' => $terlambat,
@@ -194,7 +262,7 @@ class AjukanPermohonan extends Component
         return [$hasil, false];
     }
 
-    private function pengguna(): User
+    protected function pengguna(): User
     {
         /** @var User $user */
         $user = auth()->user();
@@ -202,7 +270,7 @@ class AjukanPermohonan extends Component
         return $user;
     }
 
-    private function ormawa(): Ormawa
+    protected function ormawa(): Ormawa
     {
         $ormawa = Ormawa::findOrFail($this->ormawaId);
         Gate::forUser($this->pengguna())->authorize('view', $ormawa);

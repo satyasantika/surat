@@ -6,6 +6,7 @@ use App\Models\Ormawa;
 use App\Models\Permohonan;
 use App\Models\User;
 use App\Support\Pelacakan\Linimasa;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -32,14 +33,14 @@ class Progres extends Component
 
     public function pilih(string $id): void
     {
-        $permohonan = Permohonan::where('ormawa_id', $this->ormawaId)->findOrFail($id);
+        $permohonan = $this->kueri()->findOrFail($id);
         Gate::forUser($this->pengguna())->authorize('view', $permohonan);
         $this->terpilih = $permohonan->getKey();
     }
 
     public function render(): View
     {
-        $daftar = Permohonan::with('jenis')->where('ormawa_id', $this->ormawaId)->latest('diajukan_pada')->get();
+        $daftar = $this->kueri()->with('jenis')->latest('diajukan_pada')->get();
         $detail = $this->terpilih ? $daftar->firstWhere('id', $this->terpilih) : null;
 
         if ($detail !== null) {
@@ -47,7 +48,7 @@ class Progres extends Component
         }
 
         return view('livewire.ormawa.progres', [
-            'ormawa' => Ormawa::findOrFail($this->ormawaId),
+            'pengaju' => $this->infoPengaju(),
             'daftar' => $daftar,
             'detail' => $detail,
             'linimasa' => $detail !== null ? app(Linimasa::class)->permohonan($detail) : [],
@@ -56,7 +57,21 @@ class Progres extends Component
         ])->title('Progres permohonan');
     }
 
-    private function pengguna(): User
+    /** @return Builder<Permohonan> */
+    protected function kueri(): Builder
+    {
+        return Permohonan::where('ormawa_id', $this->ormawaId);
+    }
+
+    /** @return array{nama: string, kembali: string, baru: string} */
+    protected function infoPengaju(): array
+    {
+        $ormawa = Ormawa::findOrFail($this->ormawaId);
+
+        return ['nama' => $ormawa->nama, 'kembali' => route('ormawa', ['o' => $ormawa->id]), 'baru' => route('ormawa.permohonan.baru', $ormawa)];
+    }
+
+    protected function pengguna(): User
     {
         /** @var User $user */
         $user = auth()->user();

@@ -154,7 +154,7 @@ class PlotRuangan extends Page
             $entri[$r->tanggal->toDateString()][] = [
                 'sesi' => $r->sesi, 'jenis' => $r->status, 'permohonan_id' => $r->permohonan_id,
                 // Nama ormawa/kegiatan hanya untuk yang berhak melihat permohonannya (tooltip pun tidak membocorkannya).
-                'label' => Gate::allows('view', $r->permohonan) ? $r->permohonan->ormawa->nama.' — '.$r->permohonan->nama_kegiatan : 'Terisi',
+                'label' => Gate::allows('view', $r->permohonan) ? $r->permohonan->namaPengaju().' — '.$r->permohonan->nama_kegiatan : 'Terisi',
             ];
         }
 

@@ -131,6 +131,17 @@ describe('registrasi pengirim', function () {
         expect($surat->jenis_pengirim)->toBe(JenisPengirim::Prodi)->and($surat->pengirimUnitKerja->nama)->toBe('Pendidikan Matematika');
     });
 
+    it('laboratorium mewajibkan unit kerja seperti prodi', function () {
+        $staf = penggunaSk('staf-khusus');
+        $lab = UnitKerja::create(['kode' => 'LAB-KOM', 'nama' => 'Laboratorium Komputer', 'tipe' => 'laboratorium']);
+
+        expect(fn () => app(RegistrasiSuratMasuk::class)->jalankan(dataSk(['jenis_pengirim' => 'laboratorium']), $staf))->toThrow(ValidationException::class);
+
+        $surat = app(RegistrasiSuratMasuk::class)->jalankan(dataSk(['jenis_pengirim' => 'laboratorium', 'pengirim_unit_kerja_id' => $lab->id]), $staf);
+
+        expect($surat->jenis_pengirim)->toBe(JenisPengirim::Laboratorium)->and($surat->pengirimUnitKerja->nama)->toBe('Laboratorium Komputer');
+    });
+
     it('menolak jenis pengirim tak dikenal', function () {
         expect(fn () => app(RegistrasiSuratMasuk::class)->jalankan(dataSk(['jenis_pengirim' => 'siluman']), penggunaSk('staf-khusus')))
             ->toThrow(ValidationException::class);

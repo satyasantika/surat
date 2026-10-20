@@ -47,7 +47,7 @@ class TerbitkanIzin
 
             $this->cekUlangBentrok($segar);
 
-            $segar->loadMissing(['ormawa', 'jenis.jenisNaskah', 'ruangan']);
+            $segar->loadMissing(['ormawa', 'unitKerja', 'jenis.jenisNaskah', 'ruangan']);
             $jenisNaskah = $segar->jenis->jenisNaskah ?? throw ValidationException::withMessages(['jenis' => 'Jenis permohonan belum memiliki templat surat.']);
 
             $naskah = $this->draf->jalankan(null, [
@@ -59,7 +59,7 @@ class TerbitkanIzin
                 'penanda_tangan_jabatan_id' => $jenisNaskah->jabatan_penanda_tangan_bawaan_id,
                 'mode_tanda_tangan' => $jenisNaskah->mode_tanda_tangan_diizinkan[0],
                 'data' => $this->isiOtomatis($segar, $jenisNaskah),
-                'tujuan' => [['nama' => "Ketua {$segar->ormawa->nama}"]],
+                'tujuan' => [['nama' => $segar->sebutanPimpinanPengaju()]],
                 'isi' => null,
             ], $admin);
 
@@ -107,13 +107,13 @@ class TerbitkanIzin
             : (string) $p->tempat_lain;
 
         $nilai = [
-            'ormawa' => $p->ormawa->nama,
+            'ormawa' => $p->namaPengaju(),
             'nama_kegiatan' => $p->nama_kegiatan,
             'tanggal_mulai' => $p->tanggal_mulai->toDateString(),
             'tanggal_selesai' => $p->tanggal_selesai->toDateString(),
             'tempat' => $tempat !== '' ? $tempat : '-',
             'penanggung_jawab' => (string) ($p->penanggung_jawab['ketua']['nama'] ?? ''),
-            'tujuan' => "Ketua {$p->ormawa->nama}",
+            'tujuan' => $p->sebutanPimpinanPengaju(),
         ];
 
         // Hanya kunci yang didefinisikan templat; variabel wajib yang tak terisi diberi strip.
