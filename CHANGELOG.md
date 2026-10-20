@@ -5,6 +5,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 ## [Belum dirilis]
 
 ### Dihapus
+- Fitur kabar dan galeri (K-16): model, aksi, resource panel, halaman pengurus dan publik (`/kabar`, `/galeri`), izin `kabar.kelola`/`kabar.usul`/`galeri.kelola`, kategori notifikasi `kabar`, impor sheet Blogs/Galleries, dan data UAT. Migrasi `drop_kabar_dan_galeri_tables` membuang tabel, tautan berkas milik kabar, dan izin terkait.
 - Horizon (`laravel/horizon` beserta `laravel/sentinel` dan `symfony/polyfill-php83`), `config/horizon.php`, `HorizonServiceProvider`, gerbang `viewHorizon`, `HORIZON_EMAILS`, pengecualian CSP `/horizon`, dan rute `/horizon`.
 - Redis: `/api/health` tidak lagi memeriksa Redis; variabel `REDIS_*` dihapus dari contoh env; phpredis dihapus dari `Dockerfile`.
 - Container `queue`, `redis`, `gotenberg`, dan `db` (profil `db-lokal`) dari `docker-compose.prod.yml`.
@@ -35,7 +36,7 @@ Fase 12: pengerasan, produksi, uji penerimaan, dan panduan. Rilis pertama yang s
 ### Ditambahkan
 - Keamanan (`docs/KEAMANAN.md`): header keamanan global (`HeaderKeamanan`: nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS produksi) dan CSP bernonce untuk halaman aplikasi tanpa `unsafe-inline` pada skrip; uji lintas-permukaan `MatriksAksesTest` (seluruh izin × peran PRD §3.1), `KlasifikasiRahasiaTest`, `IdorTest`, `VerifikasiPublikTest`, `RateLimitTest`, `XssTest`, `Arch/TanpaHtmlMentahTest`, `TanpaUnggahTest`, `TanpaKredensialBawaanTest`, `KonkurensiTest`, `HeaderKeamananTest`.
 - Produksi (`docs/DEPLOY.md`): `Dockerfile` bertahap (php-fpm 8.5, nginx + aset berawalan `/surat/`), `docker-compose.prod.yml` (app, nginx, queue Horizon, scheduler, redis, gotenberg internal, cadangan, profil basis data lokal), `.env.production.example`, cadangan harian `mariadb-dump` retensi 30 hari dengan verifikasi, uji pulih, rotasi token, dan langkah cutover.
-- Uji penerimaan: `php artisan surat:siapkan-uat` (data rekaan: akun per peran, 3 ormawa, surat masuk, permohonan di tiap tahap, LPJ, kabar, galeri; idempoten; ditolak di produksi).
+- Uji penerimaan: `php artisan surat:siapkan-uat` (data rekaan: akun per peran, 3 ormawa, surat masuk, permohonan di tiap tahap, LPJ; idempoten; ditolak di produksi).
 - Panduan pengguna HTML per peran dengan 59 tangkapan layar otomatis (Playwright) di `public/panduan/` (`/panduan/`), ditautkan dari halaman publik, masuk, aplikasi, dan panel; `PanduanSeeder` (hanya lokal), `composer panduan`, `PanduanTest`.
 
 ### Diubah

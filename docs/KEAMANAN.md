@@ -14,7 +14,7 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 | K-05 Nomor dari register | `NomorTest`, `KonkurensiTest`, `AjukanPermohonanTest` |
 | K-06 "TTE" hanya untuk mode tersertifikasi; gambar tanda tangan tak terekspos | `TandaTanganTest`, `IdorTest` (tautan `ttd_visual` tidak pernah dapat dibuka) |
 | K-07 QR → halaman verifikasi dengan hash | `VerifikasiTest`, `VerifikasiPublikTest` (hanya bidang putih; 404 seragam; tanpa cache/indeks; CSP ketat) |
-| K-08 Templat dan isi tersanitasi; CSP aktif | `XssTest` (kabar, naskah, ormawa), `Arch/TanpaHtmlMentahTest` (hanya `isi-aman` yang boleh `{!! !!}`), `HeaderKeamananTest` |
+| K-08 Templat dan isi tersanitasi; CSP aktif | `XssTest` (naskah, ormawa), `Arch/TanpaHtmlMentahTest` (hanya `isi-aman` yang boleh `{!! !!}`), `HeaderKeamananTest` |
 | K-09 Klasifikasi rahasia dihormati di UI, PDF, notifikasi, ekspor, pencarian | `KlasifikasiRahasiaTest`, `NotifikasiTest`, `LaporanTest`, `ArsipRetensiTest` |
 | K-10 Data pribadi hanya bagi yang berhak | `HalamanPublikTest`, `PengurusOrmawaTest`, `LaporanTest` (tanpa data pribadi), `VerifikasiMigrasiTest` (cek privasi) |
 | K-11 Tautan: https + daftar putih; anti-SSRF; tanpa unggahan | `TautanBerkasTest`, `Arch/BerkasTest`, `TanpaUnggahTest` |
@@ -31,7 +31,7 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 | Area | CSP |
 |---|---|
 | Halaman aplikasi (masuk, daftar, profil, Livewire ormawa/pimpinan) | `script-src 'self' 'nonce-…' 'unsafe-eval'` — **tanpa `unsafe-inline` untuk skrip**; nonce baru tiap respons (dipakai `@vite` dan `@livewireScripts`); `frame-ancestors 'self'`, `object-src 'none'`, `form-action 'self'` |
-| Halaman publik (`/`, `/kabar`, `/galeri`, `/organisasi`) | `script-src 'self'`; gambar hanya `lh3.googleusercontent.com` dan `*.unsil.ac.id`; bingkai hanya `youtube-nocookie.com`/Drive; `frame-ancestors 'none'` |
+| Halaman publik (`/`, `/organisasi`) | `script-src 'self'`; gambar hanya `lh3.googleusercontent.com` dan `*.unsil.ac.id`; tanpa bingkai pihak ketiga; `frame-ancestors 'none'` |
 | Verifikasi QR | `default-src 'none'`, skrip hanya ber-nonce, `frame-ancestors 'none'`, `no-store`, `noindex` |
 | Pratinjau naskah | `default-src 'none'` (tanpa skrip) |
 | Panel Filament dan update Livewire | Tidak diberi CSP aplikasi: Filament menyuntikkan skrip/gaya inline tanpa nonce. Header dasar tetap berlaku; akses panel dibatasi login + MFA + Policy |

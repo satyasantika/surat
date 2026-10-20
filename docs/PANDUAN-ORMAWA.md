@@ -4,6 +4,6 @@
 
 Panduan HTML: [`public/panduan/pengurus-ormawa.html`](../public/panduan/pengurus-ormawa.html); pembina: [`pembina-ormawa.html`](../public/panduan/pembina-ormawa.html).
 
-Cakupan: Daftar akun, mengajukan permohonan, memantau progres, mengunduh surat izin, mengisi LPJ, mengusulkan kabar.
+Cakupan: Daftar akun, mengajukan permohonan, memantau progres, mengunduh surat izin, mengisi LPJ.
 
 Indeks semua panduan: [`public/panduan/index.html`](../public/panduan/index.html); di aplikasi: `/panduan/` (tertaut dari halaman publik, masuk, aplikasi, dan panel). Cara memperbarui: bagian "Memperbarui panduan" pada `README.md`.

@@ -105,3 +105,12 @@ Menerapkan K-10 butir 4 (BR-27). **Menunggu peninjauan pemilik**; (!) menyentuh 
 4. (!) Halaman publik `/lacak/{kode}`: tautan hasil ditampilkan langsung (siapa pun yang memegang kode dapat membukanya; kendali akses sesungguhnya adalah izin berbagi tautan Drive). Surat masuk rahasia/sangat rahasia: tanpa perihal, tahap generik, tanpa jabatan/unit, **tanpa tautan hasil** (pengirim mengambil lewat fakultas). Permohonan ormawa tidak punya klasifikasi sehingga selalu perihal ringkas (120 karakter). Kode tak sah dan tak ada dijawab identik (404). Limiter `lacak`: 20/menit dan 200/jam per IP.
 5. Tampilan linimasa untuk pengirim ber-akun pada **surat masuk** tidak dibuat: pengirim surat masuk tidak punya akun yang tertaut pada surat (eksternal/prodi bersurat resmi); mereka dilayani lewat tautan lacak publik dan pemberitahuan. Staf khusus/admin melihat tautan lacak di panel (rincian permohonan dan formulir surat masuk) untuk diberikan kepada pengirim.
 
+
+## K-16 — Penghapusan fitur kabar dan galeri (20 Oktober 2026)
+
+Atas permintaan pemilik: kabar dan galeri tidak berkaitan dengan alur persuratan, yang riwayatnya sudah terlacak (register, disposisi, linimasa).
+
+1. Dihapus seluruhnya: kode, izin, kategori notifikasi, langkah impor OrmawaHub (sheet Blogs dan Galleries kini diabaikan bila ada), data UAT, tes, dan bagian panduan. Tombol "Kabar"/"Galeri" hilang dari beranda dan menu publik; `/kabar` dan `/galeri` menjadi 404 tanpa pengalihan.
+2. Basis data: migrasi baru `2026_10_20_100000_drop_kabar_dan_galeri_tables` menghapus tabel `kabar` dan `galeri`, baris `tautan_berkas` milik kabar, serta izin `kabar.kelola`, `kabar.usul`, `galeri.kelola`. `down()` hanya membuat ulang struktur kosong; **data kabar/galeri yang sudah ada hilang**, cadangkan basis data produksi sebelum menerapkan.
+3. CSP halaman publik tidak lagi mengizinkan bingkai YouTube/Drive (hanya gambar profil ormawa dari `lh3.googleusercontent.com` dan `*.unsil.ac.id`).
+4. Tangkapan layar panduan untuk kabar/galeri dihapus; tangkapan beranda pengurus ormawa dan beranda publik masih versi lama sampai `composer panduan` dijalankan ulang.
