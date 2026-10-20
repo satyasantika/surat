@@ -24,6 +24,7 @@ x-app: &app
     - storage:/var/www/html/storage
   environment:
     PHP_MEMORY_LIMIT: 512M
+    GOTENBERG_URL: http://gotenberg:3000
 
 services:
   php:
@@ -85,8 +86,19 @@ services:
     command: ["/skrip/backup.sh"]
     networks: [internal]
 
+  # PDF (surat tertandatangan QR, dsb.) — hanya dipakai Surat, jadi dibungkus di sini (bukan layanan bersama).
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *log
+    command: ["gotenberg", "--api-timeout=30s", "--chromium-disable-javascript=true", "--chromium-allow-list=^file:///tmp/.*"]
+    networks: [internal]
+
 networks:
   internal: {}
 
 volumes:
-  storage: {}
+  storage:
+    external: true
+    name: docker-apps_surat-storage

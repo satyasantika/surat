@@ -90,4 +90,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script_stop: true
           script: |
-            ~/docker-apps/deploy.sh surat
+            cd ~/docker-apps/surat && git fetch --prune origin main && git reset --hard origin/main && bash scripts/deploy.sh

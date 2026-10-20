@@ -4,21 +4,22 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Produksi Profil Ringan (STANDAR-TEKNIS §1b dan §7): basis data MariaDB NATIVE di host,
- * tanpa container database, Redis, Horizon, maupun Gotenberg; setiap container berbatas memori dan lognya dirotasi.
+ * tanpa container database, Redis, maupun Horizon; setiap container berbatas memori dan lognya dirotasi.
+ * Gotenberg tetap dipakai (generate PDF surat tertandatangan QR) — dibungkus di compose ini, bukan layanan bersama.
  */
 function komposProduksi(): array
 {
     return Yaml::parseFile(base_path('docker-compose.prod.yml'));
 }
 
-it('hanya memuat layanan app, nginx, scheduler, dan backup', function () {
-    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['php', 'nginx', 'scheduler', 'backup']);
+it('hanya memuat layanan app, nginx, scheduler, backup, dan gotenberg', function () {
+    expect(array_keys(komposProduksi()['services']))->toEqualCanonicalizing(['php', 'nginx', 'scheduler', 'backup', 'gotenberg']);
 });
 
-it('tidak memuat container database, redis, queue, atau gotenberg', function () {
+it('tidak memuat container database, redis, atau queue', function () {
     $kompos = komposProduksi();
 
-    foreach (['queue', 'redis', 'gotenberg', 'db', 'mysql', 'mariadb', 'meilisearch'] as $layanan) {
+    foreach (['queue', 'redis', 'db', 'mysql', 'mariadb', 'meilisearch'] as $layanan) {
         expect($kompos['services'])->not->toHaveKey($layanan);
     }
 
@@ -26,8 +27,8 @@ it('tidak memuat container database, redis, queue, atau gotenberg', function () 
         expect($kompos['volumes'] ?? [])->not->toHaveKey($volume);
     }
 
-    // hasil parse (tanpa komentar): tidak ada image/perintah Redis, Horizon, atau Gotenberg
-    expect(json_encode($kompos))->not->toMatch('/horizon|redis|gotenberg/i');
+    // hasil parse (tanpa komentar): tidak ada image/perintah Redis atau Horizon
+    expect(json_encode($kompos))->not->toMatch('/horizon|redis/i');
 });
 
 it('memakai image mariadb hanya sebagai klien cadangan berprofil backup', function () {
