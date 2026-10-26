@@ -6,11 +6,13 @@ use App\Actions\Usulan\AjukanUsulan;
 use App\Actions\Usulan\ArsipkanUsulan;
 use App\Actions\Usulan\BatalkanUsulan;
 use App\Actions\Usulan\PutusUsulan;
+use App\Contracts\PenyimpananBerkas;
 use App\Enums\StatusSuratMasuk;
 use App\Enums\StatusUsulan;
 use App\Livewire\Ormawa\UsulanMasuk as UsulanMasukOrmawa;
 use App\Livewire\Pengirim\Beranda as BerandaPengirim;
 use App\Livewire\Pengirim\KirimanBaru;
+use App\Livewire\Unit\AjukanPermohonan as FormulirUnit;
 use App\Livewire\Unit\UsulanMasuk as UsulanMasukUnit;
 use App\Models\JenisPermohonan;
 use App\Models\Ormawa;
@@ -196,6 +198,20 @@ describe('pengiriman paralel', function () {
         expect(fn () => kepKirim($this->pengirim, ['ormawa:'.fake()->uuid()]))->toThrow(ValidationException::class);
         expect(kepKirim($this->pengirim, ["ormawa:{$this->ormawa->id}"])['usulan'])->toHaveCount(1);
     });
+
+    it('pengiriman yang gagal disimpan (transaksi dibatalkan) tidak dihitung terhadap batas harian', function () {
+        $this->mock(PenyimpananBerkas::class, fn ($m) => $m->shouldReceive('simpan')->andThrow(new RuntimeException('Penyimpanan gagal')));
+
+        expect(fn () => kepKirim($this->pengirim, ['fakultas', "unit:{$this->prodi->id}"]))->toThrow(RuntimeException::class)
+            ->and(SuratMasuk::count())->toBe(0)->and(UsulanMahasiswa::count())->toBe(0)
+            ->and(RateLimiter::attempts('kiriman-eksternal:'.$this->pengirim->id))->toBe(0);
+    });
+
+    it('pengiriman yang berhasil dihitung satu kali', function () {
+        kepKirim($this->pengirim, ['fakultas', "unit:{$this->prodi->id}", "ormawa:{$this->ormawa->id}"]);
+
+        expect(RateLimiter::attempts('kiriman-eksternal:'.$this->pengirim->id))->toBe(1);
+    });
 });
 
 describe('arsip perantara', function () {
@@ -308,6 +324,20 @@ describe('halaman perantara', function () {
         Livewire::actingAs($this->pengaju)->test(UsulanMasukUnit::class, ['unit' => $this->prodi->id])
             ->call('arsipkan', $mhs->id)->assertHasErrors("catatan.{$mhs->id}");
         expect($mhs->fresh()->status)->toBe(StatusUsulan::Diajukan);
+    });
+
+    it('daftar dasar pada formulir pengajuan menandai kiriman pihak luar', function () {
+        $luar = kepUsulan($this->pengirim, "unit:{$this->prodi->id}", ['perihal' => 'Undangan dasar']);
+        $mhs = app(AjukanUsulan::class)->jalankan($this->mhs, ['tujuan' => "unit:{$this->prodi->id}", 'perihal' => 'Usulan dasar mahasiswa', 'uraian' => 'Ikut lomba.']);
+
+        Livewire::actingAs($this->pengaju)->withQueryParams(['dasar' => [$luar->id]])->test(FormulirUnit::class, ['unit' => $this->prodi->id])
+            ->assertSee('Dasar permohonan: 1 usulan')->assertSee('Undangan dasar')->assertSee('dari pihak luar');
+        Livewire::actingAs($this->pengaju)->withQueryParams(['dasar' => [$mhs->id]])->test(FormulirUnit::class, ['unit' => $this->prodi->id])
+            ->assertSee('Usulan dasar mahasiswa')->assertDontSee('dari pihak luar');
+    });
+
+    it('kotak usulan berjudul "Usulan masuk"', function () {
+        Livewire::actingAs($this->pengaju)->test(UsulanMasukUnit::class, ['unit' => $this->prodi->id])->assertSee('Usulan masuk');
     });
 
     it('kotak usulan ormawa juga dapat mengarsipkan', function () {

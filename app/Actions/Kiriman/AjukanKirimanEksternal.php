@@ -80,10 +80,7 @@ class AjukanKirimanEksternal
         $keFakultas = in_array(self::TUJUAN_FAKULTAS, $tujuan, true);
         $perantara = $this->perantara(array_values(array_diff($tujuan, [self::TUJUAN_FAKULTAS])), (string) $valid['perihal']);
 
-        // Hanya pengiriman yang lolos validasi yang dihitung terhadap batas harian.
-        RateLimiter::hit($kunci, 86400);
-
-        return DB::transaction(function () use ($pengirim, $valid, $keFakultas, $perantara) {
+        $hasil = DB::transaction(function () use ($pengirim, $valid, $keFakultas, $perantara) {
             $nama = filled($valid['nama'] ?? null) ? $valid['nama'] : $pengirim->name;
             $instansi = filled($valid['instansi'] ?? null) ? $valid['instansi'] : null;
 
@@ -96,6 +93,11 @@ class AjukanKirimanEksternal
 
             return ['surat' => $surat, 'usulan' => $usulan];
         });
+
+        // Hanya pengiriman yang lolos validasi dan tersimpan yang dihitung terhadap batas harian.
+        RateLimiter::hit($kunci, 86400);
+
+        return $hasil;
     }
 
     /**

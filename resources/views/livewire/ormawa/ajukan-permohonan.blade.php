@@ -5,8 +5,8 @@
 
     @if ($usulanDasar->isNotEmpty())
         <section class="rounded-lg bg-blue-50 p-3 text-sm" aria-label="Dasar permohonan">
-            <p class="font-medium">Dasar permohonan: {{ $usulanDasar->count() }} usulan mahasiswa</p>
-            <ul class="mt-1 list-disc pl-5">@foreach ($usulanDasar as $u)<li wire:key="d-{{ $u->id }}">{{ $u->perihal }} <span class="text-slate-500">— {{ $u->mahasiswa->name }}</span></li>@endforeach</ul>
+            <p class="font-medium">Dasar permohonan: {{ $usulanDasar->count() }} usulan</p>
+            <ul class="mt-1 list-disc pl-5">@foreach ($usulanDasar as $u)<li wire:key="d-{{ $u->id }}">{{ $u->perihal }} <span class="text-slate-500">— {{ $u->mahasiswa->name }}</span>@if ($u->dariPihakLuar()) <span class="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-900">dari pihak luar</span>@endif</li>@endforeach</ul>
         </section>
     @endif
 

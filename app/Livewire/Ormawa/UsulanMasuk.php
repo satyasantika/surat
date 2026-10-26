@@ -114,7 +114,7 @@ class UsulanMasuk extends Component
         return view('livewire.ormawa.usulan-masuk', [
             'pengaju' => $this->infoPengaju(),
             'daftar' => $this->kueri()->with(['mahasiswa', 'tautan'])->oldest()->get(),
-        ])->title('Usulan mahasiswa');
+        ])->title('Usulan masuk');
     }
 
     protected function pengguna(): User

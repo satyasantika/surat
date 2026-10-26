@@ -42,9 +42,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('usulan_mahasiswa', function (Blueprint $table): void {
-            $table->dropUnique(['kode_lacak']);
-            $table->dropColumn(['kode_lacak', 'instansi']);
-        });
+        // kode_lacak (beserta indeks uniknya) sengaja dibiarkan: kolom itu dapat dimiliki migrasi
+        // 2026_10_20_140000_add_kode_lacak_ke_usulan_mahasiswa, dan up() di sini hanya menambahkannya bila belum ada.
+        if (Schema::hasColumn('usulan_mahasiswa', 'instansi')) {
+            Schema::table('usulan_mahasiswa', fn (Blueprint $table) => $table->dropColumn('instansi'));
+        }
     }
 };

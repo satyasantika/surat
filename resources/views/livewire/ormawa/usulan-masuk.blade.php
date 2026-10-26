@@ -1,6 +1,6 @@
 <div class="space-y-4">
     <a href="{{ $pengaju['kembali'] }}" class="text-sm text-blue-800 underline">&larr; Kembali</a>
-    <h2 class="text-lg font-semibold">Usulan mahasiswa — {{ $pengaju['nama'] }}</h2>
+    <h2 class="text-lg font-semibold">Usulan masuk — {{ $pengaju['nama'] }}</h2>
     <p class="text-sm text-slate-600">Pilih satu atau beberapa usulan lalu jadikan dasar satu permohonan ke fakultas, atau kembalikan/tolak dengan catatan. Kiriman dari pihak luar (mis. undangan) juga dapat diarsipkan tanpa tindak lanjut.</p>
 
     @if (session('status'))<p class="rounded bg-green-50 p-3 text-sm text-green-800" role="status">{{ session('status') }}</p>@endif
