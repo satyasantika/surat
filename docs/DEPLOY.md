@@ -86,7 +86,7 @@ Produksi berjalan di bawah awalan `/surat`, jadi URI pengalihan **harus** `<APP_
 
 Membuat OAuth Client di Google Cloud Console:
 
-1. Pilih atau buat proyek, lalu buka APIs & Services > OAuth consent screen. Atur jenis pengguna (Internal bila akun Google Workspace unsil.ac.id saja; External bila pengirim eksternal boleh memakai Gmail), isi nama aplikasi dan surel dukungan.
+1. Pilih atau buat proyek, lalu buka APIs & Services > OAuth consent screen. Atur jenis pengguna (pilih **External**: Internal hanya menerima akun Workspace organisasi pemilik proyek, sehingga memblokir mahasiswa `student.unsil.ac.id` (Workspace lain) dan pengirim eksternal ber-Gmail), isi nama aplikasi dan surel dukungan.
 2. Pada Scopes, tambahkan hanya `openid`, `email`, dan `profile` (tidak ada scope sensitif).
 3. Buka Credentials > Create credentials > OAuth client ID, tipe **Web application**.
 4. Pada Authorized redirect URIs, daftarkan URI lokal dan URI produksi di atas (persis sama dengan `GOOGLE_REDIRECT_URI`, termasuk skema dan awalan).
@@ -104,7 +104,7 @@ docker compose -f docker-compose.prod.yml run --rm app php artisan key:generate 
 docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
 docker compose -f docker-compose.prod.yml exec app php artisan db:seed --force      # master: peran, jabatan, register, jenis, rubrik (tanpa akun)
-docker compose -f docker-compose.prod.yml exec app php artisan surat:buat-superadmin   # interaktif; MFA wajib saat masuk pertama ke /surat/admin
+docker compose -f docker-compose.prod.yml exec app php artisan surat:buat-superadmin   # interaktif; MFA wajib hanya bila saklar mfa_wajib (Pengaturan sistem > Keamanan) menyala; bawaannya mati, nyalakan setelah masa uji coba
 docker compose -f docker-compose.prod.yml exec app php artisan optimize
 ```
 

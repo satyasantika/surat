@@ -18,14 +18,14 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 | K-09 Klasifikasi rahasia dihormati di UI, PDF, notifikasi, ekspor, pencarian | `KlasifikasiRahasiaTest`, `NotifikasiTest`, `LaporanTest`, `ArsipRetensiTest` |
 | K-10 Data pribadi hanya bagi yang berhak | `HalamanPublikTest`, `PengurusOrmawaTest`, `LaporanTest` (tanpa data pribadi), `VerifikasiMigrasiTest` (cek privasi) |
 | K-11 Tautan: https + daftar putih; anti-SSRF; tanpa unggahan | `TautanBerkasTest`, `Arch/BerkasTest`, `TanpaUnggahTest` |
-| K-12 MFA super-admin, admin-persuratan, dekan, WD | `AutentikasiTest`, `FondasiTest` (`WajibMfa`) |
+| K-12 MFA super-admin, admin-persuratan, staf khusus, dekan, WD; sejak K-18 berlaku hanya bila saklar `mfa_wajib` menyala (bawaan mati) | `AutentikasiTest`, `FondasiTest` (`WajibMfa`) |
 | K-13 Rate limit login, verifikasi, ajukan | `RateLimitTest` (masuk 5/mnt, daftar & lupa sandi 5/mnt, verifikasi 30/mnt, ajukan 10/jam) |
 | K-14 Deployment Web App GAS OrmawaHub dihapus setelah cutover | Langkah manusia (07-MIGRASI §9, `DEPLOY.md` §Cutover) |
 | G-01 Masuk dengan Google (K-18): hanya `email_verified` yang dipercaya; domain mahasiswa akhiran persis; akun nonaktif tanpa sesi; peran panel tidak pernah dibuat dari Google | `PenautanGoogleTest`, `GoogleControllerTest` |
 | G-02 Cegah pengambilalihan akun: akun cocok yang surelnya belum terverifikasi diganti kata sandi acak dan sesinya dihapus saat penautan pertama; akun ber-MFA ditolak sebelum efek samping | `PenautanGoogleTest`, `GoogleControllerTest` |
 | G-03 Limiter `masuk-google` 60/mnt/IP (kunci tanpa surel); state/penolakan Google kembali ke `/masuk` tanpa 500 | `GoogleControllerTest` |
 | G-04 Saklar MFA (`mfa_wajib`) bawaan mati; hanya super-admin yang melihat dan mengubah | `SaklarMfaTest`, `AutentikasiTest` |
-| G-05 Peran `pengirim-eksternal` (izin hanya `kiriman.ajukan`): tanpa panel, `/mahasiswa`, `/disposisi`; hanya melihat dan menarik kiriman sendiri; kontak terenkripsi, tidak di log; batas 5/hari dan 5 tujuan | `KirimanEksternalFakultasTest`, `KirimanEksternalPerantaraTest`, `MatriksAksesTest`, `PeranDanIzinTest`, `IdorTest` |
+| G-05 Peran `pengirim-eksternal` (izin hanya `kiriman.ajukan`): tanpa panel, `/mahasiswa`, `/disposisi`; hanya melihat dan menarik/membatalkan kiriman sendiri (id milik orang lain 404); kontak pengirim pada surat masuk terenkripsi dan tidak di log (usulan tidak menyimpan kontak); batas 5/hari dan 5 tujuan | `KirimanEksternalFakultasTest`, `KirimanEksternalPerantaraTest`, `MatriksAksesTest`, `PeranDanIzinTest` (akses sendiri/IDOR: "hanya menampilkan kiriman milik sendiri", "pengirim menarik kirimannya lewat beranda, tetapi tidak milik pengirim lain (IDOR)", "pengirim membatalkan usulannya lewat beranda; id milik pengirim lain berakhir 404 (IDOR)") |
 
 ## 2. Header keamanan dan CSP
 
@@ -62,7 +62,7 @@ Tidak ditemukan kebocoran data rahasia, IDOR, atau kredensial bawaan pada penguj
 
 - Google dipercaya hanya bila `email_verified` benar. Surel dinormalkan ke huruf kecil; peran `mahasiswa` hanya untuk akhiran persis `student.unsil.ac.id` (diperiksa bersama klaim `hd`), selain itu `pengirim-eksternal`. Peran panel tidak pernah dibuat atau dinaikkan lewat Google.
 - Mitigasi pengambilalihan akun: bila akun yang cocok belum terverifikasi, kata sandi diganti acak dan sesi lain dihapus pada penautan pertama. Akun ber-MFA ditolak lewat Google (penyimpangan K-18); mereka masuk lewat `/admin` dengan kata sandi dan kode.
-- **Saklar MFA bawaan mati.** Selama mati, pejabat (super-admin, admin-persuratan, dekan, wakil dekan) hanya dilindungi kata sandi atau akun Google mereka. Disarankan menyalakannya setelah masa uji coba (Pengaturan sistem, Keamanan); setelah itu pejabat wajib memasang MFA dan tidak lagi dapat memakai Google.
+- **Saklar MFA bawaan mati.** Selama mati, pejabat (super-admin, admin-persuratan, staf khusus, dekan, wakil dekan) hanya dilindungi kata sandi atau akun Google mereka. Disarankan menyalakannya setelah masa uji coba (Pengaturan sistem, Keamanan); setelah itu pejabat wajib memasang MFA dan tidak lagi dapat memakai Google.
 
 ## 5. Risiko sisa dan pekerjaan lanjutan
 
