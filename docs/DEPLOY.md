@@ -82,7 +82,7 @@ GOOGLE_CLIENT_SECRET=<dari Google Cloud Console>
 GOOGLE_REDIRECT_URI=https://supportfkip.unsil.ac.id/surat/masuk/google/callback   # <APP_URL>/masuk/google/callback
 ```
 
-Produksi berjalan di bawah awalan `/surat`, jadi URI pengalihan **harus** `<APP_URL>/masuk/google/callback` termasuk `/surat`. Lokal: `http://localhost:8000/masuk/google/callback` (sesuaikan dengan `APP_URL`).
+Produksi berjalan di bawah awalan `/surat`, jadi URI pengalihan **harus** `<APP_URL>/masuk/google/callback` termasuk `/surat`. Bila `GOOGLE_REDIRECT_URI` dikosongkan, aplikasi memakai jalur bawaan `/masuk/google/callback` yang dilengkapi dengan `APP_URL` (hasilnya URI yang sama); URI itu tetap harus didaftarkan di Console. Lokal: `http://localhost:8000/masuk/google/callback` (sesuaikan dengan `APP_URL`).
 
 Membuat OAuth Client di Google Cloud Console:
 
