@@ -31,9 +31,11 @@ use Database\Seeders\RegisterNomorSeeder;
 use Database\Seeders\StrukturFkipSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Cache\RateLimiter as CacheRateLimiter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
@@ -141,6 +143,31 @@ describe('mengajukan kiriman ke fakultas', function () {
         $ketiga = User::factory()->create()->assignRole('pengirim-eksternal');
         kefKirim($ketiga);
         expect(fn () => kefKirim($ketiga))->toThrow(TooManyRequestsHttpException::class);
+    });
+
+    it('memeriksa batas lagi di dalam transaksi terkunci: percobaan basi kedua di batas ditolak', function () {
+        Pengaturan::set('batas_kiriman_harian', 1);
+        kefKirim($this->pengirim);
+
+        // Meniru permintaan paralel yang lolos pemeriksaan awal sebelum percobaan pertama mencatat hitungannya.
+        RateLimiter::swap(new class(app('cache')->store()) extends CacheRateLimiter
+        {
+            private bool $basi = true;
+
+            public function tooManyAttempts($key, $maxAttempts)
+            {
+                if ($this->basi) {
+                    $this->basi = false;
+
+                    return false;
+                }
+
+                return parent::tooManyAttempts($key, $maxAttempts);
+            }
+        });
+
+        expect(fn () => kefKirim($this->pengirim))->toThrow(TooManyRequestsHttpException::class)
+            ->and(SuratMasuk::count())->toBe(1);
     });
 
     it('menolak pengguna tanpa izin kiriman.ajukan', function () {

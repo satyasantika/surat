@@ -53,9 +53,8 @@ class AjukanKirimanEksternal
         $kunci = 'kiriman-eksternal:'.$pengirim->getKey();
         $batas = max(1, (int) Pengaturan::get('batas_kiriman_harian', 5));
 
-        if (RateLimiter::tooManyAttempts($kunci, $batas)) {
-            throw new TooManyRequestsHttpException(RateLimiter::availableIn($kunci), 'Batas pengiriman harian tercapai. Coba lagi besok.');
-        }
+        // Pemeriksaan awal (murah, sebelum validasi); pemeriksaan yang menentukan diulang di dalam transaksi terkunci.
+        $this->pastikanBelumBatas($kunci, $batas);
 
         $valid = Validator::make($data, [
             'tujuan' => ['required', 'array', 'min:1'],
@@ -80,7 +79,13 @@ class AjukanKirimanEksternal
         $keFakultas = in_array(self::TUJUAN_FAKULTAS, $tujuan, true);
         $perantara = $this->perantara(array_values(array_diff($tujuan, [self::TUJUAN_FAKULTAS])), (string) $valid['perihal']);
 
-        $hasil = DB::transaction(function () use ($pengirim, $valid, $keFakultas, $perantara) {
+        return DB::transaction(function () use ($pengirim, $valid, $keFakultas, $perantara, $kunci, $batas) {
+            // Baris akun pengirim dikunci: pengiriman paralel akun yang sama antre di sini, sehingga periksa-lalu-catat
+            // batas harian tidak dapat diselip. Penyimpan cache `database` memakai koneksi bawaan yang sama, jadi hitungan
+            // ikut dibatalkan bila transaksi gagal.
+            User::whereKey($pengirim->getKey())->lockForUpdate()->first();
+            $this->pastikanBelumBatas($kunci, $batas);
+
             $nama = filled($valid['nama'] ?? null) ? $valid['nama'] : $pengirim->name;
             $instansi = filled($valid['instansi'] ?? null) ? $valid['instansi'] : null;
 
@@ -91,13 +96,18 @@ class AjukanKirimanEksternal
                 $usulan[] = $this->kePerantara($pengirim, $valid, $tujuan, $instansi);
             }
 
+            // Dicatat paling akhir: pengiriman yang gagal validasi atau gagal disimpan tidak dihitung.
+            RateLimiter::hit($kunci, 86400);
+
             return ['surat' => $surat, 'usulan' => $usulan];
         });
+    }
 
-        // Hanya pengiriman yang lolos validasi dan tersimpan yang dihitung terhadap batas harian.
-        RateLimiter::hit($kunci, 86400);
-
-        return $hasil;
+    private function pastikanBelumBatas(string $kunci, int $batas): void
+    {
+        if (RateLimiter::tooManyAttempts($kunci, $batas)) {
+            throw new TooManyRequestsHttpException(RateLimiter::availableIn($kunci), 'Batas pengiriman harian tercapai. Coba lagi besok.');
+        }
     }
 
     /**
