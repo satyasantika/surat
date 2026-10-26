@@ -5,7 +5,9 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Aktivitas;
+use App\Models\IdentitasGoogle;
 use App\Models\User;
+use App\Services\Auth\PenautanGoogle;
 use Database\Seeders\PeranDanIzinSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -209,4 +211,55 @@ it('menyediakan aksi masuk sebagai hanya untuk super-admin', function () {
 
     $this->actingAs(pengelola('operator-layanan', ['pengguna.kelola']));
     Livewire::test(ListUsers::class)->assertTableActionHidden('masukSebagai', $target);
+});
+
+it('admin menonaktifkan akun pengirim-eksternal bersurel gmail lewat aksi dan formulir panel', function () {
+    $pelaku = pengelola();
+    $luar = User::factory()->create(['email' => 'luar@gmail.com'])->assignRole('pengirim-eksternal');
+
+    app(SimpanPengguna::class)->jalankan($luar, dataPengguna(['name' => $luar->name, 'email' => 'luar@gmail.com', 'nip_nim' => null, 'aktif' => false, 'peran' => ['pengirim-eksternal']]), $pelaku);
+    expect($luar->fresh()->aktif)->toBeFalse();
+
+    $luar2 = User::factory()->create(['email' => 'luar2@gmail.com'])->assignRole('pengirim-eksternal');
+    $this->actingAs($pelaku);
+    Livewire::test(EditUser::class, ['record' => $luar2->getKey()])
+        ->fillForm(['aktif' => false])
+        ->call('save')
+        ->assertHasNoFormErrors();
+    expect($luar2->fresh()->aktif)->toBeFalse()->and($luar2->fresh()->email)->toBe('luar2@gmail.com');
+});
+
+it('tetap menolak mengganti surel akun menjadi domain di luar unsil, lewat aksi maupun formulir', function () {
+    Notification::fake();
+    $pelaku = pengelola();
+    $user = app(SimpanPengguna::class)->jalankan(null, dataPengguna(), $pelaku);
+
+    expect(fn () => app(SimpanPengguna::class)->jalankan($user, dataPengguna(['email' => 'pindah@gmail.com']), $pelaku))
+        ->toThrow(ValidationException::class);
+
+    $luar = User::factory()->create(['email' => 'luar@gmail.com'])->assignRole('pengirim-eksternal');
+    $this->actingAs($pelaku);
+    Livewire::test(EditUser::class, ['record' => $luar->getKey()])
+        ->fillForm(['email' => 'lain@gmail.com'])
+        ->call('save')
+        ->assertHasFormErrors(['email']);
+    expect($user->fresh()->email)->toBe('baru@unsil.ac.id')->and($luar->fresh()->email)->toBe('luar@gmail.com');
+});
+
+it('mengganti surel akun memutus tautan Google lamanya', function () {
+    Notification::fake();
+    $pelaku = pengelola();
+    $user = app(SimpanPengguna::class)->jalankan(null, dataPengguna(['email' => 'lama@unsil.ac.id']), $pelaku);
+    IdentitasGoogle::create(['user_id' => $user->id, 'google_id' => 'g-lama', 'surel' => 'lama@unsil.ac.id']);
+
+    // Simpan tanpa mengubah surel: tautan tetap.
+    app(SimpanPengguna::class)->jalankan($user, dataPengguna(['email' => 'lama@unsil.ac.id', 'telepon' => '0899']), $pelaku);
+    expect(IdentitasGoogle::where('user_id', $user->id)->exists())->toBeTrue();
+
+    app(SimpanPengguna::class)->jalankan($user, dataPengguna(['email' => 'baru2@unsil.ac.id']), $pelaku);
+    expect(IdentitasGoogle::where('user_id', $user->id)->exists())->toBeFalse();
+
+    // Google lama tidak lagi masuk sebagai akun ini; ia diperlakukan sebagai akun baru menurut aturan biasa.
+    $hasil = app(PenautanGoogle::class)->masuk('g-lama', 'lama@unsil.ac.id', true, 'Lama');
+    expect($hasil->is($user))->toBeFalse()->and($hasil->hasRole('pengirim-eksternal'))->toBeTrue();
 });

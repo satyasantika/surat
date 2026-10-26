@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Actions\Pengguna\SimpanPengguna;
+use App\Models\User;
 use App\Rules\SurelDomainUnsil;
 use Database\Seeders\PeranDanIzinSeeder;
 use Filament\Forms\Components\CheckboxList;
@@ -20,7 +21,7 @@ class UserForm
         return $schema->components([
             Section::make('Akun')->columns(2)->schema([
                 TextInput::make('name')->label('Nama')->required()->maxLength(150),
-                TextInput::make('email')->label('Surel')->email()->required()->rule(new SurelDomainUnsil),
+                TextInput::make('email')->label('Surel')->email()->required()->rule(new SurelDomainUnsil, fn (?User $record, ?string $state): bool => SimpanPengguna::surelBerubah($record, $state)),
                 TextInput::make('nip_nim')->label('NIP/NIM')->maxLength(30),
                 TextInput::make('telepon')->label('Telepon')->tel()->maxLength(20)
                     ->helperText('Data pribadi; dipakai untuk notifikasi.'),

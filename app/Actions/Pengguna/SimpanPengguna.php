@@ -48,7 +48,13 @@ class SimpanPengguna
                 // Kata sandi acak tak diketahui siapa pun; pengguna menyetelnya lewat surel.
                 $user = User::create($profil + ['password' => Hash::make(Str::random(40))]);
             } else {
+                $surelBerubah = self::surelBerubah($user, $profil['email']);
                 $user->update($profil);
+
+                // Surel diganti admin: tautan Google lama diputus agar akun Google pemilik surel lama tak lagi masuk ke sini.
+                if ($surelBerubah) {
+                    $user->identitasGoogle()->delete();
+                }
             }
 
             $peranLama = $user->roles()->pluck('name')->sort()->values()->all();
@@ -79,7 +85,9 @@ class SimpanPengguna
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id), new SurelDomainUnsil],
+            // Domain unsil hanya untuk surel baru/diubah: akun lama di luar domain (mis. pengirim-eksternal Gmail) tetap dapat disimpan.
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id),
+                ...(self::surelBerubah($user, $data['email'] ?? null) ? [new SurelDomainUnsil] : [])],
             'nip_nim' => ['nullable', 'string', 'max:30', Rule::unique('users', 'nip_nim')->ignore($user?->id)],
             'telepon' => ['nullable', 'string', 'max:20'],
             'aktif' => ['boolean'],
@@ -89,6 +97,12 @@ class SimpanPengguna
             'izin_langsung' => ['array'],
             'izin_langsung.*' => ['string', Rule::in(PeranDanIzinSeeder::IZIN)],
         ])->validate();
+    }
+
+    /** Akun baru, atau surel yang diisi berbeda dari yang tersimpan (tanpa membedakan huruf besar/kecil). */
+    public static function surelBerubah(?User $user, mixed $surel): bool
+    {
+        return $user === null || Str::lower(trim((string) $surel)) !== Str::lower((string) $user->email);
     }
 
     /** @param  list<string>  $peran */
