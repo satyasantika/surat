@@ -30,6 +30,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property ?string $pengirim_surel
  * @property ?string $pengirim_wa
  * @property string $kode_lacak
+ * @property ?string $nomor_agenda nullable selama kiriman eksternal berstatus diajukan
+ * @property ?string $nomor_surat
+ * @property ?string $diregistrasi_oleh
+ * @property ?string $pengirim_user_id
  * @property ?CarbonImmutable $hasil_dikirim_pada
  * @property ?string $hasil_dikirim_oleh
  */
@@ -119,6 +123,12 @@ class SuratMasuk extends Model
         return $this->diteruskan_pada !== null;
     }
 
+    /** Kiriman pengirim eksternal yang belum diterima fakultas (belum bernomor agenda). */
+    public function masihDiajukan(): bool
+    {
+        return $this->status === StatusSuratMasuk::Diajukan;
+    }
+
     /**
      * Dekan hanya melihat surat yang sudah diteruskan; pemegang izin registrasi/penerusan dan super-admin melihat semua.
      *
@@ -129,6 +139,16 @@ class SuratMasuk extends Model
         if ($pelaku !== null && $pelaku->hasRole('dekan') && ! $pelaku->hasRole('super-admin') && ! $pelaku->canAny(['masuk.registrasi', 'masuk.teruskan'])) {
             $query->whereNotNull('diteruskan_pada');
         }
+    }
+
+    /**
+     * Akun pengirim eksternal yang mengirim surat ini lewat halaman pengirim (null bila diregistrasi petugas).
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function pengirimUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pengirim_user_id');
     }
 
     /** @return BelongsTo<User, $this> */

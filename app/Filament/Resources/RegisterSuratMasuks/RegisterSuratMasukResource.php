@@ -58,7 +58,8 @@ class RegisterSuratMasukResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         /** @var Builder<Model> $query */
-        $query = SuratMasuk::query()->tampakBagi(auth()->user());
+        // Register agenda hanya memuat surat bernomor agenda (kiriman pengirim eksternal yang belum diterima tidak).
+        $query = SuratMasuk::query()->tampakBagi(auth()->user())->whereNotNull('nomor_agenda');
 
         return $query;
     }

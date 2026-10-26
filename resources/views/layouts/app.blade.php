@@ -13,6 +13,7 @@
         <a href="{{ \App\Support\Beranda::url(auth()->user()) }}" class="font-semibold">{{ config('app.name') }}</a>
         <div class="flex items-center gap-4">
             @if (auth()->user()->hasRole('mahasiswa'))<a href="{{ route('mahasiswa') }}" class="underline">Usulan</a>@endif
+            @if (auth()->user()->hasRole('pengirim-eksternal'))<a href="{{ route('pengirim') }}" class="underline">Kiriman</a>@endif
             @if (auth()->user()->unitDiajukan()->exists() || auth()->user()->unitDisetujui()->exists())<a href="{{ route('unit') }}" class="underline">Unit</a>@endif
             @if (auth()->user()->unitPembuat()->exists())<a href="{{ route('pembuat') }}" class="underline">Tugas pembuat</a>@endif
             <a href="{{ route('notifikasi') }}" class="underline">Notifikasi @if (($n = auth()->user()->unreadNotifications()->count()) > 0)<span class="rounded-full bg-amber-400 px-1.5 text-xs text-blue-950">{{ $n }}</span>@endif</a>

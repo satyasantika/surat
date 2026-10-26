@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum StatusSuratMasuk: string
 {
+    /** Kiriman pengirim eksternal yang belum diterima fakultas: belum bernomor agenda dan belum diregistrasi. */
+    case Diajukan = 'diajukan';
     case Diterima = 'diterima';
     case Didisposisikan = 'didisposisikan';
     case Selesai = 'selesai';
@@ -11,7 +13,10 @@ enum StatusSuratMasuk: string
 
     public function label(): string
     {
-        return ucfirst($this->value);
+        return match ($this) {
+            self::Diajukan => 'Diajukan pengirim',
+            default => ucfirst($this->value),
+        };
     }
 
     /** @return array<string, string> */

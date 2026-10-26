@@ -74,7 +74,7 @@ class Arsip extends Page
     /** @return list<array<string, mixed>> */
     private function cariMasuk(User $u, string $kata, ?string $kode): array
     {
-        return SuratMasuk::query()->with('klasifikasiArsip')
+        return SuratMasuk::query()->with('klasifikasiArsip')->whereNotNull('nomor_agenda')
             ->when($kata !== '', fn (Builder $q) => $q->where(fn (Builder $w) => $w
                 ->where('nomor_agenda', 'like', "%{$kata}%")->orWhere('nomor_surat', 'like', "%{$kata}%")->orWhere('asal', 'like', "%{$kata}%")
                 // perihal hanya dicari pada surat yang bukan tertutup: perihal rahasia tidak boleh bocor lewat pencarian

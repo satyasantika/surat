@@ -27,6 +27,8 @@ use App\Livewire\Ormawa\Profil as ProfilOrmawa;
 use App\Livewire\Ormawa\Progres;
 use App\Livewire\Ormawa\UsulanMasuk as UsulanMasukOrmawa;
 use App\Livewire\Pembuat\Tugas as TugasPembuat;
+use App\Livewire\Pengirim\Beranda as BerandaPengirim;
+use App\Livewire\Pengirim\KirimanBaru;
 use App\Livewire\Pimpinan\KotakMasuk;
 use App\Livewire\Unit\AjukanPermohonan as AjukanPermohonanUnit;
 use App\Livewire\Unit\Beranda as BerandaUnit;
@@ -83,6 +85,11 @@ Route::middleware(['auth', AuthenticateSession::class, PastikanAktif::class])->g
     // Mahasiswa perorangan mengusulkan kepada ormawa atau program studi/laboratorium.
     Route::get('/mahasiswa', BerandaMahasiswa::class)->name('mahasiswa');
     Route::get('/mahasiswa/usulan/baru', UsulanBaru::class)->name('mahasiswa.usulan.baru');
+    // Pengirim eksternal (akun Google di luar kampus) mengirim surat ke fakultas dan memantau kirimannya.
+    Route::middleware('can:kiriman.ajukan')->group(function () {
+        Route::get('/pengirim', BerandaPengirim::class)->name('pengirim');
+        Route::get('/pengirim/kiriman/baru', KirimanBaru::class)->name('pengirim.kiriman.baru');
+    });
     // Pengaju dan kepala program studi/laboratorium (alur unit: pengaju -> kepala unit -> fakultas).
     Route::get('/unit', BerandaUnit::class)->name('unit');
     Route::get('/unit/persetujuan', PersetujuanUnit::class)->name('unit.persetujuan');

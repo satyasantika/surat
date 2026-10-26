@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property ?string $unit_kerja_id
  * @property ?string $permohonan_id
  */
-#[Fillable(['mahasiswa_id', 'ormawa_id', 'unit_kerja_id', 'perihal', 'uraian'])]
+#[Fillable(['mahasiswa_id', 'asal', 'ormawa_id', 'unit_kerja_id', 'perihal', 'uraian'])]
 class UsulanMahasiswa extends Model
 {
     use HasUuids, TercatatAktivitas;

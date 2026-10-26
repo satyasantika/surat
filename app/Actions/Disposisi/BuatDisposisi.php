@@ -76,6 +76,11 @@ class BuatDisposisi
 
     private function otorisasi(SuratMasuk $surat, User $pembuat, ?DisposisiPenerima $induk): void
     {
+        // Kiriman pengirim eksternal yang belum diterima (belum bernomor agenda) tidak dapat didisposisikan, juga oleh super-admin.
+        if ($surat->masihDiajukan()) {
+            throw ValidationException::withMessages(['surat' => 'Kiriman ini belum diterima fakultas.']);
+        }
+
         if ($induk === null) {
             if (! ($pembuat->can('disposisi.buat') && ($pembuat->hasRole('dekan') || $pembuat->hasRole('super-admin')))) {
                 throw new AuthorizationException('Hanya dekan yang dapat membuat disposisi awal.');

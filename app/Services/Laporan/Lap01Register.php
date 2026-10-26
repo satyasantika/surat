@@ -22,14 +22,14 @@ class Lap01Register extends Laporan
 
     public function deskripsi(): string
     {
-        return 'Surat masuk (menurut tanggal terima) dan naskah keluar bernomor (menurut tanggal naskah) pada periode.';
+        return 'Surat masuk bernomor agenda (menurut tanggal terima) dan naskah keluar bernomor (menurut tanggal naskah) pada periode.';
     }
 
     public function susun(CarbonImmutable $dari, CarbonImmutable $sampai): array
     {
         $kolom = ['Nomor', 'Tanggal', 'Asal / Tujuan', 'Perihal', 'Klasifikasi', 'Status'];
 
-        $masuk = SuratMasuk::whereBetween('tanggal_terima', [$dari, $sampai])->orderBy('tanggal_terima')->orderBy('nomor_agenda')->get()
+        $masuk = SuratMasuk::whereNotNull('nomor_agenda')->whereBetween('tanggal_terima', [$dari, $sampai])->orderBy('tanggal_terima')->orderBy('nomor_agenda')->get()
             ->map(fn (SuratMasuk $s) => [$s->nomor_agenda, $s->tanggal_terima->format('Y-m-d'), $s->asal, $this->perihalAman($s->klasifikasi_keamanan, $s->perihal), $s->klasifikasi_keamanan->label(), $s->status->label()])->all();
 
         $keluar = Naskah::whereIn('status', [StatusNaskah::Terbit->value, StatusNaskah::Ditandatangani->value, StatusNaskah::Dibatalkan->value])

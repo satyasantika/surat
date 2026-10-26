@@ -39,6 +39,7 @@ class Linimasa
         'staf-khusus' => 'Staf khusus dekanat',
         'operator-layanan' => 'Operator layanan',
         'pegawai' => 'Pegawai fakultas',
+        'pengirim-eksternal' => 'Pengirim',
     ];
 
     /** @var array<string, ?string> */
@@ -80,7 +81,14 @@ class Linimasa
     {
         $tahap = [];
 
-        $tahap[] = ['waktu' => $surat->tanggal_terima, 'tahap' => 'Surat diterima dan didaftarkan', 'pelaku' => $this->jabatanPelaku($surat->diregistrasi_oleh ? User::with('roles')->find($surat->diregistrasi_oleh) : null, $surat->tanggal_terima), 'catatan' => null];
+        // Kiriman pengirim eksternal: tahap awal adalah pengajuan; "diterima" baru ada setelah petugas menerimanya.
+        if ($surat->pengirim_user_id !== null || $surat->masihDiajukan()) {
+            $tahap[] = ['waktu' => $surat->created_at ?? $surat->tanggal_terima, 'tahap' => 'Kiriman diajukan pengirim', 'pelaku' => 'Pengirim', 'catatan' => null];
+        }
+
+        if (! $surat->masihDiajukan()) {
+            $tahap[] = ['waktu' => $surat->tanggal_terima, 'tahap' => 'Surat diterima dan didaftarkan', 'pelaku' => $this->jabatanPelaku($surat->diregistrasi_oleh ? User::with('roles')->find($surat->diregistrasi_oleh) : null, $surat->tanggal_terima), 'catatan' => null];
+        }
 
         if ($surat->diteruskan_pada !== null) {
             $tahap[] = ['waktu' => $surat->diteruskan_pada, 'tahap' => 'Diteruskan kepada dekan', 'pelaku' => $this->jabatanPelaku($surat->diteruskan_oleh ? User::with('roles')->find($surat->diteruskan_oleh) : null, $surat->diteruskan_pada), 'catatan' => null];
@@ -116,6 +124,7 @@ class Linimasa
     public function statusSuratMasuk(SuratMasuk $surat): string
     {
         return match ($surat->status) {
+            StatusSuratMasuk::Diajukan => 'Menunggu diterima fakultas',
             StatusSuratMasuk::Diterima => $surat->sudahDiteruskan() ? 'Menunggu disposisi dekan' : 'Diterima, menunggu diteruskan',
             StatusSuratMasuk::Didisposisikan => $surat->unit_pembuat_id !== null ? 'Surat sedang dibuat' : 'Sedang diproses',
             StatusSuratMasuk::Selesai, StatusSuratMasuk::Diarsipkan => 'Selesai',

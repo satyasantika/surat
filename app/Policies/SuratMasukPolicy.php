@@ -54,6 +54,19 @@ class SuratMasukPolicy
             && ! $surat->sudahDiteruskan() && $surat->status === StatusSuratMasuk::Diterima;
     }
 
+    /** Menerima kiriman pengirim eksternal (memberi nomor agenda): pemegang izin registrasi, selama masih diajukan. */
+    public function terima(User $pelaku, SuratMasuk $surat): bool
+    {
+        return $pelaku->can('masuk.registrasi') && $this->lihatMetadata($pelaku, $surat) && $surat->masihDiajukan();
+    }
+
+    /** Pengirim eksternal menarik kirimannya sendiri selama belum diterima fakultas. */
+    public function tarik(User $pelaku, SuratMasuk $surat): bool
+    {
+        return $pelaku->can('kiriman.ajukan') && $surat->pengirim_user_id !== null
+            && $surat->pengirim_user_id === $pelaku->getKey() && $surat->masihDiajukan();
+    }
+
     /** Mengarsipkan surat selesai (RS-09): metadata saja, jadi admin boleh walau suratnya rahasia. */
     public function arsipkan(User $pelaku, SuratMasuk $surat): bool
     {

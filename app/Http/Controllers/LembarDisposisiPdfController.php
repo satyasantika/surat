@@ -16,6 +16,8 @@ class LembarDisposisiPdfController extends Controller
     {
         // Metadata saja sudah cukup untuk mencetak lembar; isi rahasia tetap disamarkan di HTML.
         Gate::authorize('lihatMetadata', $surat);
+        // Kiriman yang belum diterima belum bernomor agenda: belum ada lembar disposisi.
+        abort_if($surat->masihDiajukan(), 404);
 
         $berkas = Str::slug('lembar-disposisi-'.$surat->nomor_agenda).'.pdf';
 

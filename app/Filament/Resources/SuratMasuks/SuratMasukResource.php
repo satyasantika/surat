@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SuratMasuks;
 
+use App\Actions\Kiriman\TerimaKirimanEksternal;
 use App\Actions\Masuk\ArsipkanSuratMasuk;
 use App\Actions\Masuk\TeruskanSuratKeDekan;
 use App\Enums\DerajatKecepatan;
@@ -58,9 +59,13 @@ class SuratMasukResource extends Resource
     {
         return $schema->components([
             Section::make('Surat')->columns(2)->schema([
-                TextInput::make('nomor_agenda')->label('Nomor agenda')->disabled()->dehydrated(false)->visibleOn('edit'),
+                // Selalu hanya-baca; kiriman pengirim eksternal baru bernomor setelah diterima (aksi "Terima kiriman").
+                TextInput::make('nomor_agenda')->label('Nomor agenda')->disabled()->dehydrated(false)->visibleOn('edit')
+                    ->placeholder('Diberikan saat kiriman diterima'),
                 DateTimePicker::make('tanggal_terima')->label('Tanggal terima')->default(now())->required(),
-                TextInput::make('nomor_surat')->label('Nomor surat pengirim')->required()->maxLength(150),
+                // Kiriman pengirim eksternal boleh tanpa nomor surat; surat yang sudah bernomor tidak boleh dikosongkan.
+                TextInput::make('nomor_surat')->label('Nomor surat pengirim')->maxLength(150)
+                    ->required(fn (?SuratMasuk $record) => $record?->pengirim_user_id === null || filled($record->getOriginal('nomor_surat'))),
                 DatePicker::make('tanggal_surat')->label('Tanggal surat')->required()->maxDate(now()->addDay()),
                 TextInput::make('asal')->label('Asal / pengirim')->required()->maxLength(255)->columnSpanFull(),
                 TextInput::make('perihal')->required()->maxLength(500)->columnSpanFull(),
@@ -111,7 +116,7 @@ class SuratMasukResource extends Resource
         return $table
             ->defaultSort('tanggal_terima', 'desc')
             ->columns([
-                TextColumn::make('nomor_agenda')->label('No. agenda')->searchable()->sortable(),
+                TextColumn::make('nomor_agenda')->label('No. agenda')->searchable()->sortable()->placeholder('Belum bernomor'),
                 TextColumn::make('tanggal_terima')->label('Diterima')->dateTime('d M Y H:i')->sortable(),
                 TextColumn::make('asal')->searchable()->wrap(),
                 TextColumn::make('jenis_pengirim')->label('Pengirim')->badge()->formatStateUsing(fn (JenisPengirim $state) => $state->label()),
@@ -136,10 +141,11 @@ class SuratMasukResource extends Resource
                 SelectFilter::make('klasifikasi_keamanan')->label('Keamanan')->options(KlasifikasiKeamanan::pilihan()),
                 SelectFilter::make('status')->options(StatusSuratMasuk::pilihan()),
                 SelectFilter::make('jenis_pengirim')->label('Jenis pengirim')->options(JenisPengirim::pilihan()),
-                Filter::make('menunggu_diteruskan')->label('Menunggu diteruskan ke dekan')->query(fn (Builder $query): Builder => $query->whereNull('diteruskan_pada')),
+                Filter::make('menunggu_diteruskan')->label('Menunggu diteruskan ke dekan')->query(fn (Builder $query): Builder => $query->whereNull('diteruskan_pada')->where('status', StatusSuratMasuk::Diterima->value)),
             ])
             ->recordActions([
                 EditAction::make(),
+                self::aksiTerima(),
                 Action::make('teruskan')->label('Teruskan ke dekan')->icon(Heroicon::OutlinedPaperAirplane)
                     ->schema([Textarea::make('catatan')->label('Catatan untuk dekan (opsional)')->rows(3)->maxLength(2000)])
                     ->modalDescription('Setelah diteruskan, surat tampil di kotak masuk dekan untuk didisposisikan.')
@@ -156,6 +162,18 @@ class SuratMasukResource extends Resource
                         Notification::make()->title('Surat diarsipkan')->success()->send();
                     }),
             ]);
+    }
+
+    /** Menerima kiriman pengirim eksternal: memberi nomor agenda dan memasukkannya ke alur registrasi biasa. */
+    public static function aksiTerima(): Action
+    {
+        return Action::make('terima')->label('Terima kiriman')->icon(Heroicon::OutlinedCheckCircle)->requiresConfirmation()
+            ->modalDescription('Kiriman dari pihak luar ini diberi nomor agenda dan masuk alur surat masuk. Pengirim tidak dapat menariknya lagi.')
+            ->visible(fn (SuratMasuk $record) => auth()->user()?->can('terima', $record) ?? false)
+            ->action(function (SuratMasuk $record) {
+                $surat = app(TerimaKirimanEksternal::class)->jalankan($record, auth()->user());
+                Notification::make()->title("Kiriman diterima dengan nomor agenda {$surat->nomor_agenda}")->success()->send();
+            });
     }
 
     /** @return Builder<Model> */

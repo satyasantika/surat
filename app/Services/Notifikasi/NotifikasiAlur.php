@@ -50,6 +50,21 @@ class NotifikasiAlur
         });
     }
 
+    /**
+     * Kiriman pengirim eksternal baru (belum bernomor agenda): pemegang izin registrasi diminta menerimanya.
+     * Kontak pengirim tidak pernah disertakan; label "pihak luar" membedakannya dari surat yang diregistrasi petugas.
+     */
+    public function kirimanEksternalBaru(SuratMasuk $surat, User $pengirim): void
+    {
+        $this->aman(function () use ($surat, $pengirim) {
+            $dari = $surat->pengirim_instansi ?? $surat->pengirim_nama ?? $surat->asal;
+            $ringkas = $this->ringkasSurat($surat->klasifikasi_keamanan, "Kiriman dari pihak luar ({$dari}): {$surat->perihal}", 'Kiriman dari pihak luar')
+                .' menunggu diterima dan diberi nomor agenda.';
+
+            $this->kirim->kirim(Penerima::izin('masuk.registrasi'), 'surat-masuk', 'Kiriman pihak luar menunggu diterima', $ringkas, SuratMasukResource::getUrl('edit', ['record' => $surat]), $pengirim);
+        });
+    }
+
     public function suratDiteruskan(SuratMasuk $surat, User $staf, ?string $catatan = null): void
     {
         $this->aman(function () use ($surat, $staf, $catatan) {
