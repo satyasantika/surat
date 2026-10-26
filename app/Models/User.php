@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\TercatatAktivitas;
+use App\Support\Pengaturan;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
@@ -156,7 +157,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return false;
         }
 
-        return $this->hasAnyRole(config('unsil.peran_wajib_mfa'));
+        return (bool) Pengaturan::get('mfa_wajib') && $this->hasAnyRole(config('unsil.peran_wajib_mfa'));
     }
 
     public function getAppAuthenticationSecret(): ?string

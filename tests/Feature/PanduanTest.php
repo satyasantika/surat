@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\Pengaturan;
 use Database\Seeders\PanduanSeeder;
 use Database\Seeders\PeranDanIzinSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -93,6 +94,7 @@ it('PanduanSeeder menolak lingkungan selain local dan butuh kata sandi dari ling
 
 it('MFA hanya dikecualikan untuk akun demo contoh.test di lokal dengan flag menyala', function () {
     $this->seed(PeranDanIzinSeeder::class);
+    Pengaturan::set('mfa_wajib', true);
     $demo = User::factory()->create(['email' => 'panduan.dekan@contoh.test'])->assignRole('dekan');
     $nyata = User::factory()->create(['email' => 'dekan@unsil.ac.id'])->assignRole('dekan');
 

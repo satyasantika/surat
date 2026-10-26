@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\Pengaturan;
 use Database\Seeders\PeranDanIzinSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -74,6 +75,7 @@ it('membatasi 5 percobaan per menit lalu 429', function () {
 });
 
 it('mengarahkan pejabat tanpa MFA ke penyiapan MFA', function (string $peran) {
+    Pengaturan::set('mfa_wajib', true);
     Filament::setCurrentPanel('admin');
 
     $this->actingAs(akun($peran))->get('/admin')

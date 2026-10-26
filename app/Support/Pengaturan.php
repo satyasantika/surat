@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Pengaturan as ModelPengaturan;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Cache;
 
 /** Pengaturan kebijakan sistem (kunci–nilai JSON), ter-cache. Dibaca di Action, bukan hanya di UI. */
@@ -36,6 +37,11 @@ class Pengaturan
         'layanan_ruangan' => ['nilai' => 'lokal', 'grup' => 'ruangan'],
         // [{nama, kategori}]: pilihan fasilitas rektorat pada permohonan (diisi impor OrmawaHub atau admin)
         'fasilitas_rektorat_katalog' => ['nilai' => [], 'grup' => 'permohonan'],
+        // saklar MFA: bila menyala, peran di config unsil.peran_wajib_mfa wajib memasang MFA (hanya super-admin yang mengubah)
+        'mfa_wajib' => ['nilai' => false, 'grup' => 'keamanan'],
+        // batas penyalahgunaan kiriman pihak luar: pengiriman per hari per akun, dan tujuan perantara per pengiriman
+        'batas_kiriman_harian' => ['nilai' => 5, 'grup' => 'kiriman'],
+        'batas_tujuan_kiriman' => ['nilai' => 5, 'grup' => 'kiriman'],
     ];
 
     public static function get(string $kunci, mixed $bawaan = null): mixed
@@ -56,7 +62,22 @@ class Pengaturan
     /** @return array<string, mixed> */
     public static function semua(): array
     {
-        return Cache::remember(self::CACHE_KUNCI, 3600, fn () => ModelPengaturan::query()->pluck('nilai', 'kunci')->all());
+        $tersimpan = Cache::get(self::CACHE_KUNCI);
+
+        if (is_array($tersimpan)) {
+            return $tersimpan;
+        }
+
+        try {
+            $semua = ModelPengaturan::query()->pluck('nilai', 'kunci')->all();
+        } catch (QueryException) {
+            // tabel belum ada (migrasi, composer install, tes awal): pakai bawaan dan jangan di-cache
+            return [];
+        }
+
+        Cache::put(self::CACHE_KUNCI, $semua, 3600);
+
+        return $semua;
     }
 
     public static function lupakan(): void

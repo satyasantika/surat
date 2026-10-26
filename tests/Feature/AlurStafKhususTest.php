@@ -14,6 +14,7 @@ use App\Models\SuratMasuk;
 use App\Models\UnitKerja;
 use App\Models\User;
 use App\Notifications\NotifikasiTahap;
+use App\Support\Pengaturan;
 use Database\Seeders\PeranDanIzinSeeder;
 use Database\Seeders\RegisterNomorSeeder;
 use Database\Seeders\StrukturFkipSeeder;
@@ -80,6 +81,8 @@ describe('peran dan jabatan', function () {
     });
 
     it('mewajibkan MFA untuk staf khusus', function () {
+        Pengaturan::set('mfa_wajib', true);
+
         expect(User::factory()->create()->assignRole('staf-khusus')->wajibMfa())->toBeTrue();
     });
 });

@@ -37,7 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->profile(EditProfil::class)
             ->multiFactorAuthentication(
                 [AppAuthentication::make()->recoverable()],
-                // Akun demo panduan (lokal) dapat dikecualikan; di staging/produksi selalu wajib (config panduan.tanpa_mfa hanya berlaku di local).
+                // Tetap true agar rute penyiapan MFA dan middleware WajibMfa terpasang saat rute didaftarkan (juga saat route:cache);
+                // keputusan wajib atau tidak diambil per permintaan oleh WajibMfa lewat User::wajibMfa() dan saklar mfa_wajib.
+                // Akun demo panduan (lokal) dapat dikecualikan (config panduan.tanpa_mfa hanya berlaku di local).
                 isRequired: ! (config('panduan.tanpa_mfa') && app()->environment('local')),
             )
             ->multiFactorAuthenticationRequiredMiddlewareName(WajibMfa::class)

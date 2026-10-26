@@ -80,7 +80,21 @@ class PengaturanSistem extends Page
                 TextInput::make('jam_pengingat_disposisi')->label('Pengingat disposisi mendekati batas (jam)')->numeric()->integer()->minValue(1)->maxValue(720)->required(),
                 TextInput::make('hari_tertahan_permohonan')->label('Pengingat permohonan tertahan (hari)')->numeric()->integer()->minValue(1)->maxValue(90)->required(),
             ]),
+            Section::make('Keamanan')->schema([
+                Toggle::make('mfa_wajib')->label('Wajibkan MFA untuk pejabat dan admin')
+                    ->helperText('Bila menyala, peran pejabat dan admin harus memasang aplikasi autentikator sebelum memakai panel.')
+                    ->visible(fn (): bool => static::superAdmin()),
+            ]),
+            Section::make('Kiriman eksternal')->columns(2)->schema([
+                TextInput::make('batas_kiriman_harian')->label('Batas pengiriman per hari per akun')->numeric()->integer()->minValue(1)->maxValue(50)->required(),
+                TextInput::make('batas_tujuan_kiriman')->label('Batas tujuan perantara per pengiriman')->numeric()->integer()->minValue(1)->maxValue(50)->required(),
+            ]),
         ]);
+    }
+
+    protected static function superAdmin(): bool
+    {
+        return (bool) auth()->user()?->hasRole('super-admin');
     }
 
     public function simpan(): void
@@ -89,6 +103,11 @@ class PengaturanSistem extends Page
 
         $data = $this->form->getState();
         $data['kop_surat'] = array_values(array_filter((array) $data['kop_surat'], 'is_string'));
+
+        // saklar MFA hanya boleh diubah super-admin, apa pun yang dikirim klien
+        if (! static::superAdmin()) {
+            unset($data['mfa_wajib']);
+        }
 
         foreach (array_keys(Pengaturan::BAWAAN) as $kunci) {
             if (array_key_exists($kunci, $data)) {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\Pengaturan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,6 +12,7 @@ it('membuat super-admin dengan peran dan surel terverifikasi', function () {
         ->expectsQuestion('Kata sandi (min. 12 karakter, huruf dan angka)', 'RahasiaKuat12345')
         ->assertSuccessful();
 
+    Pengaturan::set('mfa_wajib', true);
     $u = User::firstWhere('email', 'admin@unsil.ac.id');
 
     expect($u->hasRole('super-admin'))->toBeTrue()
