@@ -12,6 +12,7 @@
     <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
     <button type="submit" class="w-full rounded bg-blue-900 px-4 py-2 text-white">Masuk</button>
 </form>
+@include('auth.tombol-google', ['tautan' => route('login.google')])
 <p class="mt-4 text-sm"><a class="text-blue-800 underline" href="{{ route('password.request') }}">Lupa kata sandi?</a>
     · <a class="text-blue-800 underline" href="{{ route('daftar') }}">Daftar pengurus ormawa</a></p>
 <p class="mt-2 text-sm text-slate-500">Pimpinan dan admin masuk melalui <a class="underline" href="{{ url('admin') }}">halaman admin</a>.</p>

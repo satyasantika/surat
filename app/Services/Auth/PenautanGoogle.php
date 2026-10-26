@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Models\IdentitasGoogle;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -14,7 +15,10 @@ use Illuminate\Support\Str;
  */
 class PenautanGoogle
 {
-    /** @throws GagalMasukGoogle */
+    /**
+     * @throws GagalMasukGoogle
+     * @throws UniqueConstraintViolationException dua login pertama bersamaan untuk surel/akun Google yang sama
+     */
     public function masuk(string $googleId, string $surel, bool $surelTerverifikasi, string $nama, ?string $hd = null): User
     {
         $surel = Str::lower(trim($surel));
