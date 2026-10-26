@@ -20,6 +20,7 @@ class PeranDanIzinSeeder extends Seeder
         'permohonan.lihat', 'permohonan.ajukan', 'permohonan.setujui-pembina', 'permohonan.validasi', 'permohonan.putuskan',
         'permohonan.ajukan-unit', 'permohonan.setujui-unit',
         'usulan.ajukan',
+        'kiriman.ajukan',
         'ruangan.kelola', 'ruangan.kelola-jadwal',
         'lpj.isi', 'lpj.nilai', 'lpj.lihat',
         'laporan.lihat',
@@ -70,6 +71,8 @@ class PeranDanIzinSeeder extends Seeder
         'kalab' => ['permohonan.setujui-unit'],
         // Mahasiswa perorangan: mengusulkan kepada ormawa atau program studi/laboratorium (perantara), tidak langsung ke fakultas.
         'mahasiswa' => ['usulan.ajukan'],
+        // Pengirim di luar lingkungan kampus (akun Google biasa): mengirim surat/berkas ke fakultas.
+        'pengirim-eksternal' => ['kiriman.ajukan'],
     ];
 
     public function run(): void
