@@ -4,6 +4,7 @@ namespace App\Support\Pelacakan;
 
 use App\Enums\StatusPermohonan;
 use App\Enums\StatusSuratMasuk;
+use App\Enums\StatusUsulan;
 use App\Models\Aktivitas;
 use App\Models\Disposisi;
 use App\Models\Naskah;
@@ -12,6 +13,7 @@ use App\Models\Permohonan;
 use App\Models\RiwayatNaskah;
 use App\Models\SuratMasuk;
 use App\Models\User;
+use App\Models\UsulanMahasiswa;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
@@ -113,6 +115,33 @@ class Linimasa
         }
 
         return $this->urutkan($tahap);
+    }
+
+    /**
+     * Kiriman pihak luar (atau usulan mahasiswa) pada perantara: pengajuan lalu putusan perantara. Pelaku hanya
+     * "Pengirim" / "Perantara" tanpa nama; catatan perantara tidak pernah dimuat.
+     *
+     * @return list<Tahap>
+     */
+    public function usulan(UsulanMahasiswa $usulan): array
+    {
+        $tahap = [['waktu' => $usulan->created_at, 'tahap' => $usulan->dariPihakLuar() ? 'Kiriman diajukan pengirim' : 'Usulan diajukan', 'pelaku' => 'Pengirim', 'catatan' => null]];
+
+        if ($usulan->status !== StatusUsulan::Diajukan) {
+            $tahap[] = [
+                'waktu' => $usulan->updated_at,
+                'tahap' => $this->statusUsulan($usulan),
+                'pelaku' => $usulan->status === StatusUsulan::Dibatalkan ? 'Pengirim' : 'Perantara',
+                'catatan' => null,
+            ];
+        }
+
+        return $this->urutkan($tahap);
+    }
+
+    public function statusUsulan(UsulanMahasiswa $usulan): string
+    {
+        return $usulan->status->label();
     }
 
     /** Status akhir permohonan sebagai teks publik. */

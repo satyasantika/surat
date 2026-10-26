@@ -105,14 +105,14 @@ describe('mengajukan kiriman ke fakultas', function () {
             ->and(json_encode($surat->toArray()))->not->toContain('rani@gmail.com')->not->toContain('081234567890');
     });
 
-    it('menolak kiriman tanpa kontak, tanpa tujuan, tujuan selain fakultas, WA tidak sah, atau tautan di luar domain', function (array $ubah) {
+    it('menolak kiriman tanpa kontak, tanpa tujuan, tujuan tak dikenal, WA tidak sah, atau tautan di luar domain', function (array $ubah) {
         expect(fn () => kefKirim($this->pengirim, $ubah))->toThrow(ValidationException::class);
         expect(SuratMasuk::count())->toBe(0);
     })->with([
         'tanpa kontak' => [['surel' => '', 'wa' => '']],
         'tujuan kosong' => [['tujuan' => []]],
         'tujuan bukan daftar' => [['tujuan' => 'fakultas']],
-        'tujuan perantara (belum didukung)' => [['tujuan' => ['ormawa:'.'00000000-0000-0000-0000-000000000000']]],
+        'tujuan perantara tidak ada' => [['tujuan' => ['ormawa:'.'00000000-0000-0000-0000-000000000000']]],
         'tujuan asing' => [['tujuan' => ['rektorat']]],
         'WA tidak sah' => [['surel' => '', 'wa' => 'abc']],
         'surel tidak sah' => [['surel' => 'bukan-surel', 'wa' => '']],

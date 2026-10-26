@@ -111,7 +111,7 @@
     },
     {
      "judul": "Usulan mahasiswa",
-     "teks": "Mahasiswa dapat mengusulkan kepada ormawa Anda. Dari beranda ormawa buka **Lihat dan pilah usulan mahasiswa**: pilih satu atau beberapa usulan dan **Jadikan dasar permohonan** (digabung menjadi satu pengajuan), atau kembalikan/tolak dengan catatan."
+     "teks": "Mahasiswa dapat mengusulkan kepada ormawa Anda. Dari beranda ormawa buka **Lihat dan pilah usulan mahasiswa**: pilih satu atau beberapa usulan dan **Jadikan dasar permohonan** (digabung menjadi satu pengajuan), atau kembalikan/tolak dengan catatan. Kiriman dari luar kampus diberi label **dari pihak luar**; selain diproses seperti usulan mahasiswa, kiriman itu (mis. undangan) dapat langsung **Arsipkan** tanpa tindak lanjut."
     }
    ],
    "faq": [
@@ -237,7 +237,7 @@
     },
     {
      "judul": "Usulan mahasiswa",
-     "teks": "Mahasiswa dapat mengusulkan kepada unit Anda. Buka **Usulan mahasiswa** pada unit, pilih satu atau beberapa usulan, lalu **Jadikan dasar permohonan** untuk membuka formulir pengajuan dengan dasar terpilih; usulan juga dapat dikembalikan atau ditolak dengan catatan."
+     "teks": "Mahasiswa dapat mengusulkan kepada unit Anda. Buka **Usulan mahasiswa** pada unit, pilih satu atau beberapa usulan, lalu **Jadikan dasar permohonan** untuk membuka formulir pengajuan dengan dasar terpilih; usulan juga dapat dikembalikan atau ditolak dengan catatan. Kiriman dari luar kampus diberi label **dari pihak luar** dan dapat langsung **Arsipkan** tanpa tindak lanjut."
     },
     {
      "judul": "Ajukan permohonan",

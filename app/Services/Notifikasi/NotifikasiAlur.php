@@ -125,36 +125,60 @@ class NotifikasiAlur
         });
     }
 
-    /** Perantara (pengurus ormawa atau pengaju unit) diberi tahu ada usulan mahasiswa baru. */
+    /**
+     * Perantara (pengurus ormawa atau pengaju unit) diberi tahu ada usulan mahasiswa baru, atau kiriman pihak luar
+     * (berlabel "pihak luar" agar dibedakan; kontak pengirim tidak disertakan).
+     */
     public function usulanDiajukan(UsulanMahasiswa $usulan, User $mahasiswa): void
     {
         $this->aman(function () use ($usulan, $mahasiswa) {
             $usulan->loadMissing(['ormawa', 'unitKerja']);
             $penerima = $usulan->ormawa_id !== null ? Penerima::ormawa($usulan->ormawa) : Penerima::pengajuUnit((string) $usulan->unit_kerja_id);
             $url = $usulan->ormawa_id !== null ? route('ormawa.usulan', $usulan->ormawa_id) : route('unit.usulan', $usulan->unit_kerja_id);
+            $judul = $usulan->dariPihakLuar() ? 'Kiriman pihak luar baru' : 'Usulan mahasiswa baru';
 
-            $this->kirim->kirim($penerima, 'permohonan', 'Usulan mahasiswa baru', Str::limit($usulan->perihal, 120).' ('.$usulan->namaTujuan().').', $url, $mahasiswa);
+            $this->kirim->kirim($penerima, 'permohonan', $judul, Str::limit($usulan->perihal, 120).' ('.$usulan->namaTujuan().').', $url, $mahasiswa);
         });
     }
 
-    /** Mahasiswa diberi tahu usulannya dikembalikan atau ditolak perantara (beserta catatan). */
+    /** Pengusul (mahasiswa atau pihak luar) diberi tahu usulannya dikembalikan atau ditolak perantara (beserta catatan). */
     public function usulanDiputus(UsulanMahasiswa $usulan, User $oleh): void
     {
         $this->aman(function () use ($usulan, $oleh) {
             $usulan->loadMissing(['mahasiswa', 'ormawa', 'unitKerja']);
             $ditolak = $usulan->status === StatusUsulan::Ditolak;
 
-            $this->kirim->kirim([$usulan->mahasiswa], 'permohonan', $ditolak ? 'Usulan Anda ditolak' : 'Usulan Anda dikembalikan', Str::limit($usulan->perihal, 100).' ('.$usulan->namaTujuan().') — catatan: '.Str::limit((string) $usulan->catatan, 200), route('mahasiswa'), $oleh);
+            $this->kirim->kirim([$usulan->mahasiswa], 'permohonan', $ditolak ? 'Usulan Anda ditolak' : 'Usulan Anda dikembalikan', Str::limit($usulan->perihal, 100).' ('.$usulan->namaTujuan().') — catatan: '.Str::limit((string) $usulan->catatan, 200), $this->urlPengusul($usulan), $oleh);
         });
     }
 
-    /** Mahasiswa pengusul dasar permohonan mengikuti tiap perubahan tahap permohonan itu. */
+    /** Pengirim pihak luar diberi tahu kirimannya diarsipkan perantara (tanpa tindak lanjut). */
+    public function usulanDiarsipkan(UsulanMahasiswa $usulan, User $oleh): void
+    {
+        $this->aman(function () use ($usulan, $oleh) {
+            $usulan->loadMissing(['mahasiswa', 'ormawa', 'unitKerja']);
+
+            $this->kirim->kirim([$usulan->mahasiswa], 'permohonan', 'Kiriman Anda diarsipkan', Str::limit($usulan->perihal, 100).' ('.$usulan->namaTujuan().') diterima dan diarsipkan tanpa tindak lanjut.', $this->urlPengusul($usulan), $oleh);
+        });
+    }
+
+    /** Halaman milik pengusul: ruang mahasiswa atau ruang pengirim pihak luar. */
+    private function urlPengusul(UsulanMahasiswa $usulan): string
+    {
+        return $usulan->dariPihakLuar() ? route('pengirim') : route('mahasiswa');
+    }
+
+    /** Pengusul (mahasiswa atau pihak luar) dasar permohonan mengikuti tiap perubahan tahap permohonan itu. */
     private function kabarkanPengusulDasar(Permohonan $p, StatusPermohonan $ke, User $oleh): void
     {
-        $mahasiswa = UsulanMahasiswa::with('mahasiswa')->where('permohonan_id', $p->getKey())->get()->pluck('mahasiswa')->filter()->unique('id')->values()->all();
+        $dasar = UsulanMahasiswa::with('mahasiswa')->where('permohonan_id', $p->getKey())->get();
 
-        if ($mahasiswa !== []) {
-            $this->kirim->kirim($mahasiswa, 'permohonan', 'Permohonan dasar usulan Anda: '.$ke->labelPublik(), "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}).", route('mahasiswa'), $oleh);
+        foreach ($dasar->groupBy(fn (UsulanMahasiswa $u) => $this->urlPengusul($u)) as $url => $kelompok) {
+            $pengusul = $kelompok->pluck('mahasiswa')->filter()->unique('id')->values()->all();
+
+            if ($pengusul !== []) {
+                $this->kirim->kirim($pengusul, 'permohonan', 'Permohonan dasar usulan Anda: '.$ke->labelPublik(), "{$p->nomor}: {$p->nama_kegiatan} ({$p->namaPengaju()}).", (string) $url, $oleh);
+            }
         }
     }
 

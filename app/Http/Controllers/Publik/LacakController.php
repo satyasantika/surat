@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Publik;
 use App\Contracts\PenyimpananBerkas;
 use App\Enums\StatusNaskah;
 use App\Enums\StatusPermohonan;
+use App\Enums\StatusUsulan;
 use App\Http\Controllers\Controller;
 use App\Models\Permohonan;
 use App\Models\SuratMasuk;
+use App\Models\UsulanMahasiswa;
 use App\Support\KodeLacak;
 use App\Support\Pelacakan\Linimasa;
 use Carbon\CarbonInterface;
@@ -80,6 +82,21 @@ class LacakController extends Controller
                 'tahap' => $this->bersihkan($linimasa->suratMasuk($s), $tertutup),
                 // Hasil surat rahasia tidak ditampilkan di halaman publik; pengirim mengambilnya lewat fakultas.
                 'hasilUrl' => ! $tertutup && $hasil !== null ? $berkas->urlAkses($hasil) : null,
+                'verifikasiUrl' => null,
+            ], 200);
+        }
+
+        // Kiriman ke ormawa/prodi/lab: tahap umum saja, tanpa nama pengusul, kontak, atau catatan perantara.
+        if ($u = UsulanMahasiswa::with(['ormawa', 'unitKerja'])->where('kode_lacak', $normal)->first()) {
+            return $this->jawab('publik.lacak-tampil', [
+                'kode' => KodeLacak::tampil($normal),
+                'layanan' => 'Kiriman kepada '.$u->namaTujuan(),
+                'perihal' => Str::limit($u->perihal, 120),
+                'tertutup' => false,
+                'status' => $linimasa->statusUsulan($u),
+                'selesai' => in_array($u->status, [StatusUsulan::Diarsipkan, StatusUsulan::Dipakai], true),
+                'tahap' => $this->bersihkan($linimasa->usulan($u), false),
+                'hasilUrl' => null,
                 'verifikasiUrl' => null,
             ], 200);
         }

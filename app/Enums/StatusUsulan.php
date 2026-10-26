@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-/** Status usulan mahasiswa pada perantara (ormawa atau program studi/laboratorium). */
+/** Status usulan (mahasiswa atau kiriman pihak luar) pada perantara (ormawa atau program studi/laboratorium). */
 enum StatusUsulan: string
 {
     case Diajukan = 'diajukan';
@@ -10,6 +10,8 @@ enum StatusUsulan: string
     case Ditolak = 'ditolak';
     case Dibatalkan = 'dibatalkan';
     case Dipakai = 'dipakai';
+    /** Akhir tanpa tindak lanjut; hanya untuk kiriman pihak luar (mis. undangan). */
+    case Diarsipkan = 'diarsipkan';
 
     public function label(): string
     {
@@ -19,6 +21,7 @@ enum StatusUsulan: string
             self::Ditolak => 'Ditolak',
             self::Dibatalkan => 'Dibatalkan',
             self::Dipakai => 'Dijadikan dasar permohonan',
+            self::Diarsipkan => 'Diarsipkan oleh perantara',
         };
     }
 

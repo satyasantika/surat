@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Ormawa;
 
+use App\Actions\Usulan\ArsipkanUsulan;
 use App\Actions\Usulan\PutusUsulan;
 use App\Enums\StatusUsulan;
 use App\Models\Ormawa;
@@ -16,8 +17,9 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * Usulan mahasiswa yang masuk ke ormawa: perantara memilah. Satu atau beberapa usulan dijadikan dasar satu permohonan
- * (membuka formulir pengajuan dengan dasar terpilih), atau dikembalikan/ditolak dengan catatan.
+ * Usulan mahasiswa dan kiriman pihak luar yang masuk ke ormawa: perantara memilah. Satu atau beberapa usulan dijadikan
+ * dasar satu permohonan (membuka formulir pengajuan dengan dasar terpilih), atau dikembalikan/ditolak dengan catatan.
+ * Kiriman pihak luar juga dapat diarsipkan tanpa tindak lanjut.
  */
 #[Layout('layouts.app')]
 class UsulanMasuk extends Component
@@ -54,12 +56,17 @@ class UsulanMasuk extends Component
 
     public function kembalikan(string $id): void
     {
-        $this->putus($id, fn (UsulanMahasiswa $u) => app(PutusUsulan::class)->kembalikan($u, $this->pengguna(), $this->catatan[$id] ?? ''), 'Usulan dikembalikan kepada mahasiswa.');
+        $this->putus($id, fn (UsulanMahasiswa $u) => app(PutusUsulan::class)->kembalikan($u, $this->pengguna(), $this->catatan[$id] ?? ''), 'Usulan dikembalikan kepada pengusul.');
     }
 
     public function tolak(string $id): void
     {
         $this->putus($id, fn (UsulanMahasiswa $u) => app(PutusUsulan::class)->tolak($u, $this->pengguna(), $this->catatan[$id] ?? ''), 'Usulan ditolak.');
+    }
+
+    public function arsipkan(string $id): void
+    {
+        $this->putus($id, fn (UsulanMahasiswa $u) => app(ArsipkanUsulan::class)->jalankan($u, $this->pengguna()), 'Kiriman pihak luar diarsipkan.');
     }
 
     /** @param  callable(UsulanMahasiswa): mixed  $aksi */

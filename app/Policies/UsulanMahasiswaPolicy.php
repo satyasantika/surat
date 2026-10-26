@@ -6,8 +6,9 @@ use App\Models\User;
 use App\Models\UsulanMahasiswa;
 
 /**
- * Mahasiswa melihat dan membatalkan usulannya sendiri. Perantara (pengurus ormawa atau pengaju unit) menangani usulan
- * yang ditujukan kepada ormawa/unitnya.
+ * Pengusul (mahasiswa, atau pengirim pihak luar untuk kiriman ke ormawa/prodi/lab) melihat dan membatalkan usulannya
+ * sendiri. Perantara (pengurus ormawa atau pengaju unit) menangani usulan yang ditujukan kepada ormawa/unitnya:
+ * mengembalikan, menolak, menjadikan dasar, atau (khusus kiriman pihak luar) mengarsipkan.
  */
 class UsulanMahasiswaPolicy
 {
