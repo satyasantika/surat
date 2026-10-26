@@ -103,8 +103,10 @@ class PenautanGoogle
         ]);
         $user->forceFill(['email_verified_at' => now()])->save();
 
-        $mahasiswa = collect(config('unsil.domain_mahasiswa'))
-            ->contains(fn (string $domain): bool => Str::endsWith($surel, '@'.$domain));
+        /** @var list<string> $domain */
+        $domain = (array) config('unsil.domain_mahasiswa');
+        $mahasiswa = collect($domain)
+            ->contains(fn (string $d): bool => Str::endsWith($surel, '@'.$d));
 
         $user->assignRole($mahasiswa ? 'mahasiswa' : 'pengirim-eksternal');
 
