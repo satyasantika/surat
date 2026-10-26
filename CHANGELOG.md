@@ -11,6 +11,8 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 - Container `queue`, `redis`, `gotenberg`, dan `db` (profil `db-lokal`) dari `docker-compose.prod.yml`.
 
 ### Ditambahkan
+- Masuk dengan Google, kiriman eksternal, dan saklar MFA (K-18): tabel `identitas_google` dan aturan penautan `PenautanGoogle` (hanya `email_verified`, akhiran domain mahasiswa persis, pencegahan pengambilalihan akun), rute `/masuk/google` dan callback dengan limiter `masuk-google`, tombol di halaman masuk dan panel, peran `pengirim-eksternal` (izin `kiriman.ajukan`) dengan beranda `/pengirim`, formulir kiriman ke fakultas dan/atau ormawa/prodi/lab, status surat masuk `diajukan` dengan aksi "Terima kiriman" (nomor agenda diberikan saat diterima), `usulan_mahasiswa.asal`/`instansi`/`kode_lacak`, status usulan `diarsipkan` dengan aksi Arsipkan bagi perantara, pelacakan publik kiriman, dan variabel `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`/`GOOGLE_REDIRECT_URI`. Pengguna ber-MFA belum dapat masuk lewat Google (penyimpangan tercatat di K-18).
+- Pengaturan sistem: saklar `mfa_wajib` (Keamanan) dan batas kiriman `batas_kiriman_harian`/`batas_tujuan_kiriman` (Kiriman eksternal), kunci `Pengaturan` yang hanya diubah super-admin.
 - Penyelesaian titik awal persuratan (tahap 6): `surat:siapkan-uat` kini juga membuat akun pengaju unit, kaprodi, kalab, dan mahasiswa, dua unit (prodi dan laboratorium), permohonan unit di berbagai tahap, dan usulan mahasiswa (menunggu, dikembalikan, digabung); judul laporan LAP-03/05 memakai kolom "Pengaju"; bagan alur pengirim memuat empat jalur (ormawa, eksternal, mahasiswa, program studi/laboratorium).
 - Usulan mahasiswa dan usulan kolektif (tahap 5): peran `mahasiswa` (daftar mandiri memilih jalur), tabel `usulan_mahasiswa`, ruang mahasiswa `/mahasiswa`; perantara (pengurus ormawa / pengaju unit) memilah di `/ormawa/{id}/usulan` atau `/unit/{id}/usulan`, lalu meneruskan satu usulan atau **menggabungkan beberapa usulan menjadi dasar satu permohonan** (`dasar_usulan` pada pengajuan); usulan kembali menunggu perantara bila permohonan ditolak/dibatalkan; mahasiswa diberi tahu tiap perubahan tahap. Desain: usulan adalah entitas ringan sendiri, bukan `Permohonan`.
 - Antarmuka pengaju unit (tahap 4): Ruang Unit `/unit`, formulir `/unit/{unit}/permohonan/baru` (memakai ulang formulir ormawa), progres `/unit/{unit}/permohonan`, dan halaman persetujuan kepala unit `/unit/persetujuan`; tautan notifikasi, beranda per peran, dan panduan ketiga peran diperbarui. Jalur pendaftaran mahasiswa perorangan ditunda ke tahap usulan kolektif.
@@ -24,6 +26,10 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan
 - `.env.production.example` kini dilacak git (sebelumnya terabaikan oleh pola `.env.*`).
 
 ### Diubah
+- MFA kini mati bawaan untuk semua peran dan dikendalikan saklar `mfa_wajib` di Pengaturan sistem (K-18); sebelumnya wajib bagi peran pejabat.
+- `surat_masuk.nomor_agenda`, `nomor_surat`, dan `diregistrasi_oleh` boleh kosong (kiriman eksternal belum bernomor sampai diterima); `nomor_agenda` tetap UNIQUE (K-18).
+- `Beranda` mengarahkan peran `pengirim-eksternal` ke `/pengirim`; kotak usulan perantara berjudul "Usulan masuk" dan menandai kiriman "dari pihak luar".
+- Rute masuk Google memakai limiter `masuk-google` (60 per menit per IP), terpisah dari limiter `masuk`.
 - Batas PHP `composer.json` menjadi `^8.5` (`composer.lock` hanya berubah pada hash dan platform).
 - Nama antrean `notifikasi`, `pdf`, `tautan`, `integrasi` menjadi `default`; ekspor laporan memakai koneksi `database-berat`.
 - Driver PDF bawaan dompdf (Gotenberg hanya bila `PDF_DRIVER=gotenberg`); sesi, antrean, dan cache memakai driver `database`.

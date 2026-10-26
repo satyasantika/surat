@@ -72,6 +72,28 @@ location /surat/ {
 
 **Awalan QR** (`/surat/verifikasi/…`) tercetak pada naskah: jangan mengubah awalan setelah produksi.
 
+## 3a. Masuk dengan Google (K-18)
+
+Isi di `.env` (nilai kosong = fitur nonaktif; tombol "Masuk dengan Google" tetap tampil tetapi menjawab "Masuk dengan Google belum tersedia."):
+
+```dotenv
+GOOGLE_CLIENT_ID=<dari Google Cloud Console>
+GOOGLE_CLIENT_SECRET=<dari Google Cloud Console>
+GOOGLE_REDIRECT_URI=https://supportfkip.unsil.ac.id/surat/masuk/google/callback   # <APP_URL>/masuk/google/callback
+```
+
+Produksi berjalan di bawah awalan `/surat`, jadi URI pengalihan **harus** `<APP_URL>/masuk/google/callback` termasuk `/surat`. Lokal: `http://localhost:8000/masuk/google/callback` (sesuaikan dengan `APP_URL`).
+
+Membuat OAuth Client di Google Cloud Console:
+
+1. Pilih atau buat proyek, lalu buka APIs & Services > OAuth consent screen. Atur jenis pengguna (Internal bila akun Google Workspace unsil.ac.id saja; External bila pengirim eksternal boleh memakai Gmail), isi nama aplikasi dan surel dukungan.
+2. Pada Scopes, tambahkan hanya `openid`, `email`, dan `profile` (tidak ada scope sensitif).
+3. Buka Credentials > Create credentials > OAuth client ID, tipe **Web application**.
+4. Pada Authorized redirect URIs, daftarkan URI lokal dan URI produksi di atas (persis sama dengan `GOOGLE_REDIRECT_URI`, termasuk skema dan awalan).
+5. Salin Client ID dan Client secret ke `.env` (izin berkas 600), lalu `php artisan optimize:clear && php artisan optimize`. Bila consent screen berstatus Testing, tambahkan akun uji sebagai test user.
+
+Rotasi: buat secret baru di Console, ganti di `.env`, muat ulang konfigurasi, lalu hapus secret lama.
+
 ## 4. Build dan jalankan pertama kali
 
 ```bash
@@ -103,6 +125,8 @@ SURAT_VERSI=X.Y.Z docker compose -f docker-compose.prod.yml up -d
 docker compose -f docker-compose.prod.yml exec app php artisan migrate --force
 docker compose -f docker-compose.prod.yml exec scheduler php artisan queue:restart      # muat ulang worker (yang berjalan selesai dulu)
 ```
+
+Catatan migrasi K-18: `php artisan migrate --force` menambah tabel `identitas_google`, kolom pengirim pada `surat_masuk` (`nomor_agenda`, `nomor_surat`, `diregistrasi_oleh` menjadi boleh kosong), serta `asal`, `instansi`, `kode_lacak` pada `usulan_mahasiswa` (data lama diisi kode lacak). `down()` migrasi `kode_lacak` membiarkan kolom `kode_lacak` tetap ada (dimiliki migrasi lain); `down()` migrasi surat masuk gagal bila sudah ada baris tanpa nomor. Seeder peran perlu dijalankan ulang (`db:seed --force`, idempoten) agar peran `pengirim-eksternal` dan izin `kiriman.ajukan` terbentuk. Cadangkan basis data sebelum migrasi.
 
 Pembatalan: `git checkout vSEBELUMNYA`, `SURAT_VERSI=… up -d`; bila migrasi sudah berjalan dan merusak, pulihkan cadangan §6 (migrasi tidak pernah diubah setelah ditandai tag, jadi mundur skema = pulihkan cadangan).
 

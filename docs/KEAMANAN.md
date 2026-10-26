@@ -21,6 +21,11 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 | K-12 MFA super-admin, admin-persuratan, dekan, WD | `AutentikasiTest`, `FondasiTest` (`WajibMfa`) |
 | K-13 Rate limit login, verifikasi, ajukan | `RateLimitTest` (masuk 5/mnt, daftar & lupa sandi 5/mnt, verifikasi 30/mnt, ajukan 10/jam) |
 | K-14 Deployment Web App GAS OrmawaHub dihapus setelah cutover | Langkah manusia (07-MIGRASI §9, `DEPLOY.md` §Cutover) |
+| G-01 Masuk dengan Google (K-18): hanya `email_verified` yang dipercaya; domain mahasiswa akhiran persis; akun nonaktif tanpa sesi; peran panel tidak pernah dibuat dari Google | `PenautanGoogleTest`, `GoogleControllerTest` |
+| G-02 Cegah pengambilalihan akun: akun cocok yang surelnya belum terverifikasi diganti kata sandi acak dan sesinya dihapus saat penautan pertama; akun ber-MFA ditolak sebelum efek samping | `PenautanGoogleTest`, `GoogleControllerTest` |
+| G-03 Limiter `masuk-google` 60/mnt/IP (kunci tanpa surel); state/penolakan Google kembali ke `/masuk` tanpa 500 | `GoogleControllerTest` |
+| G-04 Saklar MFA (`mfa_wajib`) bawaan mati; hanya super-admin yang melihat dan mengubah | `SaklarMfaTest`, `AutentikasiTest` |
+| G-05 Peran `pengirim-eksternal` (izin hanya `kiriman.ajukan`): tanpa panel, `/mahasiswa`, `/disposisi`; hanya melihat dan menarik kiriman sendiri; kontak terenkripsi, tidak di log; batas 5/hari dan 5 tujuan | `KirimanEksternalFakultasTest`, `KirimanEksternalPerantaraTest`, `MatriksAksesTest`, `PeranDanIzinTest`, `IdorTest` |
 
 ## 2. Header keamanan dan CSP
 
@@ -40,7 +45,7 @@ Diperbarui setiap rilis; jalankan ulang `composer audit` dan `npm audit` sebelum
 
 | Alat | Hasil | Catatan |
 |---|---|---|
-| `composer audit` | Tidak ada advisori | — |
+| `composer audit` | 1 advisori (medium): GHSA-mhf7-xp6r-6qrc pada `livewire/livewire` (>=4.3.0 <4.4.8) | Lihat §5 |
 | `npm audit` | 0 kerentanan | Sebelum F12.1: 2 kritis pada `shell-quote` yang dibawa `concurrently` (dependensi dev yang tak dipakai skrip proyek); `concurrently` dihapus |
 
 Produksi memasang dependensi tanpa dev (`composer install --no-dev`, aset dibangun lalu `node_modules` tidak dikirim).
@@ -53,6 +58,12 @@ Produksi memasang dependensi tanpa dev (`composer install --no-dev`, aset dibang
 
 Tidak ditemukan kebocoran data rahasia, IDOR, atau kredensial bawaan pada pengujian lintas-permukaan.
 
+### Masuk dengan Google dan saklar MFA (K-18)
+
+- Google dipercaya hanya bila `email_verified` benar. Surel dinormalkan ke huruf kecil; peran `mahasiswa` hanya untuk akhiran persis `student.unsil.ac.id` (diperiksa bersama klaim `hd`), selain itu `pengirim-eksternal`. Peran panel tidak pernah dibuat atau dinaikkan lewat Google.
+- Mitigasi pengambilalihan akun: bila akun yang cocok belum terverifikasi, kata sandi diganti acak dan sesi lain dihapus pada penautan pertama. Akun ber-MFA ditolak lewat Google (penyimpangan K-18); mereka masuk lewat `/admin` dengan kata sandi dan kode.
+- **Saklar MFA bawaan mati.** Selama mati, pejabat (super-admin, admin-persuratan, dekan, wakil dekan) hanya dilindungi kata sandi atau akun Google mereka. Disarankan menyalakannya setelah masa uji coba (Pengaturan sistem, Keamanan); setelah itu pejabat wajib memasang MFA dan tidak lagi dapat memakai Google.
+
 ## 5. Risiko sisa dan pekerjaan lanjutan
 
 | Risiko | Mitigasi / rencana |
@@ -61,4 +72,6 @@ Tidak ditemukan kebocoran data rahasia, IDOR, atau kredensial bawaan pada penguj
 | Panel Filament tanpa CSP ketat | Pantau dukungan nonce Filament; sementara dibatasi MFA + Policy |
 | Tautan Google Drive publik yang dibagikan pengguna | Tautan hanya disimpan; pengguna diarahkan memakai Shared Drive dan pembagian terbatas (STANDAR-TEKNIS §1a) |
 | Token WhatsApp/Aset API di `.env` | Rotasi berkala (DEPLOY.md §Rotasi); tidak pernah dicatat di log |
+| Advisori Livewire GHSA-mhf7-xp6r-6qrc (medium; `livewire/livewire` >=4.3.0 <4.4.8): bypass otorisasi `#[Authorize]` lewat urutan kunci parameter dan urutan eksekusi `#[Json]`, ditemukan `composer audit`; sudah ada sebelum K-18 | Ditangani lewat pembaruan Livewire terpisah; kebijakan aplikasi memakai Policy/Gate di dalam aksi, bukan hanya atribut |
+| Saklar MFA mati (K-18) | Nyalakan setelah masa uji coba; lihat bagian Masuk dengan Google dan saklar MFA |
 | Kode klasifikasi arsip, pola nomor, kop surat | Wajib diverifikasi fakultas sebelum go-live (05-UJI §5 GL-02) |

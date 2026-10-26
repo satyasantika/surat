@@ -125,3 +125,28 @@ Atas permintaan pemilik: persuratan dapat dimulai dari mahasiswa > ormawa/prodi 
 4. (!) Perantara (pengurus ormawa atau pengaju unit) memilah usulan: meneruskan satu usulan atau **menggabungkan beberapa usulan** menjadi dasar satu permohonan (`usulan_mahasiswa.permohonan_id`, status `dipakai`), atau mengembalikan/menolak dengan catatan wajib. Persetujuan pembina/kepala unit atas permohonan hasilnya berjalan seperti biasa. Bila permohonan ditolak/dibatalkan, usulan dasar kembali menunggu perantara; mahasiswa diberi tahu tiap perubahan tahap.
 5. Permohonan unit tidak membuat LPJ (LPJ dan blokirnya melekat pada ormawa). Surat izin dialamatkan kepada "Ketua Program Studi …" atau "Kepala …".
 6. Belum dikerjakan: halaman lacak publik untuk usulan mahasiswa (mahasiswa memantau lewat akun), LPJ bagi pengaju unit, tangkapan layar panduan peran baru (jalankan `composer panduan`), dan pencantuman usulan dasar pada isi naskah.
+
+## K-18 — Masuk dengan Google, kiriman eksternal, dan saklar MFA (26 Oktober 2026)
+
+Atas permintaan pemilik; rancangan di `docs/superpowers/specs/2026-10-26-login-google-design.md`. **Menunggu peninjauan pemilik**; (!) menyentuh kebijakan keamanan.
+
+Keputusan pemilik:
+
+1. (!) Masuk dengan Google tersedia untuk semua peran, termasuk peran panel. Akun yang sudah ada tertaut otomatis lewat surel terverifikasi; akun baru dari Google hanya berperan `mahasiswa` atau `pengirim-eksternal`, tidak pernah peran panel.
+2. Pengusul umum = pengirim eksternal: peran baru `pengirim-eksternal` (izin `kiriman.ajukan`) mengisi formulir sederhana yang menjadi surat masuk fakultas.
+3. Tujuan kiriman bebas dan paralel: fakultas dan/atau ormawa, prodi, laboratorium, boleh lebih dari satu dalam satu pengiriman.
+4. Perantara (ormawa/prodi/lab) boleh langsung mengarsipkan kiriman eksternal (status usulan baru `diarsipkan`) tanpa meneruskannya ke fakultas.
+5. (!) MFA dimatikan untuk semua peran. Saklar `mfa_wajib` di Pengaturan sistem (bagian Keamanan) bawaannya mati dan hanya terlihat serta dapat diubah oleh super-admin.
+
+Pilihan teknis:
+
+1. Tabel `identitas_google` (model `IdentitasGoogle`) menautkan akun Google (`sub`) ke pengguna. Aturan penautan ada di `App\Services\Auth\PenautanGoogle`: Google dipercaya hanya bila `email_verified` benar; surel dinormalkan ke huruf kecil; mahasiswa = akhiran persis `@` + `config('unsil.domain_mahasiswa')` (domain mirip seperti `student.unsil.ac.id.evil.com` menjadi `pengirim-eksternal`); klaim `hd` diperiksa; akun `aktif = false` tidak pernah mendapat sesi.
+2. (!) Pencegahan pengambilalihan akun: bila akun yang cocok belum memverifikasi surelnya, pada penautan pertama kata sandinya diganti acak dan semua sesinya dihapus, sehingga pihak yang lebih dulu mendaftar dengan surel itu tidak tetap memegang akun. Seluruh penautan berjalan dalam satu transaksi.
+3. Limiter `masuk-google`: 60 permintaan per menit per IP, kuncinya mengabaikan parameter surel. Bila `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` kosong, tombol tetap tampil tetapi menjawab "Masuk dengan Google belum tersedia."
+4. Surat masuk dari kiriman eksternal berstatus baru `diajukan` (`StatusSuratMasuk::Diajukan`). Nomor agenda baru diberikan saat staf khusus atau admin persuratan menekan "Terima kiriman" (dari register `agenda-masuk`, di dalam transaksi dengan kunci baris). Karena itu kolom `nomor_agenda`, `nomor_surat`, dan `diregistrasi_oleh` pada `surat_masuk` kini boleh kosong (`nomor_agenda` tetap UNIQUE). Kolom baru `pengirim_user_id`.
+5. `usulan_mahasiswa` mendapat kolom `asal` (`mahasiswa`/`eksternal`), `instansi`, dan `kode_lacak` (unik, data lama diisi migrasi; disembunyikan dari serialisasi dan audit). Usulan eksternal memakai `mahasiswa_id` sebagai pengusul. `StatusUsulan::Diarsipkan` ditambahkan; arsip tidak menyentuh surat masuk maupun permohonan.
+6. Batas bawaan 5 pengiriman per hari per akun (`batas_kiriman_harian`) dan 5 tujuan perantara per pengiriman (`batas_tujuan_kiriman`) disimpan sebagai kunci `Pengaturan` dan dapat diubah super-admin. Hitungan harian bertambah hanya bila pengiriman berhasil tersimpan.
+7. Kontak pengirim (surel, WhatsApp) tetap kolom terenkripsi, `$hidden`, dan tidak masuk log audit; halaman lacak publik hanya menampilkan pelaku generik ("Pengirim"/"Perantara") tanpa catatan.
+8. `isRequired` MFA pada panel tetap konstanta asli; yang memutuskan per permintaan adalah `User::wajibMfa()` (membaca saklar), karena Filament hanya mendaftarkan rute pemasangan MFA dan middleware-nya bila `isRequired` benar saat rute didaftarkan.
+
+**Penyimpangan dari rancangan (perlu keputusan pemilik):** Pengguna yang sudah memasang MFA tidak dapat masuk lewat Google; mereka tetap masuk lewat `/admin` dengan kata sandi dan kode. Alasannya: Filament hanya dapat menuntaskan tantangan MFA di dalam halaman masuknya sendiri, dan di sana kredensial diperiksa ulang setelah tantangan (butuh kata sandi yang tidak dimiliki pengguna Google). Menolak sebelum ada sesi (dan sebelum penautan mengubah apa pun) adalah pilihan aman. Akibatnya: untuk perilaku sesuai rancangan (Google lalu tantangan MFA), perlu perubahan di Filament atau halaman tantangan khusus yang menimpa `authenticate()` pada halaman masuk, yaitu kode keamanan sendiri yang harus ditinjau. Selama saklar MFA mati dan belum ada yang memasang MFA, penyimpangan ini tidak berdampak.
