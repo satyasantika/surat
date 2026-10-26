@@ -30,7 +30,7 @@ class PenautanGoogle
             throw new GagalMasukGoogle('Surel Google Anda belum terverifikasi.');
         }
 
-        if (filled($hd) && Str::lower($hd) !== Str::after($surel, '@')) {
+        if (filled($hd) && ! $this->hdSesuai(Str::lower((string) $hd), Str::after($surel, '@'))) {
             throw new GagalMasukGoogle('Akun Google tidak sesuai dengan domain surelnya.');
         }
 
@@ -79,7 +79,22 @@ class PenautanGoogle
         }
     }
 
-    /** Akun yang surelnya belum terbukti milik pemegangnya: kata sandi lama dibuang dan sesinya diakhiri. */
+    /**
+     * `hd` Google adalah domain organisasi Workspace. Diterima bila sama dengan domain surel, atau bila keduanya domain
+     * institusi (config unsil.domain_surel), sebab student.unsil.ac.id dapat menjadi domain kedua organisasi unsil.ac.id.
+     */
+    private function hdSesuai(string $hd, string $domainSurel): bool
+    {
+        /** @var list<string> $institusi */
+        $institusi = array_map('strtolower', (array) config('unsil.domain_surel'));
+
+        return $hd === $domainSurel || (in_array($hd, $institusi, true) && in_array($domainSurel, $institusi, true));
+    }
+
+    /**
+     * Akun yang surelnya belum terbukti milik pemegangnya: kata sandi lama dibuang dan sesinya diakhiri. Kewajiban ganti
+     * sandi juga dimatikan, karena tak seorang pun mengetahui kata sandi acak yang baru (ganti sandi lewat /lupa-sandi).
+     */
     private function amankanAkunLama(User $user): void
     {
         if ($user->email_verified_at !== null) {
@@ -89,6 +104,7 @@ class PenautanGoogle
         $user->forceFill([
             'password' => Hash::make(Str::random(64)),
             'email_verified_at' => now(),
+            'wajib_ganti_sandi' => false,
         ])->save();
 
         DB::table('sessions')->where('user_id', $user->id)->delete();

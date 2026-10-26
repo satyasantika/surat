@@ -31,7 +31,8 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        // Kosong = jalur relatif; Socialite melengkapinya dengan url() sehingga awalan /surat (APP_URL) ikut.
+        'redirect' => env('GOOGLE_REDIRECT_URI') ?: '/masuk/google/callback',
     ],
 
     'slack' => [

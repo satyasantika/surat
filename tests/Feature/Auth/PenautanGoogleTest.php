@@ -46,9 +46,18 @@ it('menolak surel yang belum terverifikasi tanpa membuat pengguna', function () 
     expect(User::count())->toBe($sebelum)->and(IdentitasGoogle::count())->toBe(0);
 });
 
-it('menolak hd yang berbeda dari domain surel', function () {
-    expect(fn () => masukGoogle('g-6', 'a@gmail.com', hd: 'evil.com'))->toThrow(GagalMasukGoogle::class);
+it('menolak hd yang berbeda dari domain surel', function (string $surel, string $hd) {
+    expect(fn () => masukGoogle('g-6', $surel, hd: $hd))->toThrow(GagalMasukGoogle::class);
     expect(User::count())->toBe(0);
+})->with([
+    ['a@gmail.com', 'evil.com'],
+    ['a@student.unsil.ac.id', 'evil.com'],
+    ['a@gmail.com', 'unsil.ac.id'],
+]);
+
+it('menerima hd organisasi unsil untuk surel domain kedua milik unsil', function () {
+    expect(masukGoogle('g-6b', 'a@student.unsil.ac.id', hd: 'unsil.ac.id')->hasRole('mahasiswa'))->toBeTrue()
+        ->and(masukGoogle('g-6c', 'b@unsil.ac.id', hd: 'unsil.ac.id')->hasRole('pengirim-eksternal'))->toBeTrue();
 });
 
 it('menautkan akun lama aktif tanpa mengubah peran atau menggandakan akun', function () {
@@ -159,4 +168,12 @@ it('menjalankan pemeriksaan tambahan juga untuk akun yang sudah tertaut', functi
 
     expect(fn () => app(PenautanGoogle::class)->masuk('g-17', 'tertaut@gmail.com', true, 'Nama', null, fn (User $u) => throw new GagalMasukGoogle('Ditolak.')))
         ->toThrow(GagalMasukGoogle::class, 'Ditolak.');
+});
+
+it('mematikan wajib ganti sandi saat kata sandi sementara akun buatan admin diganti acak', function () {
+    $lama = User::factory()->unverified()->create(['email' => 'pegawai.baru@unsil.ac.id', 'wajib_ganti_sandi' => true]);
+
+    $user = masukGoogle('g-18', 'pegawai.baru@unsil.ac.id')->fresh();
+
+    expect($user->is($lama))->toBeTrue()->and($user->wajib_ganti_sandi)->toBeFalse();
 });

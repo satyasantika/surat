@@ -39,6 +39,17 @@ it('mengarahkan ke Google dengan cakupan openid, email, profile', function () {
         ->and(urldecode($lokasi))->toContain('openid')->toContain('email')->toContain('profile');
 });
 
+it('memakai URI callback relatif bawaan bila GOOGLE_REDIRECT_URI kosong', function () {
+    $bawaan = (require config_path('services.php'))['google']['redirect'];
+    config(['services.google.redirect' => $bawaan]);
+
+    $lokasi = $this->get(route('login.google'))->assertRedirect()->headers->get('Location');
+    parse_str((string) parse_url($lokasi, PHP_URL_QUERY), $kueri);
+
+    expect($bawaan)->toBe('/masuk/google/callback')
+        ->and($kueri['redirect_uri'])->toBe(route('login.google.callback'));
+});
+
 it('mengingat bahwa alur dimulai dari panel admin', function () {
     fakeGoogle();
 
@@ -67,6 +78,17 @@ it('mengganti ID sesi dan mengingat pengguna saat masuk', function () {
     expect(session()->getId())->not->toBe($idLama);
     $this->assertAuthenticated();
     expect(collect($r->headers->getCookies())->contains(fn ($c) => str_starts_with($c->getName(), 'remember_web_')))->toBeTrue();
+});
+
+it('tidak mengingat (remember) pengguna berperan panel', function () {
+    $dekan = User::factory()->create(['email' => 'dekan@unsil.ac.id', 'remember_token' => null])->assignRole('dekan');
+    fakeGoogle('g-dekan', 'dekan@unsil.ac.id');
+
+    $r = $this->get(route('login.google.callback'));
+
+    $this->assertAuthenticatedAs($dekan);
+    expect(collect($r->headers->getCookies())->contains(fn ($c) => str_starts_with($c->getName(), 'remember_web_')))->toBeFalse()
+        ->and($dekan->fresh()->remember_token)->toBeNull();
 });
 
 it('mengarahkan pengguna berperan panel ke /admin meski mulai dari halaman masuk publik', function () {

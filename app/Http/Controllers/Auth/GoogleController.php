@@ -77,10 +77,13 @@ class GoogleController extends Controller
             return $this->gagal('Surel atau kata sandi salah.');
         }
 
-        Auth::login($user, true);
+        $peranPanel = $user->roles->pluck('name')->diff(User::PERAN_TANPA_PANEL)->isNotEmpty();
+
+        // Akun panel tidak diberi cookie "ingat saya" (berumur panjang); hanya akun tanpa peran panel.
+        Auth::login($user, ! $peranPanel);
         $request->session()->regenerate();
 
-        if ($user->roles->pluck('name')->diff(User::PERAN_TANPA_PANEL)->isNotEmpty()) {
+        if ($peranPanel) {
             return redirect()->to(url('admin'));
         }
 
