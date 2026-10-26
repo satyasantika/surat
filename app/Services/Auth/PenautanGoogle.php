@@ -16,10 +16,13 @@ use Illuminate\Support\Str;
 class PenautanGoogle
 {
     /**
+     * @param  (callable(User): void)|null  $periksa  pemeriksaan tambahan atas akun yang sudah ada (mis. akun ber-MFA);
+     *                                                dijalankan sebelum efek samping apa pun dan menolak dengan melempar GagalMasukGoogle
+     *
      * @throws GagalMasukGoogle
      * @throws UniqueConstraintViolationException dua login pertama bersamaan untuk surel/akun Google yang sama
      */
-    public function masuk(string $googleId, string $surel, bool $surelTerverifikasi, string $nama, ?string $hd = null): User
+    public function masuk(string $googleId, string $surel, bool $surelTerverifikasi, string $nama, ?string $hd = null, ?callable $periksa = null): User
     {
         $surel = Str::lower(trim($surel));
 
@@ -31,31 +34,49 @@ class PenautanGoogle
             throw new GagalMasukGoogle('Akun Google tidak sesuai dengan domain surelnya.');
         }
 
-        return DB::transaction(function () use ($googleId, $surel, $nama): User {
+        return DB::transaction(function () use ($googleId, $surel, $nama, $periksa): User {
             $identitas = IdentitasGoogle::where('google_id', $googleId)->first();
             $user = $identitas?->user;
 
-            if (! $user) {
-                $user = User::whereRaw('lower(email) = ?', [$surel])->first();
+            if ($user) {
+                $this->pastikanBolehMasuk($user, $periksa);
 
-                if ($user) {
-                    if ($user->identitasGoogle()->exists()) {
-                        throw new GagalMasukGoogle('Surel ini sudah tertaut ke akun Google lain.');
-                    }
-                    $this->amankanAkunLama($user);
-                } else {
-                    $user = $this->buat($surel, $nama);
+                return $user;
+            }
+
+            $user = User::whereRaw('lower(email) = ?', [$surel])->first();
+
+            if ($user) {
+                if ($user->identitasGoogle()->exists()) {
+                    throw new GagalMasukGoogle('Surel ini sudah tertaut ke akun Google lain.');
                 }
-
-                IdentitasGoogle::create(['user_id' => $user->id, 'google_id' => $googleId, 'surel' => $surel]);
+                // Penolakan diputuskan sebelum kata sandi diganti, sesi diakhiri, atau identitas ditautkan.
+                $this->pastikanBolehMasuk($user, $periksa);
+                $this->amankanAkunLama($user);
+            } else {
+                $user = $this->buat($surel, $nama);
             }
 
-            if (! $user->aktif) {
-                throw new GagalMasukGoogle('Surel atau kata sandi salah.');
-            }
+            IdentitasGoogle::create(['user_id' => $user->id, 'google_id' => $googleId, 'surel' => $surel]);
 
             return $user;
         });
+    }
+
+    /**
+     * @param  (callable(User): void)|null  $periksa
+     *
+     * @throws GagalMasukGoogle
+     */
+    private function pastikanBolehMasuk(User $user, ?callable $periksa): void
+    {
+        if (! $user->aktif) {
+            throw new GagalMasukGoogle('Surel atau kata sandi salah.');
+        }
+
+        if ($periksa !== null) {
+            $periksa($user);
+        }
     }
 
     /** Akun yang surelnya belum terbukti milik pemegangnya: kata sandi lama dibuang dan sesinya diakhiri. */

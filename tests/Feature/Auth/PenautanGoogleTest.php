@@ -119,3 +119,44 @@ it('menolak google_id baru untuk surel milik akun yang sudah tertaut ke Google l
     expect(fn () => masukGoogle('g-14', 'dua@gmail.com'))->toThrow(GagalMasukGoogle::class);
     expect(IdentitasGoogle::count())->toBe(1)->and(User::count())->toBe(1);
 });
+
+it('menolak akun nonaktif yang belum terverifikasi tanpa mengubah kata sandi atau sesinya', function () {
+    $mati = User::factory()->unverified()->create(['email' => 'mati2@gmail.com', 'aktif' => false, 'password' => Hash::make('rahasia-lama')]);
+    DB::table('sessions')->insert(['id' => 's-mati', 'user_id' => $mati->id, 'payload' => '', 'last_activity' => time()]);
+
+    expect(fn () => masukGoogle('g-15', 'mati2@gmail.com'))->toThrow(GagalMasukGoogle::class);
+
+    $mati->refresh();
+    expect(Hash::check('rahasia-lama', $mati->password))->toBeTrue()
+        ->and($mati->email_verified_at)->toBeNull()
+        ->and(DB::table('sessions')->where('id', 's-mati')->exists())->toBeTrue()
+        ->and(IdentitasGoogle::count())->toBe(0);
+});
+
+it('menjalankan pemeriksaan tambahan sebelum efek samping penautan', function () {
+    $lama = User::factory()->unverified()->create(['email' => 'mfa@gmail.com', 'password' => Hash::make('rahasia-lama')]);
+    DB::table('sessions')->insert(['id' => 's-mfa', 'user_id' => $lama->id, 'payload' => '', 'last_activity' => time()]);
+    $dicek = null;
+
+    try {
+        app(PenautanGoogle::class)->masuk('g-16', 'mfa@gmail.com', true, 'Nama', null, function (User $u) use (&$dicek): void {
+            $dicek = $u->id;
+            throw new GagalMasukGoogle('Ditolak.');
+        });
+        $this->fail('Seharusnya gagal.');
+    } catch (GagalMasukGoogle $e) {
+        expect($e->getMessage())->toBe('Ditolak.');
+    }
+
+    expect($dicek)->toBe($lama->id)
+        ->and(Hash::check('rahasia-lama', $lama->fresh()->password))->toBeTrue()
+        ->and(DB::table('sessions')->where('id', 's-mfa')->exists())->toBeTrue()
+        ->and(IdentitasGoogle::count())->toBe(0);
+});
+
+it('menjalankan pemeriksaan tambahan juga untuk akun yang sudah tertaut', function () {
+    masukGoogle('g-17', 'tertaut@gmail.com');
+
+    expect(fn () => app(PenautanGoogle::class)->masuk('g-17', 'tertaut@gmail.com', true, 'Nama', null, fn (User $u) => throw new GagalMasukGoogle('Ditolak.')))
+        ->toThrow(GagalMasukGoogle::class, 'Ditolak.');
+});

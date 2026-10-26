@@ -53,8 +53,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/masuk', [MasukController::class, 'create'])->name('login');
     Route::post('/masuk', [MasukController::class, 'store'])->middleware('throttle:masuk');
     // Masuk dengan Google (publik dan panel; ?dari=admin menandai alur dari halaman masuk panel).
-    Route::get('/masuk/google', [GoogleController::class, 'arah'])->middleware('throttle:masuk')->name('login.google');
-    Route::get('/masuk/google/callback', [GoogleController::class, 'callback'])->middleware('throttle:masuk')->name('login.google.callback');
+    Route::get('/masuk/google', [GoogleController::class, 'arah'])->middleware('throttle:masuk-google')->name('login.google');
+    Route::get('/masuk/google/callback', [GoogleController::class, 'callback'])->middleware('throttle:masuk-google')->name('login.google.callback');
 
     Route::get('/daftar', [DaftarController::class, 'create'])->name('daftar');
     Route::post('/daftar', [DaftarController::class, 'store'])->middleware('throttle:daftar');

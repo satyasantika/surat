@@ -31,6 +31,10 @@ class GoogleController extends Controller
 {
     public function arah(Request $request): RedirectSymfony
     {
+        if (blank(config('services.google.client_id')) || blank(config('services.google.client_secret'))) {
+            return $this->gagal('Masuk dengan Google belum tersedia.');
+        }
+
         if ($request->query('dari') === 'admin') {
             $request->session()->put('google_dari', 'admin');
         } else {
@@ -73,10 +77,6 @@ class GoogleController extends Controller
             return $this->gagal('Surel atau kata sandi salah.');
         }
 
-        if (MultiFactorChallenge::make()->hasEnabledProviders($user)) {
-            return $this->gagal('Akun ini memakai verifikasi dua langkah; masuk lewat halaman admin.');
-        }
-
         Auth::login($user, true);
         $request->session()->regenerate();
 
@@ -105,6 +105,12 @@ class GoogleController extends Controller
             filter_var($raw['email_verified'] ?? $raw['verified_email'] ?? false, FILTER_VALIDATE_BOOL),
             (string) $googleUser->getName(),
             isset($raw['hd']) ? (string) $raw['hd'] : null,
+            // Tantangan MFA Filament hanya ada di komponen Login panel; akun ber-MFA ditolak sebelum efek samping penautan.
+            function (User $user): void {
+                if (MultiFactorChallenge::make()->hasEnabledProviders($user)) {
+                    throw new GagalMasukGoogle('Akun ini memakai verifikasi dua langkah; masuk lewat halaman admin.');
+                }
+            },
         ];
 
         try {

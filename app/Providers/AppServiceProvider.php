@@ -80,6 +80,8 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('masuk', fn (Request $request) => Limit::perMinute(5)
             ->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
+        // Rute Google tidak membawa surel: kunci per IP saja, cukup longgar untuk NAT kampus (arah + callback = 2 permintaan).
+        RateLimiter::for('masuk-google', fn (Request $request) => Limit::perMinute(60)->by('masuk-google|'.$request->ip()));
         RateLimiter::for('verifikasi', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         // Halaman lacak publik tanpa login: kode 60 bit tak dapat ditebak, batas ini menghalangi penebakan massal.
         RateLimiter::for('lacak', fn (Request $request) => [

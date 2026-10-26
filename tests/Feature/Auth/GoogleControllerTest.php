@@ -6,6 +6,8 @@ use App\Services\Auth\PenautanGoogle;
 use Database\Seeders\PeranDanIzinSeeder;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\User as UserGoogle;
@@ -15,6 +17,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->withoutVite();
     $this->seed(PeranDanIzinSeeder::class);
+    config(['services.google' => ['client_id' => 'id-uji', 'client_secret' => 'rahasia', 'redirect' => 'http://localhost/masuk/google/callback']]);
 });
 
 function fakeGoogle(string $id = 'g-1', string $surel = 'budi@student.unsil.ac.id', bool $terverifikasi = true, string $nama = 'Budi'): void
@@ -30,8 +33,6 @@ function bentrokUnik(): UniqueConstraintViolationException
 }
 
 it('mengarahkan ke Google dengan cakupan openid, email, profile', function () {
-    config(['services.google' => ['client_id' => 'id-uji', 'client_secret' => 'rahasia', 'redirect' => 'http://localhost/masuk/google/callback']]);
-
     $lokasi = $this->get(route('login.google'))->assertRedirect()->headers->get('Location');
 
     expect($lokasi)->toStartWith('https://accounts.google.com/')
@@ -154,6 +155,43 @@ it('menolak masuk Google untuk akun yang memasang verifikasi dua langkah', funct
         ->assertSessionHasErrors(['email' => 'Akun ini memakai verifikasi dua langkah; masuk lewat halaman admin.']);
 
     $this->assertGuest();
+});
+
+it('menolak akun ber-MFA yang surelnya belum terverifikasi tanpa mengubah kata sandi, sesi, atau tautan', function () {
+    $dekan = User::factory()->unverified()->create(['email' => 'dekan@unsil.ac.id', 'password' => Hash::make('rahasia-lama')])->assignRole('dekan');
+    $dekan->forceFill(['app_authentication_secret' => 'JBSWY3DPEHPK3PXP'])->save();
+    DB::table('sessions')->insert(['id' => 's-dekan', 'user_id' => $dekan->id, 'payload' => '', 'last_activity' => time()]);
+    fakeGoogle('g-dekan', 'dekan@unsil.ac.id');
+
+    $this->get(route('login.google.callback'))->assertRedirect(route('login'))
+        ->assertSessionHasErrors(['email' => 'Akun ini memakai verifikasi dua langkah; masuk lewat halaman admin.']);
+
+    $this->assertGuest();
+    $dekan->refresh();
+    expect(Hash::check('rahasia-lama', $dekan->password))->toBeTrue()
+        ->and($dekan->email_verified_at)->toBeNull()
+        ->and(DB::table('sessions')->where('id', 's-dekan')->exists())->toBeTrue()
+        ->and(IdentitasGoogle::count())->toBe(0);
+});
+
+it('membatasi rute Google per IP, 60 per menit, tanpa terpengaruh parameter email', function () {
+    config(['services.google.client_id' => null]);
+
+    foreach (range(1, 60) as $i) {
+        $this->get(route('login.google', ['email' => "acak{$i}@contoh.test"]))->assertRedirect();
+    }
+
+    $this->get(route('login.google.callback', ['email' => 'lain@contoh.test']))->assertStatus(429);
+});
+
+it('menampilkan pesan ramah bila kunci Google belum diatur, dan tombol tetap tampil', function () {
+    config(['services.google.client_id' => null, 'services.google.client_secret' => null]);
+
+    $this->get(route('login.google'))->assertRedirect(route('login'))
+        ->assertSessionHasErrors(['email' => 'Masuk dengan Google belum tersedia.']);
+
+    $this->get(route('login'))->assertSee('Masuk dengan Google');
+    $this->get('/admin/login')->assertSee('Masuk dengan Google');
 });
 
 it('halaman masuk publik memuat tombol Google', function () {
