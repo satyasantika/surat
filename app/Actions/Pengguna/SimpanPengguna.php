@@ -25,8 +25,9 @@ class SimpanPengguna
 
     /**
      * @param  array<string, mixed>  $data  name, email, nip_nim, telepon, aktif, peran (list), izin_langsung (list)
+     * @param  bool  $kirimTautan  false = pemanggil sendiri yang mengirim tautan atur kata sandi akun baru (mis. impor tempel lewat antrean)
      */
-    public function jalankan(?User $user, array $data, User $pelaku): User
+    public function jalankan(?User $user, array $data, User $pelaku, bool $kirimTautan = true): User
     {
         $data = $this->validasi($user, $data);
         $peran = array_values(array_unique($data['peran'] ?? []));
@@ -40,7 +41,7 @@ class SimpanPengguna
             throw ValidationException::withMessages(['aktif' => 'Anda tidak dapat menonaktifkan akun sendiri.']);
         }
 
-        return DB::transaction(function () use ($user, $data, $peran, $izin) {
+        return DB::transaction(function () use ($user, $data, $peran, $izin, $kirimTautan) {
             $profil = collect($data)->only(['name', 'email', 'nip_nim', 'telepon', 'aktif', 'wajib_ganti_sandi'])->all();
             $baru = $user === null;
 
@@ -69,7 +70,7 @@ class SimpanPengguna
                     ->log('Peran/izin pengguna diubah');
             }
 
-            if ($baru) {
+            if ($baru && $kirimTautan) {
                 Password::sendResetLink(['email' => $user->email]);
             }
 

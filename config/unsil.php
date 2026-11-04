@@ -5,7 +5,7 @@ return [
     'kode_unit' => env('KODE_UNIT', 'UN58.10'),
 
     // Domain surel yang diizinkan untuk akun (BR-01). Pola surel mahasiswa perlu diverifikasi.
-    'domain_surel' => ['unsil.ac.id', 'student.unsil.ac.id'],
+    'domain_surel' => ['unsil.ac.id', 'student.unsil.ac.id', 'staff.unsil.ac.id'],
 
     // Domain khusus mahasiswa (pendaftaran mandiri pengurus ormawa, F2.2).
     'domain_mahasiswa' => ['student.unsil.ac.id'],
