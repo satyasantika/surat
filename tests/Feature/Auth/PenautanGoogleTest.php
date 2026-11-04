@@ -177,3 +177,11 @@ it('mematikan wajib ganti sandi saat kata sandi sementara akun buatan admin diga
 
     expect($user->is($lama))->toBeTrue()->and($user->wajib_ganti_sandi)->toBeFalse();
 });
+
+it('menerima akun Google staff.unsil.ac.id dengan hd organisasi unsil.ac.id untuk akun buatan admin', function () {
+    $staf = User::factory()->create(['email' => 'tu@staff.unsil.ac.id'])->assignRole('pegawai');
+
+    $user = app(PenautanGoogle::class)->masuk('g-staf', 'tu@staff.unsil.ac.id', true, 'Tata Usaha', 'unsil.ac.id');
+
+    expect($user->is($staf))->toBeTrue()->and($user->hasRole('pegawai'))->toBeTrue();
+});
