@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('layouts.masuk')
 @section('judul', 'Lupa kata sandi')
 @section('isi')
 <form method="POST" action="{{ route('password.email') }}" class="space-y-4">

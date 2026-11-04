@@ -31,11 +31,13 @@ class GoogleController extends Controller
 {
     public function arah(Request $request): RedirectSymfony
     {
+        $dariAdmin = $request->query('dari') === 'admin';
+
         if (blank(config('services.google.client_id')) || blank(config('services.google.client_secret'))) {
-            return $this->gagal('Masuk dengan Google belum tersedia.');
+            return $this->gagal('Masuk dengan Google belum tersedia.', $dariAdmin);
         }
 
-        if ($request->query('dari') === 'admin') {
+        if ($dariAdmin) {
             $request->session()->put('google_dari', 'admin');
         } else {
             $request->session()->forget('google_dari');
@@ -52,29 +54,29 @@ class GoogleController extends Controller
         $dariAdmin = $request->session()->pull('google_dari') === 'admin';
 
         if ($request->filled('error')) {
-            return $this->gagal('Masuk dengan Google dibatalkan.');
+            return $this->gagal('Masuk dengan Google dibatalkan.', $dariAdmin);
         }
 
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (InvalidStateException) {
-            return $this->gagal('Sesi masuk dengan Google kedaluwarsa. Silakan coba lagi.');
+            return $this->gagal('Sesi masuk dengan Google kedaluwarsa. Silakan coba lagi.', $dariAdmin);
         } catch (Throwable $e) {
             report($e);
 
-            return $this->gagal('Tidak dapat terhubung dengan Google. Silakan coba lagi.');
+            return $this->gagal('Tidak dapat terhubung dengan Google. Silakan coba lagi.', $dariAdmin);
         }
 
         try {
             $user = $this->tautkan($penautan, $googleUser);
         } catch (GagalMasukGoogle $e) {
-            return $this->gagal($e->getMessage());
+            return $this->gagal($e->getMessage(), $dariAdmin);
         } catch (UniqueConstraintViolationException) {
-            return $this->gagal('Masuk dengan Google gagal sesaat. Silakan coba lagi.');
+            return $this->gagal('Masuk dengan Google gagal sesaat. Silakan coba lagi.', $dariAdmin);
         }
 
         if (! $user->aktif) {
-            return $this->gagal('Surel atau kata sandi salah.');
+            return $this->gagal('Surel atau kata sandi salah.', $dariAdmin);
         }
 
         $peranPanel = $user->roles->pluck('name')->diff(User::PERAN_TANPA_PANEL)->isNotEmpty();
@@ -123,8 +125,16 @@ class GoogleController extends Controller
         }
     }
 
-    private function gagal(string $pesan): RedirectResponse
+    /**
+     * Alur dari panel kembali ke halaman masuk panel; pesan dibaca tombol Google (render hook) dari sesi `galat_google`.
+     * Alur publik kembali ke /masuk dengan galat pada isian surel.
+     */
+    private function gagal(string $pesan, bool $dariAdmin = false): RedirectResponse
     {
+        if ($dariAdmin) {
+            return redirect()->route('filament.admin.auth.login')->with('galat_google', $pesan);
+        }
+
         return redirect()->route('login')->withErrors(['email' => $pesan]);
     }
 }

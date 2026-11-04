@@ -40,7 +40,25 @@ it('mengarahkan ke Google dengan cakupan openid, email, profile', function () {
 });
 
 it('memakai URI callback relatif bawaan bila GOOGLE_REDIRECT_URI kosong', function () {
-    $bawaan = (require config_path('services.php'))['google']['redirect'];
+    // Kosongkan dari semua sumber env agar test tidak bergantung pada .env lokal yang mengisinya.
+    $semula = [$_ENV['GOOGLE_REDIRECT_URI'] ?? null, $_SERVER['GOOGLE_REDIRECT_URI'] ?? null, getenv('GOOGLE_REDIRECT_URI')];
+    $_ENV['GOOGLE_REDIRECT_URI'] = $_SERVER['GOOGLE_REDIRECT_URI'] = '';
+    putenv('GOOGLE_REDIRECT_URI=');
+
+    try {
+        $bawaan = (require config_path('services.php'))['google']['redirect'];
+    } finally {
+        [$env, $server, $put] = $semula;
+        unset($_ENV['GOOGLE_REDIRECT_URI'], $_SERVER['GOOGLE_REDIRECT_URI']);
+        if ($env !== null) {
+            $_ENV['GOOGLE_REDIRECT_URI'] = $env;
+        }
+        if ($server !== null) {
+            $_SERVER['GOOGLE_REDIRECT_URI'] = $server;
+        }
+        putenv($put === false ? 'GOOGLE_REDIRECT_URI' : "GOOGLE_REDIRECT_URI={$put}");
+    }
+
     config(['services.google.redirect' => $bawaan]);
 
     $lokasi = $this->get(route('login.google'))->assertRedirect()->headers->get('Location');
@@ -226,4 +244,53 @@ it('halaman masuk panel memuat tombol Google dengan dari=admin', function () {
     $this->get('/admin/login')->assertOk()
         ->assertSee(e(route('login.google', ['dari' => 'admin'])), false)
         ->assertSee('Masuk dengan Google');
+});
+
+it('mengembalikan galat alur panel ke halaman masuk panel, bukan /masuk', function () {
+    $dekan = User::factory()->create(['email' => 'dekan@unsil.ac.id'])->assignRole('dekan');
+    $dekan->forceFill(['app_authentication_secret' => 'JBSWY3DPEHPK3PXP'])->save();
+    IdentitasGoogle::create(['user_id' => $dekan->id, 'google_id' => 'g-dekan', 'surel' => 'dekan@unsil.ac.id']);
+    fakeGoogle('g-dekan', 'dekan@unsil.ac.id');
+
+    $this->withSession(['google_dari' => 'admin'])->get(route('login.google.callback'))
+        ->assertRedirect(route('filament.admin.auth.login'))
+        ->assertSessionHas('galat_google', 'Akun ini memakai verifikasi dua langkah; masuk lewat halaman admin.')
+        ->assertSessionHasNoErrors();
+
+    $this->assertGuest();
+});
+
+it('mengembalikan pembatalan dari panel ke halaman masuk panel', function () {
+    $this->withSession(['google_dari' => 'admin'])->get(route('login.google.callback', ['error' => 'access_denied']))
+        ->assertRedirect(route('filament.admin.auth.login'))
+        ->assertSessionHas('galat_google', 'Masuk dengan Google dibatalkan.');
+});
+
+it('mengembalikan kunci Google yang belum diatur dari panel ke halaman masuk panel', function () {
+    config(['services.google.client_id' => null]);
+
+    $this->get(route('login.google', ['dari' => 'admin']))
+        ->assertRedirect(route('filament.admin.auth.login'))
+        ->assertSessionHas('galat_google', 'Masuk dengan Google belum tersedia.');
+});
+
+it('halaman masuk panel menampilkan galat Google dari sesi', function () {
+    $this->withSession(['galat_google' => 'Masuk dengan Google dibatalkan.'])->get('/admin/login')
+        ->assertOk()
+        ->assertSeeInOrder(['role="alert"', 'Masuk dengan Google dibatalkan.', 'Masuk dengan Google'], false);
+});
+
+it('halaman masuk panel memakai layout dua kolom dengan merek dan tautan beranda', function () {
+    $this->get('/admin/login')->assertOk()
+        ->assertSee('sr-merek-panel', false)
+        ->assertSee('Halaman masuk pimpinan, staf, dan admin persuratan.')
+        ->assertSee(e(route('beranda')), false)
+        ->assertSee('Persuratan FKIP Unsil v', false);
+});
+
+it('halaman masuk publik memakai layout dua kolom yang sama dengan panel', function () {
+    $this->get(route('login'))->assertOk()
+        ->assertSee('sr-merek-panel', false)
+        ->assertSee('data-sakelar-tema', false)
+        ->assertSee(e(route('beranda')), false);
 });
