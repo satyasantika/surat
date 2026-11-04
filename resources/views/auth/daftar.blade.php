@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('layouts.masuk')
 @section('judul', 'Daftar akun mahasiswa')
 @section('isi')
 <form method="POST" action="{{ route('daftar') }}" class="space-y-4">

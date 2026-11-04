@@ -287,3 +287,10 @@ it('halaman masuk panel memakai layout dua kolom dengan merek dan tautan beranda
         ->assertSee(e(route('beranda')), false)
         ->assertSee('Persuratan FKIP Unsil v', false);
 });
+
+it('halaman masuk publik memakai layout dua kolom yang sama dengan panel', function () {
+    $this->get(route('login'))->assertOk()
+        ->assertSee('sr-merek-panel', false)
+        ->assertSee('data-sakelar-tema', false)
+        ->assertSee(e(route('beranda')), false);
+});
