@@ -53,6 +53,15 @@ class ImporPenggunaTempel
 
         foreach ($baris as $nomor => [$nama, $surel, $peranTeks, $nim, $telepon]) {
             $surel = Str::lower($surel);
+
+            // Akun yang sudah ada tidak diubah, sehingga isi kolom lainnya (dan domain surel lama) tidak divalidasi.
+            if ($surel !== '' && $surelAda->has($surel) && ! isset($surelTerlihat[$surel])) {
+                $surelTerlihat[$surel] = $nomor;
+                $dilewati[] = $surel;
+
+                continue;
+            }
+
             $pesan = Validator::make(
                 ['nama' => $nama, 'surel' => $surel, 'NIP/NIM' => $nim, 'telepon' => $telepon],
                 [
@@ -82,10 +91,7 @@ class ImporPenggunaTempel
                 }
             }
 
-            $lewati = $surelAda->has($surel);
-
-            // NIP/NIM hanya diperiksa untuk akun yang akan dibuat; akun yang dilewati tidak diubah.
-            if ($nim !== '' && ! $lewati) {
+            if ($nim !== '') {
                 if ($nimAda->has($nim)) {
                     $pesan[] = "NIP/NIM {$nim} sudah dipakai akun lain";
                 } elseif (isset($nimTerlihat[$nim])) {
@@ -100,17 +106,14 @@ class ImporPenggunaTempel
                 continue;
             }
 
-            if ($lewati) {
-                $dilewati[] = $surel;
-
-                continue;
-            }
-
             $baru[] = [
                 'baris' => $nomor, 'name' => $nama, 'email' => $surel, 'peran' => array_values(array_unique($peran)),
                 'nip_nim' => $nim !== '' ? $nim : null, 'telepon' => $telepon !== '' ? $telepon : null,
             ];
         }
+
+        // Galat urai (jumlah kolom) dan galat validasi digabung menurut nomor baris.
+        usort($galat, fn (string $a, string $b): int => (int) preg_replace('/\D.*/s', '', substr($a, 6)) <=> (int) preg_replace('/\D.*/s', '', substr($b, 6)));
 
         return ['baru' => $galat === [] ? $baru : [], 'dilewati' => $dilewati, 'galat' => $galat];
     }
