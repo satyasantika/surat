@@ -7,6 +7,7 @@ use App\Contracts\LayananRuangan;
 use App\Contracts\PembangkitPdf;
 use App\Contracts\PenyimpananBerkas;
 use App\Events\NaskahTerbit;
+use App\Http\Livewire\HandleRequestsSubpath;
 use App\Listeners\SelesaikanPermohonanDariNaskah;
 use App\Services\Berkas\TautanEksternal;
 use App\Services\Notifikasi\GerbangWhatsappHttp;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Mechanisms\HandleRequests\HandleRequests;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,6 +57,22 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(PembangkitPdf::class, fn () => $this->pembangkitPdf((string) config('pdf.driver')));
         $this->app->bind('pdf.naskah', fn () => $this->pembangkitPdf((string) config('pdf.driver_naskah')));
+
+        // Dibatasi ke subpath saja (lihat aturUrlSubpath()): Livewire::getUpdateUri() memakai
+        // toRoute(absolute: false), yang pada APP_URL bersubpath menghasilkan path relatif yang
+        // SUDAH memuat /surat; FrontendAssets.php lalu membungkusnya lagi dengan url(), menambah
+        // /surat SEKALI LAGI -> dobel. Override ini mengembalikan URL absolut langsung sehingga
+        // url() mengenalinya sebagai URL valid dan tidak mengubahnya lagi.
+        if ($this->berjalanDiSubpath()) {
+            $this->app->bind(HandleRequests::class, HandleRequestsSubpath::class);
+        }
+    }
+
+    private function berjalanDiSubpath(): bool
+    {
+        $path = parse_url((string) config('app.url'), PHP_URL_PATH);
+
+        return $path !== null && $path !== '' && $path !== '/';
     }
 
     private function pembangkitPdf(string $driver): PembangkitPdf
