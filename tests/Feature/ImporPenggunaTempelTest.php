@@ -84,6 +84,20 @@ it('idempoten: surel terdaftar dilewati tanpa diubah', function () {
         ->and(User::count())->toBe(4);
 });
 
+it('melewati akun lama tanpa memvalidasi ulang domain atau kolom lainnya', function () {
+    User::factory()->create(['email' => 'pengirim@gmail.com']);
+
+    $hasil = app(ImporPenggunaTempel::class)->handle("Pengirim\tPengirim@gmail.com\tperan-asing\nBaru\tbaru@unsil.ac.id", pengelolaTempel());
+
+    expect($hasil)->toBe(['dibuat' => 1, 'dilewati' => ['pengirim@gmail.com'], 'galat' => []]);
+});
+
+it('mengurutkan galat menurut nomor baris', function () {
+    $galat = app(ImporPenggunaTempel::class)->periksa("Ani\tani@gmail.com\nKosong\nBudi\tbudi@unsil.ac.id\tpenyihir", pengelolaTempel())['galat'];
+
+    expect(array_map(fn (string $g): string => strtok($g, ':'), $galat))->toBe(['Baris 1', 'Baris 2', 'Baris 3']);
+});
+
 it('membatalkan seluruh impor bila satu baris salah, dengan pesan per baris', function () {
     User::factory()->create(['nip_nim' => '111']);
     $teks = "Ani\tani@unsil.ac.id\tpegawai\n"
@@ -133,18 +147,51 @@ it('membatasi jumlah baris per impor', function () {
     expect(app(ImporPenggunaTempel::class)->periksa($teks, pengelolaTempel())['galat'])->toBe(['Maksimal 500 baris per impor.']);
 });
 
-it('aksi panel menampilkan pratinjau lalu membuat akun', function () {
-    $pelaku = pengelolaTempel();
-    $this->actingAs($pelaku);
+it('pratinjau panel memisahkan akun baru, surel dilewati, dan galat per baris', function () {
+    User::factory()->create(['email' => 'rina@unsil.ac.id']);
+    $this->actingAs(pengelolaTempel());
 
-    expect(ListUsers::ringkasPratinjau(teksExcel()))
-        ->toContain('3 akun baru akan dibuat, 0 dilewati karena sudah terdaftar.')
-        ->toContain('Budi Santoso <budi.santoso@unsil.ac.id> — pegawai');
+    expect(ListUsers::pratinjau(''))->toMatchArray(['keadaan' => 'kosong', 'jumlah_baru' => 0]);
 
-    Livewire::actingAs($pelaku)->test(ListUsers::class)
-        ->callAction('imporTempel', ['teks' => teksExcel(), 'kirim_tautan' => true])
+    $siap = ListUsers::pratinjau(teksExcel());
+    expect($siap['keadaan'])->toBe('siap')
+        ->and($siap['jumlah_baru'])->toBe(2)
+        ->and($siap['dilewati'])->toBe(['rina@unsil.ac.id'])
+        ->and($siap['baru'][0])->toMatchArray(['baris' => 2, 'name' => 'Budi Santoso', 'email' => 'budi.santoso@unsil.ac.id', 'peran' => ['pegawai']]);
+
+    $galat = ListUsers::pratinjau("Ani\tani@gmail.com\nBudi\tbudi@unsil.ac.id\tpenyihir");
+    expect($galat['keadaan'])->toBe('galat')
+        ->and($galat['baru'])->toBe([])
+        ->and($galat['galat'][0]['baris'])->toBe(1)
+        ->and($galat['galat'][1])->toBe(['baris' => 2, 'pesan' => "Peran 'penyihir' tidak dikenal."]);
+});
+
+it('aksi panel membuat akun tanpa mengirim surel atur sandi', function () {
+    Livewire::actingAs(pengelolaTempel())->test(ListUsers::class)
+        ->callAction('imporTempel', ['teks' => teksExcel()])
         ->assertHasNoActionErrors()
         ->assertNotified('3 pengguna dibuat, 0 dilewati (sudah terdaftar)');
 
     expect(User::where('email', 'siti@student.unsil.ac.id')->exists())->toBeTrue();
+    Notification::assertNothingSent();
+});
+
+it('view pratinjau menampilkan petunjuk kolom, tabel akun baru, dan tabel galat', function () {
+    $this->actingAs(pengelolaTempel());
+    User::factory()->create(['email' => 'rina@unsil.ac.id']);
+    $render = fn (string $teks): string => view('filament.pengguna.pratinjau-impor-tempel', ['pratinjau' => ListUsers::pratinjau($teks)])->render();
+
+    expect($render(''))->toContain('Tempel data di atas')->toContain('NIP/NIM');
+
+    expect($render(teksExcel()))
+        ->toContain('Siap diimpor')
+        ->toContain('budi.santoso@unsil.ac.id')
+        ->toContain('<span class="sr-pt-peran">pengurus-ormawa</span>')
+        ->toContain('1 surel dilewati karena sudah terdaftar')
+        ->not->toContain('Perbaiki baris berikut');
+
+    expect($render("Ani\tani@gmail.com"))
+        ->toContain('Perbaiki baris berikut')
+        ->toContain('Surel harus memakai domain')
+        ->not->toContain('Siap diimpor');
 });
