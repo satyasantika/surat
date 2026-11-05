@@ -16,7 +16,7 @@ use Livewire\Mechanisms\HandleRequests\HandleRequests;
  */
 class HandleRequestsSubpath extends HandleRequests
 {
-    public function getUpdateUri()
+    public function getUpdateUri(): string
     {
         $route = $this->updateRoute ?? $this->findUpdateRoute();
 
