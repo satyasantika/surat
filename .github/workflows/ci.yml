@@ -96,6 +96,11 @@ jobs:
           script: |
             cd ~/docker-apps/surat && git fetch --prune origin main && git reset --hard origin/main && bash scripts/deploy.sh
 
+      # Beri waktu pulih bila kegagalan berasal dari gangguan sesaat (jaringan atau GitHub).
+      - name: Jeda sebelum percobaan 2
+        if: steps.rilis.outcome == 'failure'
+        run: sleep 60
+
       - name: Deploy ke server via SSH (percobaan 2)
         if: steps.rilis.outcome == 'failure'
         uses: appleboy/ssh-action@v1.2.5
