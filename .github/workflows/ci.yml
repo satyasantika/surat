@@ -77,17 +77,31 @@ jobs:
     needs: uji
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     concurrency:
       group: deploy-surat
       cancel-in-progress: false
     steps:
+      # Gagal di sini belum memerahkan job; percobaan kedua di bawah yang menentukan.
+      # Penyebab umum: "dial tcp :22: i/o timeout" dari runner ke server (server sehat).
+      # deploy.sh idempoten dan memegang kunci sendiri, jadi aman diulang.
       - name: Deploy ke server via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        id: rilis
+        continue-on-error: true
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_stop: true
+          script: |
+            cd ~/docker-apps/surat && git fetch --prune origin main && git reset --hard origin/main && bash scripts/deploy.sh
+
+      - name: Deploy ke server via SSH (percobaan 2)
+        if: steps.rilis.outcome == 'failure'
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/docker-apps/surat && git fetch --prune origin main && git reset --hard origin/main && bash scripts/deploy.sh
